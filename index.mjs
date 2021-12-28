@@ -1,6 +1,7 @@
 import {
     Client,
     Intents,
+    Permissions,
 } from 'discord.js';
 
 import commands from './commands/index.mjs';
@@ -42,6 +43,15 @@ discordClient.on('messageCreate', (message) => {
     // console.log(message);
 
     if (message.channel.type != 'DM' && message.channel.type != 'GUILD_TEXT') {
+        return false;
+    }
+
+    if(!message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.SEND_MESSAGES)){
+        discordClient.users.fetch(process.env.ADMIN_ID, false)
+            .then((user) => {
+                user.send(`Missing posting permissions in ${guild.name} (${guild.id})`);
+            });
+
         return false;
     }
 
