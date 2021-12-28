@@ -49,7 +49,7 @@ discordClient.on('messageCreate', (message) => {
     if(!message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.SEND_MESSAGES)){
         discordClient.users.fetch(process.env.ADMIN_ID, false)
             .then((user) => {
-                user.send(`Missing posting permissions in ${guild.name} (${guild.id})`);
+                user.send(`Missing posting permissions in ${message.guild.name} (${message.guild.id})`);
             });
 
         return false;
