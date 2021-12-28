@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Discord bot",
   "main": "index.mjs",
+  "engines": {
+      "node": "16.*"
+  },
   "scripts": {
     "start": "node index.mjs",
     "dev": "nodemon -r dotenv/config index.mjs"
