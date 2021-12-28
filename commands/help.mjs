@@ -29,8 +29,8 @@ const help = (message) => {
 
     if (embed.length > 0) {
         message.channel.send({embeds: [embed]})
-            .then(console.log)
             .catch(console.error);
+            // .then(console.log)
     } else {
         message.react('❌');
     }

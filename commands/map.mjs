@@ -47,8 +47,8 @@ const map = (message) => {
         response.content = map;
 
         message.channel.send(response)
-            .then(console.log)
             .catch(console.error);
+            // .then(console.log)
     } else {
         message.react('❌');
     }

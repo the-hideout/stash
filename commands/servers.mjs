@@ -24,8 +24,8 @@ const servers = (message, client) => {
     }
 
     message.channel.send({embeds: [embed]})
-        .then(console.log)
         .catch(console.error);
+        // .then(console.log)
 };
 
 export default servers;

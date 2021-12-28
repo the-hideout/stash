@@ -13,8 +13,8 @@ const leaveServer = (message, client) => {
     response.content = "Left server " + server.name + " (" + server.id + ")";
 
     message.channel.send({content: response})
-        .then(console.log)
         .catch(console.error);
+        // .then(console.log)
 };
 
 export default leaveServer;

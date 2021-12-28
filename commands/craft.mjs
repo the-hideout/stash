@@ -100,8 +100,8 @@ const craft = async (message) => {
                     }
                     ending.setDescription(otheritems);
                     message.channel.send({embeds: [ending]})
-                        .then(console.log)
                         .catch(console.error);
+                        // .then(console.log)
                 }
             })
             .catch(console.error);
