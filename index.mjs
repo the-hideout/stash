@@ -31,7 +31,11 @@ discordClient.on('guildCreate', (guild) => {
     }
 
     console.log(`Joined server ${guild.name} (${guild.id})!`);
-    //optionally do something to notify you when the bot joins a new server
+
+    discordClient.users.fetch(process.env.ADMIN_ID, false)
+        .then((user) => {
+            user.send(`Joined server ${guild.name} (${guild.id})!`);
+        });
 });
 
 discordClient.on('messageCreate', (message) => {
