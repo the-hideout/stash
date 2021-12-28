@@ -1,0 +1,18 @@
+{
+  "name": "tarkov-tools-discord-bot",
+  "version": "1.0.0",
+  "description": "Discord bot",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs",
+    "dev": "nodemon -r dotenv/config index.mjs"
+  },
+  "type": "module",
+  "dependencies": {
+    "discord.js": "^13.4.0",
+    "dotenv": "^10.0.0",
+    "got": "^12.0.0",
+    "jquery": "^3.6.0",
+    "nodemon": "^2.0.15"
+  }
+}
