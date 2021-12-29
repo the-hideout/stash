@@ -13,7 +13,7 @@ const help = (message) => {
     };
     const embed = new MessageEmbed();
 
-    if (helpCommand == '') {
+    if (helpCommand == '' || message.content.toLowerCase().indexOf('!help') !== 0) {
         embed.setTitle("Available Commands");
         for (const command in commands) {
             const c = commands[command];
