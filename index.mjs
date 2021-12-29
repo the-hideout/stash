@@ -76,6 +76,11 @@ discordClient.on('messageCreate', (message) => {
             console.error(someError);
         }
 
-        break;
+        return true;
+    }
+
+    // If somebody said something to us
+    if(message.channel.type === 'DM'){
+        commands['!help'](message);
     }
 });
