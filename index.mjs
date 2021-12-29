@@ -46,14 +46,14 @@ discordClient.on('messageCreate', (message) => {
         return false;
     }
 
-    if(!message.guild.me?.permissionsIn(message.channel).has(Permissions.FLAGS.SEND_MESSAGES)){
-        discordClient.users.fetch(process.env.ADMIN_ID, false)
-            .then((user) => {
-                user.send(`Missing posting permissions in ${message.guild.name} (${message.guild.id})`);
-            });
+    // if(!message.guild?.me.permissionsIn(message.channel).has(Permissions.FLAGS.SEND_MESSAGES)){
+    //     discordClient.users.fetch(process.env.ADMIN_ID, false)
+    //         .then((user) => {
+    //             user.send(`Missing posting permissions in ${message} (${message})`);
+    //         });
 
-        return false;
-    }
+    //     return false;
+    // }
 
     const formattedMessage = message.content.toLowerCase();
 
@@ -62,7 +62,11 @@ discordClient.on('messageCreate', (message) => {
             continue;
         }
 
-        commands[command](message, discordClient);
+        try {
+            commands[command](message, discordClient);
+        } catch (someError){
+            console.error(someError);
+        }
 
         break;
     }
