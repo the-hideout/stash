@@ -1,7 +1,10 @@
+import fs from 'fs';
+
 import {
     Client,
     Intents,
     Permissions,
+    Collection,
 } from 'discord.js';
 
 import commands from './classic-commands/index.mjs';
@@ -15,6 +18,16 @@ const discordClient = new Client({
     partials: ["CHANNEL"],
 });
 
+discordClient.commands = new Collection();
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.mjs'));
+
+for (const file of commandFiles) {
+	const command = await import(`./commands/${file}`);
+
+	// Set a new item in the Collection
+	// With the key as the command name and the value as the exported module
+	discordClient.commands.set(command.default.data.name, command);
+}
 
 discordClient.on('ready', () => {
     console.log(`Logged in as ${discordClient.user.tag}!`);
@@ -83,4 +96,27 @@ discordClient.on('messageCreate', (message) => {
     if(message.channel.type === 'DM'){
         commands['!help'](message);
     }
+});
+
+discordClient.on('interactionCreate', async (interaction) => {
+	if (!interaction.isCommand()) {
+        return false;
+    }
+
+	const command = discordClient.commands.get(interaction.commandName);
+
+	if (!command) {
+        return false;
+    }
+
+	try {
+		await command.default.execute(interaction);
+	} catch (error) {
+		console.error(error);
+
+		await interaction.reply({
+            content: 'There was an error while executing this command!',
+            ephemeral: true,
+        });
+	}
 });
