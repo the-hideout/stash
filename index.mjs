@@ -46,6 +46,12 @@ discordClient.on('messageCreate', (message) => {
         return false;
     }
 
+    if(message.author.bot){
+        // Don't do anything from other bots
+
+        return false;
+    }
+
     const formattedMessage = message.content.toLowerCase();
 
     for(const command in commands){
