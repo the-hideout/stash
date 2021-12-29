@@ -25,6 +25,8 @@ const defaultFunction = {
             return true;
         }
 
+        console.log(`craft ${searchString}`);
+
         const matchedCrafts = [];
 
         const {crafts} = await getCraftsBarters();
@@ -36,6 +38,15 @@ const defaultFunction = {
             if (craft.rewardItems[0].item.name.toLowerCase().includes(searchString)) {
                 matchedCrafts.push(craft);
             }
+        }
+
+        if(matchedCrafts.length === 0){
+            await interaction.reply({
+                content: 'Found no matching crafts for that item',
+                ephemeral: true,
+            });
+
+            return true;
         }
 
         let embeds = [];

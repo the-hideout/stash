@@ -25,6 +25,8 @@ const defaultFunction = {
             randomMaps = inputMaps.split(' ');
         }
 
+        console.log(`map ${inputMaps}`);
+
         const outputMap = randomMaps[Math.floor(Math.random() * randomMaps.length)];
 
 		await interaction.reply(outputMap.charAt(0).toUpperCase() + outputMap.slice(1));

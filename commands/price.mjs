@@ -17,6 +17,17 @@ const defaultFunction = {
 	async execute(interaction) {
         const searchString = interaction.options.getString('name');
 
+        if(!searchString){
+            await interaction.reply({
+                content: 'You need to specify a search term',
+                ephemeral: true,
+            });
+
+            return true;
+        }
+
+        console.log(`price ${searchString}`);
+
         const query = `query {
             itemsByName(name: "${searchString}") {
                 id
@@ -71,7 +82,14 @@ const defaultFunction = {
             }
         }
 
-        // let endingsent = false;
+        if(response.data.itemsByName.length === 0){
+            await interaction.reply({
+                content: 'Your search term matched no items',
+                ephemeral: true,
+            });
+
+            return true;
+        }
 
         let embeds = [];
 

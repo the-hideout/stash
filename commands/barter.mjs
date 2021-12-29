@@ -25,6 +25,8 @@ const defaultFunction = {
             return true;
         }
 
+        console.log(`barter ${searchString}`);
+
         const matchedBarters = [];
 
         const {barters} = await getCraftsBarters();
@@ -36,6 +38,15 @@ const defaultFunction = {
             if (barter.rewardItems[0].item.name.toLowerCase().includes(searchString)) {
                 matchedBarters.push(barter);
             }
+        }
+
+        if(matchedBarters.length === 0){
+            await interaction.reply({
+                content: 'Found no matching barters for that item',
+                ephemeral: true,
+            });
+
+            return true;
         }
 
         let embeds = [];
