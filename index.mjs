@@ -62,6 +62,8 @@ discordClient.on('messageCreate', (message) => {
             continue;
         }
 
+        console.log(formattedMessage);
+
         try {
             commands[command](message, discordClient);
         } catch (someError){
