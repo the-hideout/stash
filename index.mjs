@@ -4,7 +4,7 @@ import {
     Permissions,
 } from 'discord.js';
 
-import commands from './commands/index.mjs';
+import commands from './classic-commands/index.mjs';
 
 const discordClient = new Client({
     intents: [
