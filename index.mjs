@@ -46,11 +46,14 @@ discordClient.on('messageCreate', (message) => {
         return false;
     }
 
-    // if(!message.guild?.me.permissionsIn(message.channel).has(Permissions.FLAGS.SEND_MESSAGES)){
-    //     discordClient.users.fetch(process.env.ADMIN_ID, false)
-    //         .then((user) => {
-    //             user.send(`Missing posting permissions in ${message} (${message})`);
-    //         });
+    if(message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.SEND_MESSAGES)){
+        discordClient.users.fetch(process.env.ADMIN_ID, false)
+            .then((user) => {
+                user.send(`Missing posting permissions in ${message} (${message})`);
+            });
+
+        return false;
+    }
 
     //     return false;
     // }
