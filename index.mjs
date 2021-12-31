@@ -6,8 +6,15 @@ import {
     Permissions,
     Collection,
 } from 'discord.js';
+import Rollbar from 'rollbar';
 
 import commands from './classic-commands/index.mjs';
+
+new Rollbar({
+    accessToken: '7ac07140aabe45698942a94bc636d58c',
+    captureUncaught: true,
+    captureUnhandledRejections: true
+});
 
 const discordClient = new Client({
     intents: [
