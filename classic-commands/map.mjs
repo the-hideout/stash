@@ -4,7 +4,7 @@ const map = (message) => {
     const skips = [];
 
     for (let i = 0; i < args.length; i = i + 1) {
-        const arg = args[i];
+        let arg = args[i];
         if (arg.indexOf('-') == 0) {
             arg = arg.replace('-', '');
             skips.push(arg);
