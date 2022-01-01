@@ -12,7 +12,11 @@ const defaultFunction = {
 	data: new SlashCommandBuilder()
 		.setName('craft')
 		.setDescription('Find crafts with a specific item')
-        .addStringOption(option => option.setName('name').setDescription('Item name to search for')),
+        .addStringOption(option => {
+            return option.setName('name')
+                .setDescription('Item name to search for')
+                .setAutocomplete(true);
+        }),
 	async execute(interaction) {
         const searchString = interaction.options.getString('name');
 
