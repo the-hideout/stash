@@ -7,6 +7,8 @@ async function fillCache(){
         return true;
     }
 
+    console.log('Filling autocomplete cache');
+    console.time('fill-autocomplete-cache');
     try {
         const itemNamesResponse = await ttRequest({
             graphql: `query {
@@ -20,7 +22,9 @@ async function fillCache(){
     } catch (requestError){
         console.error(requestError);
     }
-}
+
+    console.timeEnd('fill-autocomplete-cache');
+};
 
 function autocomplete(interaction){
     // const searchString = 'm4a1';
