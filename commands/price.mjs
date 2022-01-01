@@ -103,7 +103,7 @@ const defaultFunction = {
         const {crafts, barters} = await getCraftsBarters();
 
         for(const item of response.data.itemsByName){
-            if(item.shortName.toLowerCase() !== itemname){
+            if(item.shortName.toLowerCase() !== searchString){
                 continue;
             }
 
