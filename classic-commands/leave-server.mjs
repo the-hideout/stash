@@ -1,5 +1,6 @@
 const leaveServer = (message, client) => {
     const serverid = message.content.toLowerCase().replace('!leaveserver ', '');
+    const sendTo = message.fallbackChannel || message.channel;
     let response = {};
 
     if (!client.guilds.cache.has(serverid)) {
@@ -12,7 +13,7 @@ const leaveServer = (message, client) => {
     server.leave();
     response.content = "Left server " + server.name + " (" + server.id + ")";
 
-    message.channel.send(response)
+    sendTo.send(response)
         .catch(console.error);
         // .then(console.log)
 };

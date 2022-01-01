@@ -10,6 +10,7 @@ const servers = (message, client) => {
     if(message.channel.type !== 'DM') {
         return false;
     }
+    const sendTo = message.fallbackChannel || message.channel;
     const embed = new MessageEmbed();
     embed.setTitle("Servers");
 
@@ -23,7 +24,7 @@ const servers = (message, client) => {
         return true;
     }
 
-    message.channel.send({embeds: [embed]})
+    sendTo.send({embeds: [embed]})
         .catch(console.error);
         // .then(console.log)
 };

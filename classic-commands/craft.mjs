@@ -9,6 +9,7 @@ const MAX_CRAFTS = 2;
 
 const craft = async (message) => {
     const itemname = message.content.replace('!craft ', '').toLowerCase();
+    const sendTo = message.fallbackChannel || message.channel;
 
     const matchedCrafts = [];
 
@@ -79,7 +80,7 @@ const craft = async (message) => {
         }
         embed.addField("Total", totalCost.toLocaleString() + "₽", true);
 
-        message.channel.send({embeds: [embed]})
+        sendTo.send({embeds: [embed]})
             .then(() => {
                 if (i == MAX_CRAFTS - 1 && matchedCrafts.length > MAX_CRAFTS && !endingsent) {
                     endingsent = true;
@@ -99,7 +100,7 @@ const craft = async (message) => {
                         otheritems += citemname + "\r\n";
                     }
                     ending.setDescription(otheritems);
-                    message.channel.send({embeds: [ending]})
+                    sendTo.send({embeds: [ending]})
                         .catch(console.error);
                         // .then(console.log)
                 }

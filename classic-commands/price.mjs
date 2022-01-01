@@ -10,6 +10,7 @@ const MAX_ITEMS = 2;
 
 const price = async (message) => {
     const itemname = message.content.replace('!price ', '');
+    const sendTo = message.fallbackChannel || message.channel;
     const query = `query {
         itemsByName(name: "${itemname}") {
             id
@@ -47,7 +48,7 @@ const price = async (message) => {
     }`;
     let response;
     try {
-        response = await ttRequest({ channel: message.channel, graphql: query });
+        response = await ttRequest({ channel: sendTo, graphql: query });
     } catch (error) {
         console.error(error);
     }
@@ -233,7 +234,7 @@ const price = async (message) => {
             embed.setDescription('No prices available.');
         }
 
-        message.channel.send({embeds: [embed]})
+        sendTo.send({embeds: [embed]})
             .then(() => {
                 if (i == MAX_ITEMS - 1 && response.data.itemsByName.length > MAX_ITEMS && !endingsent) {
                     endingsent = true;
@@ -256,7 +257,7 @@ const price = async (message) => {
                     }
                     ending.setDescription(otheritems);
 
-                    message.channel.send({embeds: [ending]})
+                    sendTo.send({embeds: [ending]})
                         .catch(console.error);
                         // .then(console.log)
                 }

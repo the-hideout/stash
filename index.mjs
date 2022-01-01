@@ -59,7 +59,7 @@ discordClient.on('guildCreate', (guild) => {
         });
 });
 
-discordClient.on('messageCreate', (message) => {
+discordClient.on('messageCreate', async (message) => {
     // console.log(message);
 
     if (message.channel.type != 'DM' && message.channel.type != 'GUILD_TEXT') {
@@ -80,12 +80,17 @@ discordClient.on('messageCreate', (message) => {
         }
 
         if(message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.SEND_MESSAGES)){
-            discordClient.users.fetch(process.env.ADMIN_ID, false)
-                .then((user) => {
-                    user.send(`Missing posting permissions in ${message.guild.name}#${message.channel.name} (${message.guild.id})`);
-                });
+            const user = await discordClient.users.fetch(message.author.id, false);
+            user.send(`Missing posting permissions in ${message.guild.name}#${message.channel.name} (${message.guild.id}). Replying here instead.\n\rIf you want to fix this, talk to your discord admin`);
 
-            return false;
+            message.fallbackChannel = user;
+        }
+
+        if(message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.EMBED_LINKS)){
+            const user = await discordClient.users.fetch(message.author.id, false);
+            user.send(`Missing embed permissions in ${message.guild.name}#${message.channel.name} (${message.guild.id}). Replying here instead.\n\rIf you want to fix this, talk to your discord admin`);
+
+            message.fallbackChannel = user;
         }
 
         console.log(formattedMessage);

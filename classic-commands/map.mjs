@@ -1,5 +1,6 @@
 const map = (message) => {
     const args = message.content.toLowerCase().replace('!map', '').trim().toLowerCase().split(' ');
+    const sendTo = message.fallbackChannel || message.channel;
     let maps = [];
     const skips = [];
 
@@ -46,7 +47,7 @@ const map = (message) => {
         map = map.charAt(0).toUpperCase() + map.slice(1);
         response.content = map;
 
-        message.channel.send(response)
+        sendTo.send(response)
             .catch(console.error);
             // .then(console.log)
     } else {

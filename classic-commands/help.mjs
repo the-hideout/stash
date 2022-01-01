@@ -4,6 +4,7 @@ import {
 
 const help = (message) => {
     const helpCommand = message.content.toLowerCase().replace('!help', '').trim();
+    const sendTo = message.fallbackChannel || message.channel;
     const commands = {
         'help': {
             syntax: '!help [command]',
@@ -48,7 +49,7 @@ const help = (message) => {
     }
 
     if (embed.length > 0) {
-        message.channel.send({embeds: [embed]})
+        sendTo.send({embeds: [embed]})
             .catch(console.error);
             // .then(console.log)
     } else {

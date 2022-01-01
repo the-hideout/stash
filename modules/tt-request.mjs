@@ -5,7 +5,7 @@ const ttRequest = async (options) => {
         throw new Error("you must provide graphql");
     }
 
-    if (options.hasOwnProperty('channel')) {
+    if (options.hasOwnProperty('channel') && options.channel.sendTyping) {
         options.channel.sendTyping();
     }
 

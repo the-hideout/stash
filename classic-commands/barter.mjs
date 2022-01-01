@@ -9,6 +9,7 @@ const MAX_BARTERS = 2;
 
 const barter = async (message) => {
     const itemname = message.content.replace('!barter ', '').toLowerCase();
+    const sendTo = message.fallbackChannel || message.channel;
     const matchedBarters = [];
 
     const {barters} = await getCraftsBarters();
@@ -65,7 +66,7 @@ const barter = async (message) => {
 
         embed.addField("Total", totalCost.toLocaleString() + "₽", true);
 
-        message.channel.send({embeds: [embed]})
+        sendTo.send({embeds: [embed]})
             .then(() => {
                 if (i == MAX_BARTERS -1 && matchedBarters.length > MAX_BARTERS && !endingsent) {
                     endingsent = true;
@@ -86,7 +87,7 @@ const barter = async (message) => {
                         otheritems += bitemname + "\r\n";
                     }
                     ending.setDescription(otheritems);
-                    message.channel.send({embeds: [ending]})
+                    sendTo.send({embeds: [ending]})
                     .catch(console.error);
                         // .then(console.log)
                 }
