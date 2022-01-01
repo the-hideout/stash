@@ -11,11 +11,15 @@ import Rollbar from 'rollbar';
 import commands from './classic-commands/index.mjs';
 import autocomplete, {fillCache} from './modules/autocomplete.mjs';
 
-new Rollbar({
-    accessToken: '7ac07140aabe45698942a94bc636d58c',
-    captureUncaught: true,
-    captureUnhandledRejections: true
-});
+if(process.env.NODE_ENV !== 'development'){
+    console.log('Setting up rollbar');
+
+    new Rollbar({
+        accessToken: '7ac07140aabe45698942a94bc636d58c',
+        captureUncaught: true,
+        captureUnhandledRejections: true
+    });
+}
 
 const discordClient = new Client({
     intents: [
