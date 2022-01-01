@@ -9,6 +9,7 @@ import {
 import Rollbar from 'rollbar';
 
 import commands from './classic-commands/index.mjs';
+import autocomplete, {fillCache} from './modules/autocomplete.mjs';
 
 new Rollbar({
     accessToken: '7ac07140aabe45698942a94bc636d58c',
@@ -35,6 +36,8 @@ for (const file of commandFiles) {
 	// With the key as the command name and the value as the exported module
 	discordClient.commands.set(command.default.data.name, command);
 }
+
+await fillCache();
 
 discordClient.on('ready', () => {
     console.log(`Logged in as ${discordClient.user.tag}!`);
@@ -111,7 +114,22 @@ discordClient.on('messageCreate', async (message) => {
 });
 
 discordClient.on('interactionCreate', async (interaction) => {
-	if (!interaction.isCommand()) {
+    if(interaction.isAutocomplete()){
+        let options = autocomplete(interaction);
+
+        options = options.splice(0, 25);
+
+        await interaction.respond(options.map(name => {
+            return {
+                name: name,
+                value: name,
+            };
+        }));
+
+        return true;
+    }
+
+    if (!interaction.isCommand()) {
         return false;
     }
 
