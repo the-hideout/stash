@@ -9,7 +9,7 @@ import getCraftsBarters from '../modules/get-crafts-barters.mjs';
 const MAX_ITEMS = 2;
 
 const price = async (message) => {
-    const itemname = message.content.replace('!price ', '');
+    const itemname = message.content.replace('!price ', '').toLowerCase().trim();
     const sendTo = message.fallbackChannel || message.channel;
     const query = `query {
         itemsByName(name: "${itemname}") {
@@ -72,6 +72,16 @@ const price = async (message) => {
 
     const currencies = await getCurrencies();
     const {crafts, barters} = await getCraftsBarters();
+
+    for(const item of response.data.itemsByName){
+        if(item.shortName.toLowerCase() !== itemname){
+            continue;
+        }
+
+        response.data.itemsByName = [item];
+
+        break;
+    }
 
     for (let i = 0; i < response.data.itemsByName.length; i = i + 1) {
         const item = response.data.itemsByName[i];

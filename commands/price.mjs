@@ -19,7 +19,7 @@ const defaultFunction = {
                 .setAutocomplete(true);
         }),
 	async execute(interaction) {
-        const searchString = interaction.options.getString('name');
+        let searchString = interaction.options.getString('name');
 
         if(!searchString){
             await interaction.reply({
@@ -29,6 +29,8 @@ const defaultFunction = {
 
             return true;
         }
+
+        searchString = searchString.toLowerCase().trim();
 
         console.log(`price ${searchString}`);
 
@@ -99,6 +101,16 @@ const defaultFunction = {
 
         const currencies = await getCurrencies();
         const {crafts, barters} = await getCraftsBarters();
+
+        for(const item of response.data.itemsByName){
+            if(item.shortName.toLowerCase() !== itemname){
+                continue;
+            }
+
+            response.data.itemsByName = [item];
+
+            break;
+        }
 
         for (let i = 0; i < response.data.itemsByName.length; i = i + 1) {
             const item = response.data.itemsByName[i];
