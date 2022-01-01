@@ -59,3 +59,9 @@ DISCORD_API_TOKEN is the same as token above
 ADMIN_ID is your client ID, to be used for admin commands.
 
 ![admin id](./assets/admin-id.jpg)
+
+
+To add the DEV bot to your server, click this link where you've replaced the MY_CLIENT_ID with your bots application id.
+https://discord.com/api/oauth2/authorize?client_id=MY_CLIENT_ID&permissions=274877910080&scope=bot%20applications.commands
+
+
