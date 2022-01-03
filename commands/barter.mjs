@@ -46,7 +46,7 @@ const defaultFunction = {
             }
 
             for(const requiredItems of barter.requiredItems){
-                if (requiredItems.item.name.toLowerCase().includes(itemname)) {
+                if (requiredItems.item.name.toLowerCase().includes(searchString)) {
                     matchedBarters.push(barter);
 
                     break;
