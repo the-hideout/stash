@@ -12,11 +12,13 @@ const servers = (message, client) => {
     }
     const sendTo = message.fallbackChannel || message.channel;
     const embed = new MessageEmbed();
-    embed.setTitle("Servers");
+    let serverCount = 0;
 
     client.guilds.cache.each(server => {
         embed.addField(server.name, server.id);
+        serverCount = serverCount + 1;
     });
+    embed.setTitle(`Servers (${serverCount})`);
 
     if (embed.length == 0) {
         message.react('❌');
