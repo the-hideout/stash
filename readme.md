@@ -6,6 +6,9 @@ To add it to your server, just go here
 
 https://discord.com/api/oauth2/authorize?client_id=925298399371231242&permissions=309237664832&scope=bot%20applications.commands
 
+or here
+
+https://discordbotlist.com/bots/tarkov-tools
 
 ## Development
 For development you need to crate 2 files in your local directory. One is for registering commands and one is for running the bot.
