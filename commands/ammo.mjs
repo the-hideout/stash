@@ -79,11 +79,11 @@ const defaultFunction = {
             ]);
         }
 
-        // sort penetration_power by descending order
+        // sort penetrationPower, then damage by descending order
         // could add subcommand for multiple sorting methods
         tableData.sort(
             function (x, y) {
-                return y[1] - x[1];
+                return y[1] - x[1] || y[2] - x[2];
             }
         );
 
