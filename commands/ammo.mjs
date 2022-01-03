@@ -96,6 +96,7 @@ const defaultFunction = {
                 tableData[i][1],
                 tableData[i][2]
             ]);
+            table.setAlign(i, asciiTable.LEFT)
         }
 
         const embed = new MessageEmbed();
