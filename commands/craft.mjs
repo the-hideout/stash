@@ -39,14 +39,14 @@ const defaultFunction = {
         for (const id in crafts) {
             const craft = crafts[id];
 
-            if (craft.rewardItems[0].item.name.toLowerCase().includes(searchString)) {
+            if (craft.rewardItems[0].item.name.toLowerCase().includes(searchString.toLowerCase())) {
                 matchedCrafts.push(craft);
 
                 continue;
             }
 
             for(const requiredItems of craft.requiredItems){
-                if (requiredItems.item.name.toLowerCase().includes(searchString)) {
+                if (requiredItems.item.name.toLowerCase().includes(searchString.toLowerCase())) {
                     matchedCrafts.push(craft);
 
                     break;
