@@ -56,9 +56,12 @@ const defaultFunction = {
         const table = new asciiTable;
         const tableData = [];
 
-        table.setHeading('Name', 'Pen', 'Damage');
         table.removeBorder();
-        table.setHeadingAlign(asciiTable.LEFT);
+        table.addRow([
+            'Name',
+            'Pen',
+            'Dmg'
+        ]);
 
         for (const id in ammoResponse) {
             if (!ammoResponse[id].name.toLowerCase().includes(searchString.toLowerCase())) {
@@ -79,11 +82,11 @@ const defaultFunction = {
             ]);
         }
 
-        // sort penetration_power by descending order
+        // sort penetrationPower, then damage by descending order
         // could add subcommand for multiple sorting methods
         tableData.sort(
             function (x, y) {
-                return y[1] - x[1];
+                return y[1] - x[1] || y[2] - x[2];
             }
         );
 
@@ -93,6 +96,7 @@ const defaultFunction = {
                 tableData[i][1],
                 tableData[i][2]
             ]);
+            table.setAlign(i, asciiTable.LEFT)
         }
 
         const embed = new MessageEmbed();
