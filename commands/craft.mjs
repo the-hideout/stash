@@ -41,6 +41,16 @@ const defaultFunction = {
 
             if (craft.rewardItems[0].item.name.toLowerCase().includes(searchString)) {
                 matchedCrafts.push(craft);
+
+                continue;
+            }
+
+            for(const requiredItems of craft.requiredItems){
+                if (requiredItems.item.name.toLowerCase().includes(itemname)) {
+                    matchedCrafts.push(craft);
+
+                    break;
+                }
             }
         }
 

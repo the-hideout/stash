@@ -21,10 +21,21 @@ const craft = async (message) => {
 
         if (craft.rewardItems[0].item.name.toLowerCase().includes(itemname)) {
             matchedCrafts.push(craft);
+
+            continue;
+        }
+
+        for(const requiredItems of craft.requiredItems){
+            if (requiredItems.item.name.toLowerCase().includes(itemname)) {
+                matchedCrafts.push(craft);
+
+                break;
+            }
         }
     }
+
     if (matchedCrafts.length <= 0) {
-        message.react('❌');
+        sendTo.send({content: `There's no crafts for that item`});
 
         return false;
     }

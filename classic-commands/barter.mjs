@@ -20,11 +20,21 @@ const barter = async (message) => {
 
         if (barter.rewardItems[0].item.name.toLowerCase().includes(itemname)) {
             matchedBarters.push(barter);
+
+            continue;
+        }
+
+        for(const requiredItems of barter.requiredItems){
+            if (requiredItems.item.name.toLowerCase().includes(itemname)) {
+                matchedBarters.push(barter);
+
+                break;
+            }
         }
     }
 
     if (matchedBarters.length <= 0) {
-        message.react('❌');
+        sendTo.send({content: `There's no barters for that item`});
 
         return false;
     }
