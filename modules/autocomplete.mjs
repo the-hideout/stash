@@ -1,6 +1,7 @@
 import ttRequest from "./tt-request.mjs";
 
 let nameCache = false;
+let lookupCache = {};
 
 async function fillCache(){
     if(nameCache){
@@ -35,9 +36,13 @@ function autocomplete(interaction){
         console.error(getError);
     }
 
-    console.log(`Searching for ${searchString}`);
+    if(lookupCache[searchString]){
+        return [...lookupCache[searchString]];
+    }
 
-    return nameCache.filter(name => name.toLowerCase().includes(searchString.toLowerCase()));
+    lookupCache[searchString] = nameCache.filter(name => name.toLowerCase().includes(searchString.toLowerCase()));
+
+    return [...lookupCache[searchString]];
 };
 
 export {
