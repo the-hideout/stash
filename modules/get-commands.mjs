@@ -25,7 +25,7 @@ const commands = {
         examples: '/craft 7n31',
     },
     'ammo': {
-        syntax: '/ammo or !ammo ammo_type',
+        syntax: '/ammo ammo_type',
         description: 'Shows ammo stats for all ammo items of the specified type',
         examples: '/ammo 7.62x51mm',
     },
