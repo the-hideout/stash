@@ -79,7 +79,11 @@ discordClient.on('messageCreate', async (message) => {
         return false;
     }
 
-    const formattedMessage = message.content.toLowerCase();
+    let formattedMessage = message.content.toLowerCase();
+
+    if(message.mentions.has(discordClient.user)){
+        formattedMessage = '!help';
+    }
 
     for(const command in commands){
         if(formattedMessage.indexOf(command) !== 0){
