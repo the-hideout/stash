@@ -56,9 +56,12 @@ const defaultFunction = {
         const table = new asciiTable;
         const tableData = [];
 
-        table.setHeading('Name', 'Pen', 'Damage');
         table.removeBorder();
-        table.setHeadingAlign(asciiTable.LEFT);
+        table.addRow([
+            'Name',
+            'Pen',
+            'Dmg'
+        ]);
 
         for (const id in ammoResponse) {
             if (!ammoResponse[id].name.toLowerCase().includes(searchString.toLowerCase())) {
