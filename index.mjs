@@ -148,6 +148,7 @@ discordClient.on('interactionCreate', async (interaction) => {
     }
 
 	try {
+        console.log(command.default.data.name);
 		await command.default.execute(interaction);
 	} catch (error) {
 		console.error(error);

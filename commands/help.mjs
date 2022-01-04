@@ -16,9 +16,6 @@ const defaultFunction = {
         const embed = new MessageEmbed();
         const helpCommand = interaction.options.getString('command');
 
-        console.log(commands);
-        console.log(helpCommand);
-
         if (!helpCommand || !commands[helpCommand]) {
             embed.setTitle("Available Commands");
 
