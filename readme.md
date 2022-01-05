@@ -10,6 +10,8 @@ or here
 
 https://discordbotlist.com/bots/tarkov-tools
 
+https://top.gg/bot/925298399371231242
+
 ## Development
 For development you need to crate 2 files in your local directory. One is for registering commands and one is for running the bot.
 
