@@ -5,6 +5,7 @@ import barter from './barter.mjs';
 import craft from './craft.mjs';
 import servers from './servers.mjs';
 import leaveServer from './leave-server.mjs';
+import issue from './issue.mjs';
 
 const commands = {
     '!help': help,
@@ -14,6 +15,7 @@ const commands = {
     '!craft': craft,
     '!servers': servers,
     '!leaveserver': leaveServer,
+    '!issue': issue,
 };
 
 export default commands;

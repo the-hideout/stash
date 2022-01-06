@@ -1,0 +1,6 @@
+# Rename this file to config-dev.json and remove this comment
+{
+    "clientId": "<add_value_here>",
+    "guildId": "<add_value_here>",
+    "token": "<add_value_here>"
+}
