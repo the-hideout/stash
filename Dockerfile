@@ -1,22 +1,19 @@
-FROM node:stretch-slim
+FROM node:lts-alpine
 
-# create nonroot user
-RUN adduser nonroot
-RUN mkdir /app && chown -R nonroot:nonroot /app
-WORKDIR /app
+WORKDIR /usr/src/app
 
-COPY --chown=nonroot:nonroot package-lock.json /app
-COPY --chown=nonroot:nonroot package.json /app
+COPY package*.json ./
+
 RUN npm install
 
-USER nonroot
+USER node
 
-COPY --chown=nonroot:nonroot deploy-commands-dev.mjs .
-COPY --chown=nonroot:nonroot deploy-commands.mjs .
-COPY --chown=nonroot:nonroot classic-commands/ classic-commands/
-COPY --chown=nonroot:nonroot commands/ commands/
-COPY --chown=nonroot:nonroot modules/ modules/
-COPY --chown=nonroot:nonroot index.mjs .
+COPY deploy-commands-dev.mjs .
+COPY deploy-commands.mjs .
+COPY classic-commands/ classic-commands/
+COPY commands/ commands/
+COPY modules/ modules/
+COPY index.mjs .
 
 ENTRYPOINT [ "node" ]
 CMD [ "index.mjs" ]
