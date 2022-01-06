@@ -26,7 +26,7 @@ const defaultFunction = {
 
         try {
             const statusReponse = await ttRequest({
-                graphql: `query {
+                graphql: `{
                     status {
                         currentStatuses {
                             name
@@ -46,6 +46,13 @@ const defaultFunction = {
             currentStatus = statusReponse.data.status;
         } catch (requestError){
             console.error(requestError);
+
+            await interaction.reply({
+                content: 'Something went wrong when trying to fetch status, please try again',
+                ephemeral: true,
+             });
+
+             return true;
         }
 
         // console.log(currentStatus);
