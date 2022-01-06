@@ -1,4 +1,8 @@
 const leaveServer = (message, client) => {
+    if (message.author.id !== process.env.ADMIN_ID){
+        return false;
+    }
+
     const serverid = message.content.toLowerCase().replace('!leaveserver ', '');
     const sendTo = message.fallbackChannel || message.channel;
     let response = {};
