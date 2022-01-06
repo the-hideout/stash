@@ -55,6 +55,10 @@ Copy the `guildId` from the Discord server you want to add the bot to:
 
 > Note: In order to copy a guild id, you will need to have Discord developer mode enabled, scroll down in the guide to see how to do so (its easy!)
 
+#### token
+
+The token is the same as the `DISCORD_API_TOKEN` which can be found in the `.env` setup steps below.
+
 ### The `.env` file
 
 Next, you will need to edit the `.env` file and add the appropriate values as seen below:
