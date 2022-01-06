@@ -1,0 +1,9 @@
+version: '3.9'
+
+services:
+  bot:
+    container_name: bot
+    env_file: 
+      - ./.env
+    restart: always
+    build: ./
