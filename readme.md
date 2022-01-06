@@ -87,3 +87,46 @@ In order to copy certain values (such as channel/guild/user IDs) you need to ena
 1. In Discord, open your User Settings by clicking the Settings Cog next to your user name on the bottom.
 2. Go to Appearance and enable Developer Mode under the Advanced section, then close User Settings.
 3. Open your Discord server, right-click on the server name, then select Copy ID (to obtain the "guild ID" of your Discord server)
+
+---
+
+### Starting the Bot 🚀
+
+Before you start the bot you will need to register the Slash commands in your test server:
+
+```console
+$ node deploy-commands-dev.mjs
+Successfully registered application commands.
+```
+
+Next, there are two ways to start the bot:
+
+- Docker (suggested)
+- Locally
+
+#### Docker
+
+To start the bot with Docker, simply run the following command:
+
+```console
+$ docker-compose up --build
+Creating bot ... done
+Attaching to bot
+bot    | Setting up rollbar
+bot    | Filling autocomplete cache
+bot    | fill-autocomplete-cache: 944.249ms
+bot    | Logged in as tarkov-tools-dev#1234!
+```
+
+#### Locally
+
+To start the bot locally, run the following commands:
+
+```console
+$ export DISCORD_API_TOKEN=<token>
+$ export NODE_ENV=development
+$ node index.mjs
+Filling autocomplete cache
+fill-autocomplete-cache: 590.582ms
+Logged in as tarkov-tools-dev#1234!
+```
