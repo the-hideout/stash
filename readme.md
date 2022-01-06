@@ -21,38 +21,54 @@ The files are:
 - `config-dev.json`
 - `.env`
 
-First is `config-dev.json`
+### Create a Disord Bot
+
+Before you can test the bot out locally, you will need to create a Discord bot to authenticate with.
+
+Create your bot:
+
+![create bot](./assets/1-new-app.png)
+
+### The `config-dev.json` file
+
+An example of the `config-dev.json` file can be found at the root of this repo at `config-dev.example.json`. You will need to edit and rename this file to `config-dev.json` and add the appropriate values as seen below:
 
 ```json
 {
-    "clientId": "",
-    "guildId": "",
-    "token": ""
+    "clientId": "<add_value_here>",
+    "guildId": "<add_value_here>",
+    "token": "<add_value_here>"
 }
 ```
 
-### How to Enable Developer Mode
+#### clientId
 
-1. In Discord, open your User Settings by clicking the Settings Cog next to your user name on the bottom.
-2. Go to Appearance and enable Developer Mode under the Advanced section, then close User Settings.
-3. Open your Discord server, right-click on the server name, then select Copy ID
+The `clientId` can be found in your Discord bot's general information under `APPLICATION_ID` [https://discord.com/developers/applications/](https://discord.com/developers/applications/)
 
-### Set your Bot Token
+![client id](./assets/2-copy-app-id.png)
 
-The bot token your dev bot has gotten
+#### guildId
 
-![token](./assets/token.jpg)
+Copy the `guildId` from the Discord server you want to add the bot to:
 
-The second file is `.env`
+![guild id](./assets/3-copy-id.png)
+
+> Note: In order to copy a guild id, you will need to have Discord developer mode enabled, scroll down in the guide to see how to do so (its easy!)
+
+### The `.env` file
+
+Next, you will need to edit the `.env` file and add the appropriate values as seen below:
 
 ```ini
 DISCORD_API_TOKEN=<value_here>
 ADMIN_ID=<value_here>
 ```
 
-`DISCORD_API_TOKEN` is the same as token above
+The `DISCORD_API_TOKEN` can be found here:
 
-`ADMIN_ID` is your client ID, to be used for admin commands.
+![token](./assets/4-bot-token.png)
+
+`ADMIN_ID` is your personal Discord user ID, which is used for admin commands and can be found here:
 
 ![admin id](./assets/admin-id.jpg)
 
@@ -60,14 +76,10 @@ To add the DEV bot to your server, click this link where you've replaced the `<M
 
 [https://discord.com/api/oauth2/authorize?client_id=<MY_CLIENT_ID>&permissions=274877910080&scope=bot%20applications.commands](https://discord.com/api/oauth2/authorize?client_id=MY_CLIENT_ID&permissions=274877910080&scope=bot%20applications.commands)
 
-### clientId
+### How to Enable Developer Mode
 
-What your dev application has as "APPLICATION ID" [https://discord.com/developers/applications/](https://discord.com/developers/applications/)
+In order to copy certain values (such as channel/guild/user IDs) you need to enable developer mode in the Discord client
 
-![client id](./assets/application-id.jpg)
-
-### guildId
-
-What discord server you want to run your bot during development
-
-![guild id](./assets/guild-id.jpg)
+1. In Discord, open your User Settings by clicking the Settings Cog next to your user name on the bottom.
+2. Go to Appearance and enable Developer Mode under the Advanced section, then close User Settings.
+3. Open your Discord server, right-click on the server name, then select Copy ID (to obtain the "guild ID" of your Discord server)
