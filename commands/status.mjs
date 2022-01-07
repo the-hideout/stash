@@ -26,7 +26,7 @@ const defaultFunction = {
 
         try {
             const statusReponse = await ttRequest({
-                graphql: `{
+                graphql: `query {
                     status {
                         currentStatuses {
                             name
