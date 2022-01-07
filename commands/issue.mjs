@@ -50,7 +50,10 @@ const defaultFunction = {
             embeds: [embed],
         });
 
-        interaction.reply(`Thanks for reporting, we're on it!`);
+        interaction.reply({
+            content: "Thanks for reporting, we're on it!",
+            ephemeral: true,
+        });
     },
 };
 
