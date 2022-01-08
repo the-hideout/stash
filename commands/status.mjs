@@ -6,14 +6,16 @@ import ttRequest from '../modules/tt-request.mjs';
 
 const statusCodes = [
     'OK',
-    'Down',
+    'Updating',
     'Unstable',
+    'Down',
 ];
 
 const colorCodes = [
     '#70b035',
-    '#ff0000',
+    '#90c1eb',
     '#ca8a00',
+    '#ff0000',
 ];
 
 const defaultFunction = {
