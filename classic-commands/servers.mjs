@@ -15,7 +15,7 @@ const servers = (message, client) => {
     let serverCount = 0;
 
     client.guilds.cache.each(server => {
-        embed.addField(server.name, server.id);
+        embed.addField(server.name, server.id, true);
         serverCount = serverCount + 1;
     });
     embed.setTitle(`Servers (${serverCount})`);
