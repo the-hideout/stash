@@ -10,11 +10,13 @@ const ttRequest = async (options) => {
     }
 
     try {
+        const requestBody = JSON.stringify({
+            query: options.graphql,
+        });
+
         const response = await got.post('https://tarkov-tools.com/graphql', {
             responseType: 'json',
-            body: JSON.stringify({
-                query: options.graphql,
-            }),
+            body: requestBody,
         });
 
         return response.body;
