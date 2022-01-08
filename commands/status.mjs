@@ -27,7 +27,7 @@ const defaultFunction = {
         let currentStatus;
 
         try {
-            const statusReponse = await ttRequest({
+            const statusResponse = await ttRequest({
                 graphql: `query {
                     status {
                         currentStatuses {
@@ -45,7 +45,10 @@ const defaultFunction = {
                 }`
             });
 
-            currentStatus = statusReponse.data.status;
+            console.log(statusResponse)
+            console.log(statusResponse.data);
+
+            currentStatus = statusResponse.data.status;
         } catch (requestError){
             console.error(requestError);
 
