@@ -11,7 +11,7 @@ import Rollbar from 'rollbar';
 import commands from './classic-commands/index.mjs';
 import autocomplete, {fillCache} from './modules/autocomplete.mjs';
 
-if(process.env.NODE_ENV !== 'development'){
+if(process.env.NODE_ENV === 'production'){
     console.log('Setting up rollbar');
 
     new Rollbar({
