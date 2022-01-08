@@ -45,9 +45,6 @@ const defaultFunction = {
                 }`
             });
 
-            console.log(statusResponse)
-            console.log(statusResponse.data);
-
             currentStatus = statusResponse.data.status;
         } catch (requestError){
             console.error(requestError);
