@@ -63,7 +63,9 @@ const defaultFunction = {
 
         embed.setTitle(globalStatus.message);
         embed.setURL('https://status.escapefromtarkov.com/');
-        embed.setDescription(currentStatus.messages[0]?.content);
+        if(currentStatus.messages[0]?.content){
+            embed.setDescription(currentStatus.messages[0].content);
+        }
         // embed.setAuthor({
         //     name: 'Built by tarkov-tools',
         //     iconURL: 'https://tarkov-tools.com/apple-touch-icon.png',
