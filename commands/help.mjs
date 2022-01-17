@@ -25,7 +25,7 @@ const defaultFunction = {
                 embed.addField(c.syntax, c.description);
             }
 
-            await interaction.reply({ embeds: [embed] });
+            await interaction.editReply({ embeds: [embed] });
 
             return true;
         }
@@ -35,7 +35,7 @@ const defaultFunction = {
         embed.setTitle("!" + helpCommand + " command help");
         embed.addField(c.syntax, c.description + "\r\n\r\nExamples:\r\n" + c.examples);
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
 	},
 };
 

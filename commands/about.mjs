@@ -46,7 +46,7 @@ const defaultFunction = {
             embed.addField('Contributors', contributorsString);
         }
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
 	},
 };
 

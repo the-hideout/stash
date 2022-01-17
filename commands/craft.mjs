@@ -21,7 +21,7 @@ const defaultFunction = {
         const searchString = interaction.options.getString('name');
 
         if(!searchString){
-            await interaction.reply({
+            await interaction.editReply({
                 content: 'You need to specify a search term',
                 ephemeral: true,
             });
@@ -55,7 +55,7 @@ const defaultFunction = {
         }
 
         if(matchedCrafts.length === 0){
-            await interaction.reply({
+            await interaction.editReply({
                 content: 'Found no matching crafts for that item',
                 ephemeral: true,
             });
@@ -144,7 +144,7 @@ const defaultFunction = {
             embeds.push(ending);
         }
 
-        await interaction.reply({embeds: embeds});
+        await interaction.editReply({embeds: embeds});
 	},
 };
 

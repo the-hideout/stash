@@ -49,7 +49,7 @@ const defaultFunction = {
         } catch (requestError){
             console.error(requestError);
 
-            await interaction.reply({
+            await interaction.editReply({
                 content: 'Something went wrong when trying to fetch status, please try again',
                 ephemeral: true,
              });
@@ -77,7 +77,7 @@ const defaultFunction = {
             embed.addField(message.name, statusCodes[message.status], true);
         }
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
 	},
 };
 

@@ -45,7 +45,7 @@ const defaultFunction = {
         console.log('ammo ' + searchString);
 
         if(!searchString){
-            await interaction.reply({
+            await interaction.editReply({
                 content: 'You need to specify an ammo type',
                 ephemeral: true,
             });
@@ -101,7 +101,7 @@ const defaultFunction = {
 
         const embed = new MessageEmbed();
         embed.addField(searchString + ' Ammo Chart', '```' + table.toString() + '```', true);
-        await interaction.reply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
     },
 };
 

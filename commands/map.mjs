@@ -29,7 +29,7 @@ const defaultFunction = {
 
         const outputMap = randomMaps[Math.floor(Math.random() * randomMaps.length)];
 
-		await interaction.reply(outputMap.charAt(0).toUpperCase() + outputMap.slice(1));
+		await interaction.editReply(outputMap.charAt(0).toUpperCase() + outputMap.slice(1));
 	},
 };
 

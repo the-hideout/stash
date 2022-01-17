@@ -22,7 +22,7 @@ const defaultFunction = {
         let searchString = interaction.options.getString('name');
 
         if(!searchString){
-            await interaction.reply({
+            await interaction.editReply({
                 content: 'You need to specify a search term',
                 ephemeral: true,
             });
@@ -89,7 +89,7 @@ const defaultFunction = {
         }
 
         if(response.data.itemsByName.length === 0){
-            await interaction.reply({
+            await interaction.editReply({
                 content: 'Your search term matched no items',
                 ephemeral: true,
             });
@@ -304,7 +304,7 @@ const defaultFunction = {
             embeds.push(ending);
         }
 
-        await interaction.reply({embeds: embeds});
+        await interaction.editReply({embeds: embeds});
 	},
 };
 

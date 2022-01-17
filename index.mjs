@@ -147,13 +147,15 @@ discordClient.on('interactionCreate', async (interaction) => {
         return false;
     }
 
+    await interaction.deferReply();
+
 	try {
         console.log(command.default.data.name);
 		await command.default.execute(interaction);
 	} catch (error) {
 		console.error(error);
 
-		await interaction.reply({
+		await interaction.editReply({
             content: 'There was an error while executing this command!',
             ephemeral: true,
         });
