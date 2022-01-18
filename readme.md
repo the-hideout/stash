@@ -13,6 +13,46 @@ or here:
 or here
 [top.gg/bot/925298399371231242](https://top.gg/bot/925298399371231242)
 
+## About
+This bot takes all the data from tarkov-tools.com and exposes it in a user-friendly way.
+
+This bot is open source and supported by the team behind [tarkov-tools](https://tarkov-tools.com).
+
+Want to find out what barters are available for the wooden clock?
+
+`/barter clock` is your friend.
+
+Want to randomize a map for your friends to play but only between customs and factory?
+
+`/map customs factory` and you're good to go.
+
+
+
+
+### Commands
+`/price` && `!price`
+
+`/map` && `!map`
+
+`/barter` && `!barter`
+
+`/craft` && `!craft`
+
+`/ammo`
+
+`/status`
+
+`/help` && `!help`
+
+`/about`
+
+`/issue`
+
+`/status`
+
+with more being added almost every day.
+
+
 ---
 
 ## Development 🔨
