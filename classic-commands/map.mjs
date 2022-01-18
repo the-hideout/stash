@@ -1,4 +1,8 @@
-const map = (message) => {
+import allMaps from '../modules/all-maps.js';
+
+import getMapEmbed from '../modules/get-map-embed.js';
+
+const map = async (message) => {
     const args = message.content.toLowerCase().replace('!map', '').trim().toLowerCase().split(' ');
     const sendTo = message.fallbackChannel || message.channel;
     let maps = [];
@@ -15,17 +19,7 @@ const map = (message) => {
     }
 
     if (maps.length == 0) {
-        maps = [
-            'customs',
-            'factory',
-            'factory (night)',
-            'interchange',
-            'labs',
-            'lighthouse',
-            'reserve',
-            'shoreline',
-            'woods',
-        ];
+        maps = allMaps;
     }
 
     for (let i = 0; i < skips.length; i = i + 1) {
@@ -44,8 +38,12 @@ const map = (message) => {
         const response = {};
         let map = maps[Math.floor(Math.random() * maps.length)];
 
-        map = map.charAt(0).toUpperCase() + map.slice(1);
-        response.content = map;
+        if(!allMaps.includes(map)){
+            map = map.charAt(0).toUpperCase() + map.slice(1);
+            response.content = map;
+        } else {
+            response.embeds = [await getMapEmbed(map)];
+        }
 
         sendTo.send(response)
             .catch(console.error);

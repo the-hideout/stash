@@ -1,23 +1,9 @@
 import {
     SlashCommandBuilder
 } from '@discordjs/builders';
-import {
-    MessageEmbed,
-} from 'discord.js';
 
-import getMapData from '../modules/get-map-data.mjs';
-
-const allMaps = [
-    'customs',
-    'factory',
-    'factory (night)',
-    'interchange',
-    'labs',
-    'lighthouse',
-    'reserve',
-    'shoreline',
-    'woods',
-];
+import allMaps from '../modules/all-maps.js';
+import getMapEmbed from '../modules/get-map-embed.js';
 
 const defaultFunction = {
 	data: new SlashCommandBuilder()
@@ -39,45 +25,15 @@ const defaultFunction = {
 
         const outputMap = randomMaps[Math.floor(Math.random() * randomMaps.length)];
 
-        let mapKey = outputMap;
-
-        if(outputMap === 'factory (night)'){
-            mapKey = 'factory';
-        }
-
         // If we have a non-custom list just return that
-        if(!allMaps.includes(mapKey)){
-            await interaction.editReply({content: mapKey});
+        if(!allMaps.includes(outputMap)){
+            await interaction.editReply({content: outputMap});
 
             return true;
         }
 
-        const mapData = await getMapData();
-        const embed = new MessageEmbed();
-        const selectedMapData = mapData.find(mapObject => mapObject.key === mapKey);
-        let displayDuration = selectedMapData.duration;
+        const embed = await getMapEmbed(outputMap);
 
-        if(selectedMapData.duration.includes('/')){
-            const [day, night] = selectedMapData.duration.split('/');
-
-            if(outputMap.includes('night')){
-                displayDuration = night;
-            } else {
-                displayDuration = day;
-            }
-        }
-
-        displayDuration = displayDuration.replace('min', 'minutes');
-
-        embed.setTitle(outputMap.charAt(0).toUpperCase() + outputMap.slice(1));
-        embed.setURL(`https://tarkov-tools.com/map/${mapKey}`);
-        embed.addField('Duration', displayDuration, true);
-        embed.addField('Players', selectedMapData.players, true);
-        embed.setImage(`https://tarkov-tools.com/maps/${mapKey}.jpg`);
-
-        if(selectedMapData.source){
-            embed.setFooter({text: `Map made by ${selectedMapData.source}`});
-        }
 
 		await interaction.editReply({
             embeds: [embed],
