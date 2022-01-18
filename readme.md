@@ -10,6 +10,9 @@ or here:
 
 [discordbotlist.com/bots/tarkov-tools](https://discordbotlist.com/bots/tarkov-tools)
 
+or here
+[top.gg/bot/925298399371231242](https://top.gg/bot/925298399371231242)
+
 ---
 
 ## Development 🔨
@@ -101,8 +104,21 @@ Successfully registered application commands.
 
 Next, there are two ways to start the bot:
 
-- Docker (suggested)
-- Locally
+- Locally (suggested)
+- Docker
+
+#### Locally
+
+To start the bot locally, run the following commands:
+
+```console
+$ export DISCORD_API_TOKEN=<token>
+$ export NODE_ENV=development
+$ node index.mjs
+Filling autocomplete cache
+fill-autocomplete-cache: 590.582ms
+Logged in as tarkov-tools-dev#1234!
+```
 
 #### Docker
 
@@ -116,17 +132,4 @@ bot    | Setting up rollbar
 bot    | Filling autocomplete cache
 bot    | fill-autocomplete-cache: 944.249ms
 bot    | Logged in as tarkov-tools-dev#1234!
-```
-
-#### Locally
-
-To start the bot locally, run the following commands:
-
-```console
-$ export DISCORD_API_TOKEN=<token>
-$ export NODE_ENV=development
-$ node index.mjs
-Filling autocomplete cache
-fill-autocomplete-cache: 590.582ms
-Logged in as tarkov-tools-dev#1234!
 ```
