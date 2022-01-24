@@ -22,7 +22,7 @@ const defaultFunction = {
 
         embed.setTitle('Tarkov Tools Discord Bot');
         embed.setURL('https://github.com/kokarn/tarkov-tools-discord-bot');
-        embed.setDescription('The official tarkov-tools.com discord bot. Devloped open-source with a bunch of contributors');
+        embed.setDescription('The official tarkov-tools.com discord bot. Developed open-source with a bunch of contributors');
         embed.setAuthor({
             name: 'Built by tarkov-tools',
             iconURL: 'https://tarkov-tools.com/apple-touch-icon.png',
