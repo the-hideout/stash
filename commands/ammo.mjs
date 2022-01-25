@@ -120,7 +120,8 @@ const defaultFunction = {
         }
 
         const embed = new MessageEmbed();
-        embed.addField(searchString + ' Ammo Chart', '```' + table.toString() + '```', true);
+        embed.setTitle(`${searchString} Ammo Table`);
+        embed.setDescription('```' + table.toString() + '```');
         await interaction.editReply({ embeds: [embed] });
     },
 };
