@@ -1,6 +1,8 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
     MessageEmbed,
+    MessageActionRow,
+    MessageSelectMenu,
 } from 'discord.js';
 import got from 'got';
 import asciiTable from 'ascii-table';
@@ -41,13 +43,31 @@ const defaultFunction = {
             .setChoices(ammoTypes)
         ),
     async execute(interaction) {
-        const searchString = interaction.options.getString('ammo_type');
+        let searchString = '';
+        if(interaction.type === 'MESSAGE_COMPONENT'){
+            searchString = interaction.values[0];
+        } else {
+            searchString = interaction.options.getString('ammo_type');
+        }
         console.log('ammo ' + searchString);
 
         if(!searchString){
+            const row = new MessageActionRow()
+                .addComponents(
+                    new MessageSelectMenu()
+                        .setCustomId('select')
+                        .setPlaceholder('Nothing selected')
+                        .addOptions(ammoTypes.map(ammoType => {
+                            return {
+                                label: ammoType[0],
+                                value: ammoType[1],
+                            }
+                        })),
+                );
             await interaction.editReply({
-                content: 'You need to specify an ammo type. Discord helps you with autocomplete if you press "tab"',
-                ephemeral: true,
+                content: 'Select caliber',
+                components: [row],
+                // ephemeral: true,
             });
 
             return true;

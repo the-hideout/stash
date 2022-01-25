@@ -137,11 +137,13 @@ discordClient.on('interactionCreate', async (interaction) => {
         return true;
     }
 
-    if (!interaction.isCommand()) {
-        return false;
-    }
+    let command = false;
 
-	const command = discordClient.commands.get(interaction.commandName);
+    if(interaction.isSelectMenu()){
+        command = discordClient.commands.get(interaction.message.interaction.commandName);
+    } else if (interaction.isCommand()) {
+        command = discordClient.commands.get(interaction.commandName);
+    }
 
 	if (!command) {
         return false;
