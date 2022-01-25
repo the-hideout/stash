@@ -46,7 +46,7 @@ const defaultFunction = {
 
         if(!searchString){
             await interaction.editReply({
-                content: 'You need to specify an ammo type',
+                content: 'You need to specify an ammo type. Discord helps you with autocomplete if you press "tab"',
                 ephemeral: true,
             });
 
