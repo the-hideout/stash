@@ -80,7 +80,10 @@ const defaultFunction = {
         table.addRow([
             'Name',
             'Pen',
-            'Dmg'
+            'Dmg',
+            'Armor Dmg',
+            'Frag %',
+            'Velocity',
         ]);
 
         for (const id in ammoResponse) {
@@ -99,6 +102,9 @@ const defaultFunction = {
                 ammoResponse[id].shortName,
                 ammoResponse[id].ballistics.penetrationPower,
                 damage,
+                ammoResponse[id].ballistics.armorDamage,
+                Math.floor(ammoResponse[id].ballistics.fragmentationChance * 100),
+                ammoResponse[id].ballistics.initialSpeed,
             ]);
         }
 
@@ -114,7 +120,10 @@ const defaultFunction = {
             table.addRow([
                 tableData[i][0],
                 tableData[i][1],
-                tableData[i][2]
+                tableData[i][2],
+                tableData[i][3],
+                tableData[i][4],
+                `${tableData[i][5]} m/s`,
             ]);
             table.setAlign(i, asciiTable.LEFT)
         }
