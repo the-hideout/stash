@@ -81,9 +81,9 @@ const defaultFunction = {
             'Name',
             'Pen',
             'Dmg',
-            'Armor Dmg',
-            'Frag %',
-            'Velocity',
+            'A Dmg',
+            'Frag',
+            'Velo',
         ]);
 
         for (const id in ammoResponse) {
@@ -122,7 +122,7 @@ const defaultFunction = {
                 tableData[i][1],
                 tableData[i][2],
                 tableData[i][3],
-                tableData[i][4],
+                `${tableData[i][4]} %`,
                 `${tableData[i][5]} m/s`,
             ]);
             table.setAlign(i, asciiTable.LEFT)
