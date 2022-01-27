@@ -58,11 +58,28 @@ discordClient.on('guildCreate', (guild) => {
         return false;
     }
 
-    console.log(`Joined server ${guild.name} (${guild.id})!`);
+    const message = `Joined server ${guild.name} with ${guild.memberCount} members (${guild.id})!`;
+
+    console.log(message);
 
     discordClient.users.fetch(process.env.ADMIN_ID, false)
         .then((user) => {
-            user.send(`Joined server ${guild.name} (${guild.id})!`);
+            user.send(message);
+        });
+});
+
+discordClient.on('guildDelete', (guild) => {
+    if (!guild.available) {
+        return false;
+    }
+
+    const message = `Kicked from server ${guild.name} with ${guild.memberCount} members (${guild.id})!`;
+
+    console.log(message);
+
+    discordClient.users.fetch(process.env.ADMIN_ID, false)
+        .then((user) => {
+            user.send(message);
         });
 });
 
