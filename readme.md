@@ -121,7 +121,7 @@ The `DISCORD_API_TOKEN` can be found here:
 
 To add the DEV bot to your server, click this link where you've replaced the `<MY_CLIENT_ID>` with your bots application id:
 
-[https://discord.com/api/oauth2/authorize?client_id=<MY_CLIENT_ID>&permissions=274877910080&scope=bot%20applications.commands](https://discord.com/api/oauth2/authorize?client_id=MY_CLIENT_ID&permissions=274877910080&scope=bot%20applications.commands)
+[https://discord.com/api/oauth2/authorize?client_id=<MY_CLIENT_ID>&permissions=309237664832&scope=bot%20applications.commands](https://discord.com/api/oauth2/authorize?client_id=MY_CLIENT_ID&permissions=309237664832&scope=bot%20applications.commands)
 
 ### How to Enable Developer Mode
 
