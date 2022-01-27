@@ -53,7 +53,7 @@ discordClient.on('ready', () => {
 
 discordClient.login(process.env.DISCORD_API_TOKEN);
 
-discordClient.on('guildCreate', (guild) => {
+discordClient.on('guildCreate', async (guild) => {
     if (!guild.available) {
         return false;
     }
@@ -66,6 +66,13 @@ discordClient.on('guildCreate', (guild) => {
         .then((user) => {
             user.send(message);
         });
+
+    try {
+        const owner = await guild.fetchOwner();
+        owner.send(`Thank you so much for adding the tarkov-tools bot to your Discord!\n\rTo get more information on how the bot works, try !help or /help to get started.`);
+    } catch (someError){
+        console.error(someError);
+    }
 });
 
 discordClient.on('guildDelete', (guild) => {
