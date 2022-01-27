@@ -18,7 +18,7 @@ const servers = (message, client) => {
     client.guilds.cache.each(server => {
         embed.addField(server.name, server.id, true);
         serverCount = serverCount + 1;
-        reach = reach +  server.memberCount;
+        reach = reach + server.memberCount;
     });
     embed.setTitle(`Servers (${serverCount})`);
     embed.setDescription(`Total reach: ${reach} users`);
