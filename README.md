@@ -1,35 +1,21 @@
-# Tarkov-Tools Discord bot 🤖
+# Stash 🤖
 
-This is the official [tarkov-tools](https://tarkov-tools.com) discord bot.
+Stash is a Discord bot that helps you play Escape from Tarkov!
+
+This is the official [tarkov.dev](https://tarkov.dev) Discord bot.
 
 To add it to your server, just click the link below:
 
-[https://discord.com/api/oauth2/authorize?client_id=925298399371231242&permissions=309237664832&scope=bot%20applications.commands](https://discord.com/api/oauth2/authorize?client_id=925298399371231242&permissions=309237664832&scope=bot%20applications.commands)
+**[Invite Stash](https://discord.com/api/oauth2/authorize?client_id=955521336904667227&permissions=309237664832&scope=bot%20applications.commands)** 🔗
 
-or here:
+## About 💡
 
-[discordbotlist.com/bots/tarkov-tools](https://discordbotlist.com/bots/tarkov-tools)
+This bot takes all the data from [tarkov.dev](https://tarkov.dev) and exposes it in a user-friendly way.
 
-or here
-[top.gg/bot/925298399371231242](https://top.gg/bot/925298399371231242)
+This bot is open source and supported by the team behind [tarkov.dev](https://tarkov.dev).
 
-## About
-This bot takes all the data from tarkov-tools.com and exposes it in a user-friendly way.
+### Commands 💬
 
-This bot is open source and supported by the team behind [tarkov-tools](https://tarkov-tools.com).
-
-Want to find out what barters are available for the wooden clock?
-
-`/barter clock` is your friend.
-
-Want to randomize a map for your friends to play but only between customs and factory?
-
-`/map customs factory` and you're good to go.
-
-
-
-
-### Commands
 `/price` && `!price`
 
 `/map` && `!map`
@@ -49,9 +35,6 @@ Want to randomize a map for your friends to play but only between customs and fa
 `/issue`
 
 `/status`
-
-with more being added almost every day.
-
 
 ---
 
