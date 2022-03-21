@@ -1,5 +1,5 @@
 {
-  "name": "tarkov-tools-discord-bot",
+  "name": "stash-discord-bot",
   "version": "1.0.0",
   "description": "Discord bot",
   "main": "index.mjs",

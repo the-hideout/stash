@@ -125,7 +125,7 @@ const defaultFunction = {
             const ending = new MessageEmbed();
 
             ending.setTitle("+" + (matchedCrafts.length - MAX_CRAFTS) + " more");
-            ending.setURL("https://tarkov-tools.com/hideout-profit/?search=" + encodeURIComponent(searchString));
+            ending.setURL("https://tarkov.dev/hideout-profit/?search=" + encodeURIComponent(searchString));
 
             let otheritems = '';
 

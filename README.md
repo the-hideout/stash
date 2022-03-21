@@ -140,7 +140,7 @@ $ export NODE_ENV=development
 $ node index.mjs
 Filling autocomplete cache
 fill-autocomplete-cache: 590.582ms
-Logged in as tarkov-tools-dev#1234!
+Logged in as stash-dev#1234!
 ```
 
 #### Docker
@@ -154,5 +154,5 @@ Attaching to bot
 bot    | Setting up rollbar
 bot    | Filling autocomplete cache
 bot    | fill-autocomplete-cache: 944.249ms
-bot    | Logged in as tarkov-tools-dev#1234!
+bot    | Logged in as stash-dev#1234!
 ```

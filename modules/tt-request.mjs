@@ -14,7 +14,7 @@ const ttRequest = async (options) => {
             query: options.graphql,
         });
 
-        const response = await got.post('https://tarkov-tools.com/graphql', {
+        const response = await got.post('https://api.tarkov.dev/graphql', {
             responseType: 'json',
             body: requestBody,
         });

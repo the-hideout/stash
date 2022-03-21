@@ -284,7 +284,7 @@ const defaultFunction = {
             const ending = new MessageEmbed();
 
             ending.setTitle("+" + (response.data.itemsByName.length - MAX_ITEMS) + " more");
-            ending.setURL("https://tarkov-tools.com/?search=" + encodeURIComponent(searchString));
+            ending.setURL("https://tarkov.dev/?search=" + encodeURIComponent(searchString));
 
             let otheritems = '';
             for (let i = MAX_ITEMS; i < response.data.itemsByName.length; i = i + 1) {

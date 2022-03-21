@@ -30,10 +30,10 @@ const getMapEmbed = async (outputMap) => {
     displayDuration = displayDuration.replace('min', 'minutes');
 
     embed.setTitle(outputMap.charAt(0).toUpperCase() + outputMap.slice(1));
-    embed.setURL(`https://tarkov-tools.com/map/${mapKey}`);
+    embed.setURL(`https://tarkov.dev/map/${mapKey}`);
     embed.addField('Duration', displayDuration, true);
     embed.addField('Players', selectedMapData.players, true);
-    embed.setImage(`https://tarkov-tools.com/maps/${mapKey}.jpg`);
+    embed.setImage(`https://tarkov.dev/maps/${mapKey}.jpg`);
 
     if(selectedMapData.source){
         embed.setFooter({text: `Map made by ${selectedMapData.source}`});

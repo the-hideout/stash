@@ -122,7 +122,7 @@ const defaultFunction = {
             const ending = new MessageEmbed();
 
             ending.setTitle("+" + (matchedBarters.length - MAX_BARTERS) + " more");
-            ending.setURL("https://tarkov-tools.com/barters/?search=" + encodeURIComponent(searchString));
+            ending.setURL("https://tarkov.dev/barters/?search=" + encodeURIComponent(searchString));
 
             let otheritems = '';
 

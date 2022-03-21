@@ -97,7 +97,7 @@ const craft = async (message) => {
                     endingsent = true;
                     const ending = new MessageEmbed();
                     ending.setTitle("+" + (matchedCrafts.length - MAX_CRAFTS) + " more");
-                    ending.setURL("https://tarkov-tools.com/hideout-profit/?search=" + encodeURIComponent(itemname));
+                    ending.setURL("https://tarkov.dev/hideout-profit/?search=" + encodeURIComponent(itemname));
 
                     let otheritems = '';
                     for (let ii = MAX_CRAFTS; ii < matchedCrafts.length; ii++) {

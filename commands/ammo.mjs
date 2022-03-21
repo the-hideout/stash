@@ -129,7 +129,7 @@ const defaultFunction = {
         }
 
         const embed = new MessageEmbed();
-        embed.setURL(`https://tarkov-tools.com/ammo`);
+        embed.setURL(`https://tarkov.dev/ammo`);
         embed.setTitle(`${searchString} Ammo Table`);
         embed.setDescription('```' + table.toString() + '```');
         await interaction.editReply({ embeds: [embed] });

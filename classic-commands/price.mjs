@@ -251,7 +251,7 @@ const price = async (message) => {
                     const ending = new MessageEmbed();
 
                     ending.setTitle("+" + (response.data.itemsByName.length - MAX_ITEMS) + " more");
-                    ending.setURL("https://tarkov-tools.com/?search=" + encodeURIComponent(message.content.replace('!price ', '')));
+                    ending.setURL("https://tarkov.dev/?search=" + encodeURIComponent(message.content.replace('!price ', '')));
 
                     let otheritems = '';
                     for (let ii = MAX_ITEMS; ii < response.data.itemsByName.length; ii++) {

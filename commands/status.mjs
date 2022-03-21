@@ -67,9 +67,9 @@ const defaultFunction = {
             embed.setDescription(currentStatus.messages[0].content);
         }
         // embed.setAuthor({
-        //     name: 'Built by tarkov-tools',
-        //     iconURL: 'https://tarkov-tools.com/apple-touch-icon.png',
-        //     url: 'https://tarkov-tools.com',
+        //     name: 'Built by tarkov.dev',
+        //     iconURL: 'https://tarkov.dev/apple-touch-icon.png',
+        //     url: 'https://tarkov.dev',
         // });
         embed.setColor(colorCodes[globalStatus.status]);
 
