@@ -1,25 +1,28 @@
 import fs from 'fs';
 
+import cron from 'cron';
+
 import {
     Client,
     Intents,
     Permissions,
     Collection,
 } from 'discord.js';
-import Rollbar from 'rollbar';
+// import Rollbar from 'rollbar';
 
 import commands from './classic-commands/index.mjs';
 import autocomplete, {fillCache} from './modules/autocomplete.mjs';
+import got from 'got';
 
-if(process.env.NODE_ENV === 'production'){
-    console.log('Setting up rollbar');
+// if(process.env.NODE_ENV === 'production'){
+//     console.log('Setting up rollbar');
 
-    new Rollbar({
-        accessToken: '7ac07140aabe45698942a94bc636d58c',
-        captureUncaught: true,
-        captureUnhandledRejections: true
-    });
-}
+//     new Rollbar({
+//         accessToken: '7ac07140aabe45698942a94bc636d58c',
+//         captureUncaught: true,
+//         captureUnhandledRejections: true
+//     });
+// }
 
 const discordClient = new Client({
     intents: [
@@ -187,3 +190,9 @@ discordClient.on('interactionCreate', async (interaction) => {
         });
 	}
 });
+
+// A healthcheck cron to send a GET request to our status server
+let healthcheck = new cron.CronJob('*/45 * * * * *', () => {
+    got(`https://status.tarkov.dev/api/push/${process.env.HEALTH_ENDPOINT}?msg=OK`);
+  });
+healthcheck.start();
