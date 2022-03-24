@@ -6,7 +6,7 @@ Stash is a Discord bot that helps you play Escape from Tarkov!
 
 This is the official [tarkov.dev](https://tarkov.dev) Discord bot.
 
-To add it to your server, just click the link below:
+To add the bot to your server, just click the link below:
 
 **[Invite Stash](https://discord.com/api/oauth2/authorize?client_id=955521336904667227&permissions=309237664832&scope=bot%20applications.commands)** 🔗
 
