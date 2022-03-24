@@ -28,7 +28,7 @@ const defaultFunction = {
             iconURL: 'https://tarkov.dev/apple-touch-icon.png',
             url: 'https://tarkov.dev.com',
         });
-        // embed.addField('Bugs? Missing features? Report on discord!', 'https://discord.gg/F7JeqsfSkq', true);
+        // embed.addField('Bugs? Missing features? Report on discord!', 'https://discord.gg/XPAsKGHSzH', true);
         // embed.addField('Like it? Support on Patreon', 'https://www.patreon.com/kokarn', true);
         embed.setFooter({
             text: 'Enjoy ❤️',

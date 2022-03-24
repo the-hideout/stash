@@ -19,7 +19,7 @@ const defaultFunction = {
         if (!helpCommand || !commands[helpCommand]) {
             embed.setTitle("Available Commands");
             embed.setDescription(`Need Help or Have Questions?
-        [Come visit us in our support server.](https://discord.gg/F7JeqsfSkq)`);
+        [Come visit us in our server.](https://discord.gg/XPAsKGHSzH)`);
 
             for (const command in commands) {
                 const c = commands[command];
