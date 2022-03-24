@@ -191,8 +191,12 @@ discordClient.on('interactionCreate', async (interaction) => {
 	}
 });
 
+if (process.env.NODE_ENV === 'production') {
 // A healthcheck cron to send a GET request to our status server
 let healthcheck = new cron.CronJob('*/45 * * * * *', () => {
     got(`https://status.tarkov.dev/api/push/${process.env.HEALTH_ENDPOINT}?msg=OK`);
   });
 healthcheck.start();
+} else {
+    console.log("healthcheck disabled");
+}
