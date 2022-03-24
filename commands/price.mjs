@@ -6,6 +6,7 @@ import {
 import ttRequest from '../modules/tt-request.mjs';
 import getCurrencies from '../modules/get-currencies.mjs';
 import getCraftsBarters from '../modules/get-crafts-barters.mjs';
+import colors from '../modules/colors.js';
 
 const MAX_ITEMS = 2;
 
@@ -116,8 +117,10 @@ const defaultFunction = {
             const item = response.data.itemsByName[i];
             const embed = new MessageEmbed();
 
+            let body = "**Price and Item Details:**\n";
             embed.setTitle(item.name);
             embed.setURL(item.link);
+            
 
             if (item.iconLink) {
                 embed.setThumbnail(item.iconLink);
@@ -159,8 +162,15 @@ const defaultFunction = {
             if (bestTraderName) {
                 let traderVal = bestTraderPrice.toLocaleString() + "₽";
 
+                body += `• Sell to: \`${bestTraderName}\` for \`${traderVal}\`\n`;
+                
+                // Calculate item tier
+                var tier = get_item_tier(bestTraderPrice);
+                embed.setColor(tier.color);
+                body += `• Item Tier: ${tier.msg}\n`;
+
                 if (size > 1) {
-                    traderVal += "\r\n" + Math.round(bestTraderPrice / size).toLocaleString() + "₽/slot"
+                    traderVal += "\r\n" + Math.round(bestTraderPrice / size).toLocaleString() + "₽/slot";
                 }
                 embed.addField(bestTraderName + " Value", traderVal, true);
             }
@@ -273,6 +283,9 @@ const defaultFunction = {
                 embed.setDescription('No prices available.');
             }
 
+            // Add the item description
+            embed.setDescription(body);
+
             embeds.push(embed);
 
             if(i >= MAX_ITEMS - 1){
@@ -307,5 +320,26 @@ const defaultFunction = {
         await interaction.editReply({embeds: embeds});
 	},
 };
+
+function get_item_tier(price) {
+    var color;
+    var tier_msg;
+    if (price >= 25000) {
+        color = colors.yellow;
+        tier_msg = "⭐ Legendary ⭐";
+    } else if (price >= 12500) {
+        color = colors.green;
+        tier_msg = "🟢 Great";
+    } else if (price >= 8000) {
+        color = colors.blue;
+        tier_msg = "🔵 Average";
+    } else {
+        color = colors.red;
+        tier_msg = "🔴 Poor";
+    }
+
+    return { color: color, msg: tier_msg };
+        
+}
 
 export default defaultFunction;
