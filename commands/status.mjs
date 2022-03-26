@@ -6,10 +6,10 @@ import ttRequest from '../modules/tt-request.mjs';
 import generalError from '../modules/general-error.mjs';
 
 const statusCodes = [
-    'OK',
-    'Updating',
-    'Unstable',
-    'Down',
+    '🟢 OK',
+    '🔄 Updating',
+    '🟡 Unstable',
+    '🔴 Down',
 ];
 
 const colorCodes = [
