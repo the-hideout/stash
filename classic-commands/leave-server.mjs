@@ -1,5 +1,5 @@
 const leaveServer = (message, client) => {
-    if (message.author.id !== process.env.ADMIN_ID){
+    if (message.author.id !== process.env.ADMIN_ID) {
         return false;
     }
 
@@ -19,7 +19,7 @@ const leaveServer = (message, client) => {
 
     sendTo.send(response)
         .catch(console.error);
-        // .then(console.log)
+    // .then(console.log)
 };
 
 export default leaveServer;

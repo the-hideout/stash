@@ -6,18 +6,18 @@ import allMaps from '../modules/all-maps.js';
 import getMapEmbed from '../modules/get-map-embed.js';
 
 const defaultFunction = {
-	data: new SlashCommandBuilder()
-		.setName('map')
-		.setDescription('Replies with a random map')
+    data: new SlashCommandBuilder()
+        .setName('map')
+        .setDescription('Replies with a random map')
         .addStringOption(option => option
-                .setName('maplist')
-                .setDescription('Enter a list of maps to include')
+            .setName('maplist')
+            .setDescription('Enter a list of maps to include')
         ),
-	async execute(interaction) {
+    async execute(interaction) {
         const inputMaps = interaction.options.getString('maplist');
         let randomMaps = allMaps;
 
-        if(inputMaps){
+        if (inputMaps) {
             randomMaps = inputMaps.split(' ');
         }
 
@@ -26,8 +26,8 @@ const defaultFunction = {
         const outputMap = randomMaps[Math.floor(Math.random() * randomMaps.length)];
 
         // If we have a non-custom list just return that
-        if(!allMaps.includes(outputMap)){
-            await interaction.editReply({content: outputMap});
+        if (!allMaps.includes(outputMap)) {
+            await interaction.editReply({ content: outputMap });
 
             return true;
         }
@@ -35,10 +35,10 @@ const defaultFunction = {
         const embed = await getMapEmbed(outputMap);
 
 
-		await interaction.editReply({
+        await interaction.editReply({
             embeds: [embed],
         });
-	},
+    },
 };
 
 export default defaultFunction;

@@ -12,7 +12,7 @@ const barter = async (message) => {
     const sendTo = message.fallbackChannel || message.channel;
     const matchedBarters = [];
 
-    const {barters} = await getCraftsBarters();
+    const { barters } = await getCraftsBarters();
     const currencies = await getCurrencies();
 
     for (const bid in barters) {
@@ -24,7 +24,7 @@ const barter = async (message) => {
             continue;
         }
 
-        for(const requiredItems of barter.requiredItems){
+        for (const requiredItems of barter.requiredItems) {
             if (requiredItems.item.name.toLowerCase().includes(itemname)) {
                 matchedBarters.push(barter);
 
@@ -34,7 +34,7 @@ const barter = async (message) => {
     }
 
     if (matchedBarters.length <= 0) {
-        sendTo.send({content: `There's no barters for that item`});
+        sendTo.send({ content: `There's no barters for that item` });
 
         return false;
     }
@@ -76,9 +76,9 @@ const barter = async (message) => {
 
         embed.addField("Total", totalCost.toLocaleString() + "₽", true);
 
-        sendTo.send({embeds: [embed]})
+        sendTo.send({ embeds: [embed] })
             .then(() => {
-                if (i == MAX_BARTERS -1 && matchedBarters.length > MAX_BARTERS && !endingsent) {
+                if (i == MAX_BARTERS - 1 && matchedBarters.length > MAX_BARTERS && !endingsent) {
                     endingsent = true;
                     const ending = new MessageEmbed();
                     ending.setTitle("+" + (matchedBarters.length - MAX_BARTERS) + " more");
@@ -97,9 +97,9 @@ const barter = async (message) => {
                         otheritems += bitemname + "\r\n";
                     }
                     ending.setDescription(otheritems);
-                    sendTo.send({embeds: [ending]})
-                    .catch(console.error);
-                        // .then(console.log)
+                    sendTo.send({ embeds: [ending] })
+                        .catch(console.error);
+                    // .then(console.log)
                 }
             })
             .catch(console.error);

@@ -13,7 +13,7 @@ const craft = async (message) => {
 
     const matchedCrafts = [];
 
-    const {crafts} = await getCraftsBarters();
+    const { crafts } = await getCraftsBarters();
     const currencies = await getCurrencies();
 
     for (const id in crafts) {
@@ -25,7 +25,7 @@ const craft = async (message) => {
             continue;
         }
 
-        for(const requiredItems of craft.requiredItems){
+        for (const requiredItems of craft.requiredItems) {
             if (requiredItems.item.name.toLowerCase().includes(itemname)) {
                 matchedCrafts.push(craft);
 
@@ -35,7 +35,7 @@ const craft = async (message) => {
     }
 
     if (matchedCrafts.length <= 0) {
-        sendTo.send({content: `There's no crafts for that item`});
+        sendTo.send({ content: `There's no crafts for that item` });
 
         return false;
     }
@@ -91,7 +91,7 @@ const craft = async (message) => {
         }
         embed.addField("Total", totalCost.toLocaleString() + "₽", true);
 
-        sendTo.send({embeds: [embed]})
+        sendTo.send({ embeds: [embed] })
             .then(() => {
                 if (i == MAX_CRAFTS - 1 && matchedCrafts.length > MAX_CRAFTS && !endingsent) {
                     endingsent = true;
@@ -111,9 +111,9 @@ const craft = async (message) => {
                         otheritems += citemname + "\r\n";
                     }
                     ending.setDescription(otheritems);
-                    sendTo.send({embeds: [ending]})
+                    sendTo.send({ embeds: [ending] })
                         .catch(console.error);
-                        // .then(console.log)
+                    // .then(console.log)
                 }
             })
             .catch(console.error);

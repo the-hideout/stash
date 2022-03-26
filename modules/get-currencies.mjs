@@ -1,4 +1,4 @@
-import ttRequest from "./tt-request.mjs";
+// import ttRequest from "./tt-request.mjs";
 
 let currencies = {
     'RUB': 1,

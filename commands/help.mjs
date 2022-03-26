@@ -6,13 +6,13 @@ import {
 import commands from '../modules/get-commands.mjs';
 
 const defaultFunction = {
-	data: new SlashCommandBuilder()
-		.setName('help')
-		.setDescription('Tells you a bit about the bot')
+    data: new SlashCommandBuilder()
+        .setName('help')
+        .setDescription('Tells you a bit about the bot')
         .addStringOption(option => option
             .setName('command')
             .setDescription('Get help about command')),
-	async execute(interaction) {
+    async execute(interaction) {
         const embed = new MessageEmbed();
         const helpCommand = interaction.options.getString('command');
 
@@ -38,7 +38,7 @@ const defaultFunction = {
         embed.addField(c.syntax, c.description + "\r\n\r\nExamples:\r\n" + c.examples);
 
         await interaction.editReply({ embeds: [embed] });
-	},
+    },
 };
 
 export default defaultFunction;

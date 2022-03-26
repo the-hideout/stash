@@ -3,11 +3,11 @@ import {
 } from 'discord.js';
 
 const servers = (message, client) => {
-    if (message.author.id !== process.env.ADMIN_ID){
+    if (message.author.id !== process.env.ADMIN_ID) {
         return false;
     }
 
-    if(message.channel.type !== 'DM') {
+    if (message.channel.type !== 'DM') {
         return false;
     }
     const sendTo = message.fallbackChannel || message.channel;
@@ -29,9 +29,9 @@ const servers = (message, client) => {
         return true;
     }
 
-    sendTo.send({embeds: [embed]})
+    sendTo.send({ embeds: [embed] })
         .catch(console.error);
-        // .then(console.log)
+    // .then(console.log)
 };
 
 export default servers;

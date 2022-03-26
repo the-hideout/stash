@@ -5,10 +5,10 @@ import {
 import got from 'got';
 
 const defaultFunction = {
-	data: new SlashCommandBuilder()
-		.setName('about')
-		.setDescription('Tells you a bit about the bot'),
-	async execute(interaction) {
+    data: new SlashCommandBuilder()
+        .setName('about')
+        .setDescription('Tells you a bit about the bot'),
+    async execute(interaction) {
         const embed = new MessageEmbed();
         let data;
 
@@ -16,7 +16,7 @@ const defaultFunction = {
             data = await got('https://api.github.com/repos/the-hideout/stash/contributors', {
                 responseType: 'json',
             });
-        } catch (loadError){
+        } catch (loadError) {
             console.error(loadError);
         }
 
@@ -36,18 +36,18 @@ const defaultFunction = {
 
         let contributorsString = '';
 
-        for(const contributor of data?.body){
+        for (const contributor of data?.body) {
             contributorsString = `${contributorsString}, ${contributor.login}`;
         }
 
         contributorsString = contributorsString.substring(1).trim();
 
-        if(contributorsString){
+        if (contributorsString) {
             embed.addField('Contributors', contributorsString);
         }
 
         await interaction.editReply({ embeds: [embed] });
-	},
+    },
 };
 
 export default defaultFunction;

@@ -11,14 +11,14 @@ import {
 // import Rollbar from 'rollbar';
 
 import commands from './classic-commands/index.mjs';
-import autocomplete, {fillCache} from './modules/autocomplete.mjs';
+import autocomplete, { fillCache } from './modules/autocomplete.mjs';
 import got from 'got';
 
 // if(process.env.NODE_ENV === 'production'){
 //     console.log('Setting up rollbar');
 
 //     new Rollbar({
-//         accessToken: '7ac07140aabe45698942a94bc636d58c',
+//         accessToken: '<token>',
 //         captureUncaught: true,
 //         captureUnhandledRejections: true
 //     });
@@ -37,11 +37,11 @@ discordClient.commands = new Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.mjs'));
 
 for (const file of commandFiles) {
-	const command = await import(`./commands/${file}`);
+    const command = await import(`./commands/${file}`);
 
-	// Set a new item in the Collection
-	// With the key as the command name and the value as the exported module
-	discordClient.commands.set(command.default.data.name, command);
+    // Set a new item in the Collection
+    // With the key as the command name and the value as the exported module
+    discordClient.commands.set(command.default.data.name, command);
 }
 
 await fillCache();
@@ -73,7 +73,7 @@ discordClient.on('guildCreate', async (guild) => {
     try {
         const owner = await guild.fetchOwner();
         owner.send(`Thank you so much for adding the Stash bot to your Discord!\n\rTo get more information on how the bot works, try !help or /help to get started.`);
-    } catch (someError){
+    } catch (someError) {
         console.error(someError);
     }
 });
@@ -94,37 +94,34 @@ discordClient.on('guildDelete', (guild) => {
 });
 
 discordClient.on('messageCreate', async (message) => {
-    // console.log(message);
-
     if (message.channel.type != 'DM' && message.channel.type != 'GUILD_TEXT') {
         return false;
     }
 
-    if(message.author.bot){
+    if (message.author.bot) {
         // Don't do anything from other bots
-
         return false;
     }
 
     let formattedMessage = message.content.toLowerCase();
 
-    if(message.mentions.has(discordClient.user)){
+    if (message.mentions.has(discordClient.user)) {
         formattedMessage = '!help';
     }
 
-    for(const command in commands){
-        if(formattedMessage.indexOf(command) !== 0){
+    for (const command in commands) {
+        if (formattedMessage.indexOf(command) !== 0) {
             continue;
         }
 
-        if(message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.SEND_MESSAGES)){
+        if (message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.SEND_MESSAGES)) {
             const user = await discordClient.users.fetch(message.author.id, false);
             user.send(`Missing posting permissions in ${message.guild.name}#${message.channel.name} (${message.guild.id}). Replying here instead.\n\rIf you want to fix this, talk to your discord admin`);
 
             message.fallbackChannel = user;
         }
 
-        if(message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.EMBED_LINKS)){
+        if (message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.EMBED_LINKS)) {
             const user = await discordClient.users.fetch(message.author.id, false);
             user.send(`Missing embed permissions in ${message.guild.name}#${message.channel.name} (${message.guild.id}). Replying here instead.\n\rIf you want to fix this, talk to your discord admin`);
 
@@ -135,7 +132,7 @@ discordClient.on('messageCreate', async (message) => {
 
         try {
             commands[command](message, discordClient);
-        } catch (someError){
+        } catch (someError) {
             console.error(someError);
         }
 
@@ -143,13 +140,13 @@ discordClient.on('messageCreate', async (message) => {
     }
 
     // If somebody said something to us
-    if(message.channel.type === 'DM'){
+    if (message.channel.type === 'DM') {
         commands['!help'](message);
     }
 });
 
 discordClient.on('interactionCreate', async (interaction) => {
-    if(interaction.isAutocomplete()){
+    if (interaction.isAutocomplete()) {
         let options = autocomplete(interaction);
 
         options = options.splice(0, 25);
@@ -166,37 +163,38 @@ discordClient.on('interactionCreate', async (interaction) => {
 
     let command = false;
 
-    if(interaction.isSelectMenu()){
+    if (interaction.isSelectMenu()) {
         command = discordClient.commands.get(interaction.message.interaction.commandName);
     } else if (interaction.isCommand()) {
         command = discordClient.commands.get(interaction.commandName);
     }
 
-	if (!command) {
+    if (!command) {
         return false;
     }
 
     await interaction.deferReply();
 
-	try {
+    try {
         console.log(command.default.data.name);
-		await command.default.execute(interaction);
-	} catch (error) {
-		console.error(error);
+        await command.default.execute(interaction);
+    } catch (error) {
+        console.error(error);
 
-		await interaction.editReply({
+        await interaction.editReply({
             content: 'There was an error while executing this command!',
             ephemeral: true,
         });
-	}
+    }
 });
 
 if (process.env.NODE_ENV === 'production') {
-// A healthcheck cron to send a GET request to our status server
-let healthcheck = new cron.CronJob('*/45 * * * * *', () => {
-    got(`https://status.tarkov.dev/api/push/${process.env.HEALTH_ENDPOINT}?msg=OK`);
-  });
-healthcheck.start();
+    // A healthcheck cron to send a GET request to our status server
+    // The cron schedule is expressed in seconds for the first value
+    let healthcheck = new cron.CronJob('*/45 * * * * *', () => {
+        got(`https://status.tarkov.dev/api/push/${process.env.HEALTH_ENDPOINT}?msg=OK`);
+    });
+    healthcheck.start();
 } else {
     console.log("healthcheck disabled");
 }

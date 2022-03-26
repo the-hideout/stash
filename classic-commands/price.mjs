@@ -71,10 +71,10 @@ const price = async (message) => {
     let endingsent = false;
 
     const currencies = await getCurrencies();
-    const {crafts, barters} = await getCraftsBarters();
+    const { crafts, barters } = await getCraftsBarters();
 
-    for(const item of response.data.itemsByName){
-        if(item.shortName.toLowerCase() !== itemname){
+    for (const item of response.data.itemsByName) {
+        if (item.shortName.toLowerCase() !== itemname) {
             continue;
         }
 
@@ -244,7 +244,7 @@ const price = async (message) => {
             embed.setDescription('No prices available.');
         }
 
-        sendTo.send({embeds: [embed]})
+        sendTo.send({ embeds: [embed] })
             .then(() => {
                 if (i == MAX_ITEMS - 1 && response.data.itemsByName.length > MAX_ITEMS && !endingsent) {
                     endingsent = true;
@@ -267,9 +267,9 @@ const price = async (message) => {
                     }
                     ending.setDescription(otheritems);
 
-                    sendTo.send({embeds: [ending]})
+                    sendTo.send({ embeds: [ending] })
                         .catch(console.error);
-                        // .then(console.log)
+                    // .then(console.log)
                 }
             })
             .catch(console.error);

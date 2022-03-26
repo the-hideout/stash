@@ -1,5 +1,5 @@
 const channels = (message, client) => {
-    if (message.author.id !== process.env.ADMIN_ID){
+    if (message.author.id !== process.env.ADMIN_ID) {
         return false;
     }
 
@@ -21,7 +21,7 @@ const channels = (message, client) => {
     response.content = `Channels in ${server.name}\n`;
 
     server.channels.cache.map(channel => {
-        if(channel.type !== 'GUILD_TEXT'){
+        if (channel.type !== 'GUILD_TEXT') {
             return true;
         }
 
@@ -30,7 +30,7 @@ const channels = (message, client) => {
 
     sendTo.send(response)
         .catch(console.error);
-        // .then(console.log)
+    // .then(console.log)
 };
 
 export default channels;

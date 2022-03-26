@@ -27,9 +27,9 @@ const help = (message) => {
     }
 
     if (embed.length > 0) {
-        sendTo.send({embeds: [embed]})
+        sendTo.send({ embeds: [embed] })
             .catch(console.error);
-            // .then(console.log)
+        // .then(console.log)
     } else {
         message.react('❌');
     }

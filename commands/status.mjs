@@ -19,10 +19,10 @@ const colorCodes = [
 ];
 
 const defaultFunction = {
-	data: new SlashCommandBuilder()
-		.setName('status')
-		.setDescription('Gives you the current server status'),
-	async execute(interaction) {
+    data: new SlashCommandBuilder()
+        .setName('status')
+        .setDescription('Gives you the current server status'),
+    async execute(interaction) {
         const embed = new MessageEmbed();
         let currentStatus;
 
@@ -46,15 +46,15 @@ const defaultFunction = {
             });
 
             currentStatus = statusResponse.data.status;
-        } catch (requestError){
+        } catch (requestError) {
             console.error(requestError);
 
             await interaction.editReply({
                 content: 'Something went wrong when trying to fetch status, please try again',
                 ephemeral: true,
-             });
+            });
 
-             return true;
+            return true;
         }
 
         // console.log(currentStatus);
@@ -63,7 +63,7 @@ const defaultFunction = {
 
         embed.setTitle(globalStatus.message);
         embed.setURL('https://status.escapefromtarkov.com/');
-        if(currentStatus.messages[0]?.content){
+        if (currentStatus.messages[0]?.content) {
             embed.setDescription(currentStatus.messages[0].content);
         }
         // embed.setAuthor({
@@ -73,12 +73,12 @@ const defaultFunction = {
         // });
         embed.setColor(colorCodes[globalStatus.status]);
 
-        for(const message of currentStatus.currentStatuses){
+        for (const message of currentStatus.currentStatuses) {
             embed.addField(message.name, statusCodes[message.status], true);
         }
 
         await interaction.editReply({ embeds: [embed] });
-	},
+    },
 };
 
 export default defaultFunction;

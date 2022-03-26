@@ -38,7 +38,7 @@ const map = async (message) => {
         const response = {};
         let map = maps[Math.floor(Math.random() * maps.length)];
 
-        if(!allMaps.includes(map)){
+        if (!allMaps.includes(map)) {
             map = map.charAt(0).toUpperCase() + map.slice(1);
             response.content = map;
         } else {
@@ -47,7 +47,7 @@ const map = async (message) => {
 
         sendTo.send(response)
             .catch(console.error);
-            // .then(console.log)
+        // .then(console.log)
     } else {
         message.react('❌');
     }

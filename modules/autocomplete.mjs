@@ -3,8 +3,8 @@ import ttRequest from "./tt-request.mjs";
 let nameCache = false;
 let lookupCache = {};
 
-async function fillCache(){
-    if(nameCache){
+async function fillCache() {
+    if (nameCache) {
         return true;
     }
 
@@ -20,23 +20,22 @@ async function fillCache(){
         });
 
         nameCache = itemNamesResponse.data.itemsByType.map(item => item.name);
-    } catch (requestError){
+    } catch (requestError) {
         console.error(requestError);
     }
 
     console.timeEnd('fill-autocomplete-cache');
 };
 
-function autocomplete(interaction){
-    // const searchString = 'm4a1';
+function autocomplete(interaction) {
     let searchString;
     try {
         searchString = interaction.options.getString('name');
-    } catch(getError){
+    } catch (getError) {
         console.error(getError);
     }
 
-    if(lookupCache[searchString]){
+    if (lookupCache[searchString]) {
         return [...lookupCache[searchString]];
     }
 

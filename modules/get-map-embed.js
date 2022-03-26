@@ -10,17 +10,17 @@ const getMapEmbed = async (outputMap) => {
 
     let mapKey = outputMap;
 
-    if(outputMap === 'factory (night)'){
+    if (outputMap === 'factory (night)') {
         mapKey = 'factory';
     }
 
     const selectedMapData = mapData.find(mapObject => mapObject.key === mapKey);
     let displayDuration = selectedMapData.duration;
 
-    if(selectedMapData.duration.includes('/')){
+    if (selectedMapData.duration.includes('/')) {
         const [day, night] = selectedMapData.duration.split('/');
 
-        if(outputMap.includes('night')){
+        if (outputMap.includes('night')) {
             displayDuration = night;
         } else {
             displayDuration = day;
@@ -35,8 +35,8 @@ const getMapEmbed = async (outputMap) => {
     embed.addField('Players', selectedMapData.players, true);
     embed.setImage(`https://tarkov.dev/maps/${mapKey}.jpg`);
 
-    if(selectedMapData.source){
-        embed.setFooter({text: `Map made by ${selectedMapData.source}`});
+    if (selectedMapData.source) {
+        embed.setFooter({ text: `Map made by ${selectedMapData.source}` });
     }
 
     return embed;
