@@ -18,25 +18,18 @@ This bot is open source and supported by the team behind [tarkov.dev](https://ta
 
 ### Commands 💬
 
-`/price` && `!price`
-
-`/map` && `!map`
-
-`/barter` && `!barter`
-
-`/craft` && `!craft`
-
-`/ammo`
-
-`/status`
-
-`/help` && `!help`
-
-`/about`
-
-`/issue`
-
-`/status`
+|  Command  |  Example   |  Description   |
+|    :----:   |     :----:    |        :----:       |
+| `/help`      | `/help` or `help <command>`         | The help command to view all available commands |
+| `/price` | `/price name: <item>`  | Get a detailed output on the price of an item, its price tier, and more! |
+| `/map` | `/map woods` | View a map and some general info about it |
+| `/barter` | `/barter name: <item>` | Check barter details for an item |
+| `/craft` | `/craft name: <item>` | Check crafting details for an item |
+| `/ammo` | `/ammo ammo_type: 5.45x39mm` | Get a sorted ammo table for a certain ammo type |
+| `/status` | - | Get the game/server/website status of Escape from Tarkov |
+| `/about` | - | View details about the bot |
+| `/issue` | `/issue message: <text>` | Report an issue with the bot |
+| `/invite` | - | Get a Discord invite link for the bot to join it to another server |
 
 ---
 
