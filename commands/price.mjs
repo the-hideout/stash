@@ -11,18 +11,18 @@ import colors from '../modules/colors.js';
 const MAX_ITEMS = 2;
 
 const defaultFunction = {
-	data: new SlashCommandBuilder()
-		.setName('price')
-		.setDescription('Replies with an item price')
+    data: new SlashCommandBuilder()
+        .setName('price')
+        .setDescription('Replies with an item price')
         .addStringOption(option => {
             return option.setName('name')
                 .setDescription('Item name to search for')
                 .setAutocomplete(true);
         }),
-	async execute(interaction) {
+    async execute(interaction) {
         let searchString = interaction.options.getString('name');
 
-        if(!searchString){
+        if (!searchString) {
             await interaction.editReply({
                 content: 'You need to specify a search term',
                 ephemeral: true,
@@ -89,7 +89,7 @@ const defaultFunction = {
             }
         }
 
-        if(response.data.itemsByName.length === 0){
+        if (response.data.itemsByName.length === 0) {
             await interaction.editReply({
                 content: 'Your search term matched no items',
                 ephemeral: true,
@@ -101,10 +101,10 @@ const defaultFunction = {
         let embeds = [];
 
         const currencies = await getCurrencies();
-        const {crafts, barters} = await getCraftsBarters();
+        const { crafts, barters } = await getCraftsBarters();
 
-        for(const item of response.data.itemsByName){
-            if(item.shortName.toLowerCase() !== searchString){
+        for (const item of response.data.itemsByName) {
+            if (item.shortName.toLowerCase() !== searchString) {
                 continue;
             }
 
@@ -120,7 +120,7 @@ const defaultFunction = {
             let body = "**Price and Item Details:**\n";
             embed.setTitle(item.name);
             embed.setURL(item.link);
-            
+
 
             if (item.iconLink) {
                 embed.setThumbnail(item.iconLink);
@@ -163,7 +163,7 @@ const defaultFunction = {
                 let traderVal = bestTraderPrice.toLocaleString() + "₽";
 
                 body += `• Sell to: \`${bestTraderName}\` for \`${traderVal}\`\n`;
-                
+
                 // Calculate item tier
                 var tier = get_item_tier(bestTraderPrice);
                 embed.setColor(tier.color);
@@ -288,12 +288,12 @@ const defaultFunction = {
 
             embeds.push(embed);
 
-            if(i >= MAX_ITEMS - 1){
+            if (i >= MAX_ITEMS - 1) {
                 break;
             }
         }
 
-        if(MAX_ITEMS < response.data.itemsByName.length){
+        if (MAX_ITEMS < response.data.itemsByName.length) {
             const ending = new MessageEmbed();
 
             ending.setTitle("+" + (response.data.itemsByName.length - MAX_ITEMS) + " more");
@@ -317,8 +317,8 @@ const defaultFunction = {
             embeds.push(ending);
         }
 
-        await interaction.editReply({embeds: embeds});
-	},
+        await interaction.editReply({ embeds: embeds });
+    },
 };
 
 function get_item_tier(price) {
@@ -339,7 +339,7 @@ function get_item_tier(price) {
     }
 
     return { color: color, msg: tier_msg };
-        
+
 }
 
 export default defaultFunction;

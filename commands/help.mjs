@@ -6,13 +6,13 @@ import {
 import commands from '../modules/get-commands.mjs';
 
 const defaultFunction = {
-	data: new SlashCommandBuilder()
-		.setName('help')
-		.setDescription('Tells you a bit about the bot')
+    data: new SlashCommandBuilder()
+        .setName('help')
+        .setDescription('Tells you a bit about the bot')
         .addStringOption(option => option
             .setName('command')
             .setDescription('Get help about command')),
-	async execute(interaction) {
+    async execute(interaction) {
         const embed = new MessageEmbed();
         const helpCommand = interaction.options.getString('command');
 
@@ -22,9 +22,9 @@ const defaultFunction = {
         [Come visit us in our server.](https://discord.gg/XPAsKGHSzH)`);
 
             for (const command in commands) {
-                const c = commands[command];
+                const cmd = commands[command];
 
-                embed.addField(c.syntax, c.description);
+                embed.addField(cmd.syntax, cmd.description);
             }
 
             await interaction.editReply({ embeds: [embed] });
@@ -32,13 +32,13 @@ const defaultFunction = {
             return true;
         }
 
-        const c = commands[helpCommand];
+        const cmd = commands[helpCommand];
 
         embed.setTitle("!" + helpCommand + " command help");
-        embed.addField(c.syntax, c.description + "\r\n\r\nExamples:\r\n" + c.examples);
+        embed.addField(cmd.syntax, cmd.description + "\r\n\r\nExamples:\r\n" + cmd.examples);
 
         await interaction.editReply({ embeds: [embed] });
-	},
+    },
 };
 
 export default defaultFunction;

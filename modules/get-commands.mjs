@@ -1,26 +1,26 @@
 const commands = {
     'help': {
-        syntax: '/help or !help [command]',
+        syntax: '/help [command]',
         description: 'Show details for command',
         examples: '/help barter',
     },
     'map': {
-        syntax: '/map or !map [mapname mapname] [-mapname]',
-        description: 'Select a random map',
-        examples: '/map -woods\r\n/map customs shoreline interchange',
+        syntax: '/map [mapname mapname] [-mapname]',
+        description: 'Get a map and some info about it',
+        examples: '/map woods\r\n/map customs shoreline interchange',
     },
     'price': {
-        syntax: '/price or !price itemname',
+        syntax: '/price itemname',
         description: 'Show prices for item(s) matching itemname',
         examples: '/price bitcoin',
     },
     'barter': {
-        syntax: '/barter or !barter itemname',
+        syntax: '/barter itemname',
         description: 'Shows barter trades for item(s) matching itemname',
         examples: '/barter slick',
     },
     'craft': {
-        syntax: '/craft or !craft itemname',
+        syntax: '/craft itemname',
         description: 'Shows crafts for item(s) matching itemname',
         examples: '/craft 7n31',
     },

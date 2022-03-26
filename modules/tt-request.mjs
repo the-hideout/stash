@@ -20,7 +20,7 @@ const ttRequest = async (options) => {
         });
 
         return response.body;
-    } catch (requestError){
+    } catch (requestError) {
         console.error(requestError);
 
         throw requestError;

@@ -2,7 +2,7 @@ import {
     MessageEmbed,
 } from 'discord.js';
 
-const sendError = async(client, member, details) => {
+const sendError = async (client, member, details) => {
     let reportTo = await client.users.fetch(process.env.ADMIN_ID, false);
     const embed = new MessageEmbed();
 
@@ -18,7 +18,7 @@ const sendError = async(client, member, details) => {
     embed.setTitle('New Issue Reported 🐞');
     embed.setDescription(`**Issue Description:**\n${details}`);
 
-    let footerText = `This issue was reported by @${member.user.username}`;
+    let footerText = ` This issue was reported by @${member.user.username}`;
 
     if (member.guild) {
         footerText = `${footerText} | Server: ${member.guild.name}`;

@@ -44,14 +44,14 @@ const defaultFunction = {
         ),
     async execute(interaction) {
         let searchString = '';
-        if(interaction.type === 'MESSAGE_COMPONENT'){
+        if (interaction.type === 'MESSAGE_COMPONENT') {
             searchString = interaction.values[0];
         } else {
             searchString = interaction.options.getString('ammo_type');
         }
         console.log('ammo ' + searchString);
 
-        if(!searchString){
+        if (!searchString) {
             const row = new MessageActionRow()
                 .addComponents(
                     new MessageSelectMenu()
@@ -61,7 +61,7 @@ const defaultFunction = {
                             return {
                                 label: ammoType[0],
                                 value: ammoType[1],
-                            }
+                            };
                         })),
                 );
             await interaction.editReply({
@@ -125,7 +125,7 @@ const defaultFunction = {
                 `${tableData[i][4]} %`,
                 `${tableData[i][5]} m/s`,
             ]);
-            table.setAlign(i, asciiTable.LEFT)
+            table.setAlign(i, asciiTable.LEFT);
         }
 
         const embed = new MessageEmbed();

@@ -9,18 +9,18 @@ import getCraftsBarters from '../modules/get-crafts-barters.mjs';
 const MAX_CRAFTS = 2;
 
 const defaultFunction = {
-	data: new SlashCommandBuilder()
-		.setName('craft')
-		.setDescription('Find crafts with a specific item')
+    data: new SlashCommandBuilder()
+        .setName('craft')
+        .setDescription('Find crafts with a specific item')
         .addStringOption(option => {
             return option.setName('name')
                 .setDescription('Item name to search for')
                 .setAutocomplete(true);
         }),
-	async execute(interaction) {
+    async execute(interaction) {
         const searchString = interaction.options.getString('name');
 
-        if(!searchString){
+        if (!searchString) {
             await interaction.editReply({
                 content: 'You need to specify a search term',
                 ephemeral: true,
@@ -33,7 +33,7 @@ const defaultFunction = {
 
         const matchedCrafts = [];
 
-        const {crafts} = await getCraftsBarters();
+        const { crafts } = await getCraftsBarters();
         const currencies = await getCurrencies();
 
         for (const id in crafts) {
@@ -45,7 +45,7 @@ const defaultFunction = {
                 continue;
             }
 
-            for(const requiredItems of craft.requiredItems){
+            for (const requiredItems of craft.requiredItems) {
                 if (requiredItems.item.name.toLowerCase().includes(searchString.toLowerCase())) {
                     matchedCrafts.push(craft);
 
@@ -54,7 +54,7 @@ const defaultFunction = {
             }
         }
 
-        if(matchedCrafts.length === 0){
+        if (matchedCrafts.length === 0) {
             await interaction.editReply({
                 content: 'Found no matching crafts for that item',
                 ephemeral: true,
@@ -121,7 +121,7 @@ const defaultFunction = {
             }
         }
 
-        if(matchedCrafts.length > MAX_CRAFTS){
+        if (matchedCrafts.length > MAX_CRAFTS) {
             const ending = new MessageEmbed();
 
             ending.setTitle("+" + (matchedCrafts.length - MAX_CRAFTS) + " more");
@@ -144,8 +144,8 @@ const defaultFunction = {
             embeds.push(ending);
         }
 
-        await interaction.editReply({embeds: embeds});
-	},
+        await interaction.editReply({ embeds: embeds });
+    },
 };
 
 export default defaultFunction;

@@ -9,18 +9,18 @@ import getCraftsBarters from '../modules/get-crafts-barters.mjs';
 const MAX_BARTERS = 2;
 
 const defaultFunction = {
-	data: new SlashCommandBuilder()
-		.setName('barter')
-		.setDescription('Find barters with a specific item')
+    data: new SlashCommandBuilder()
+        .setName('barter')
+        .setDescription('Find barters with a specific item')
         .addStringOption(option => {
             return option.setName('name')
                 .setDescription('Item name to search for')
                 .setAutocomplete(true);
         }),
-	async execute(interaction) {
+    async execute(interaction) {
         const searchString = interaction.options.getString('name');
 
-        if(!searchString){
+        if (!searchString) {
             await interaction.editReply({
                 content: 'You need to specify a search term',
                 ephemeral: true,
@@ -33,7 +33,7 @@ const defaultFunction = {
 
         const matchedBarters = [];
 
-        const {barters} = await getCraftsBarters();
+        const { barters } = await getCraftsBarters();
         const currencies = await getCurrencies();
 
         for (const bid in barters) {
@@ -45,7 +45,7 @@ const defaultFunction = {
                 continue;
             }
 
-            for(const requiredItems of barter.requiredItems){
+            for (const requiredItems of barter.requiredItems) {
                 if (requiredItems.item.name.toLowerCase().includes(searchString.toLowerCase())) {
                     matchedBarters.push(barter);
 
@@ -54,7 +54,7 @@ const defaultFunction = {
             }
         }
 
-        if(matchedBarters.length === 0){
+        if (matchedBarters.length === 0) {
             await interaction.editReply({
                 content: 'Found no matching barters for that item',
                 ephemeral: true,
@@ -118,7 +118,7 @@ const defaultFunction = {
             }
         }
 
-        if(matchedBarters.length > MAX_BARTERS){
+        if (matchedBarters.length > MAX_BARTERS) {
             const ending = new MessageEmbed();
 
             ending.setTitle("+" + (matchedBarters.length - MAX_BARTERS) + " more");
@@ -141,8 +141,8 @@ const defaultFunction = {
             embeds.push(ending);
         }
 
-        await interaction.editReply({embeds: embeds});
-	},
+        await interaction.editReply({ embeds: embeds });
+    },
 };
 
 export default defaultFunction;
