@@ -2,14 +2,13 @@ import {
     MessageEmbed,
 } from 'discord.js';
 
+// Admin only command that returns the servers and the reach the bot has
 const servers = (message, client) => {
+    // The the message comes from a user other than the bot admin, return
     if (message.author.id !== process.env.ADMIN_ID) {
         return false;
     }
 
-    if (message.channel.type !== 'DM') {
-        return false;
-    }
     const sendTo = message.fallbackChannel || message.channel;
     const embed = new MessageEmbed();
     let serverCount = 0;
@@ -31,7 +30,6 @@ const servers = (message, client) => {
 
     sendTo.send({ embeds: [embed] })
         .catch(console.error);
-    // .then(console.log)
 };
 
 export default servers;

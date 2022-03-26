@@ -3,6 +3,7 @@ import {
     MessageEmbed,
 } from 'discord.js';
 import ttRequest from '../modules/tt-request.mjs';
+import generalError from '../modules/general-error.mjs';
 
 const statusCodes = [
     'OK',
@@ -49,10 +50,7 @@ const defaultFunction = {
         } catch (requestError) {
             console.error(requestError);
 
-            await interaction.editReply({
-                content: 'Something went wrong when trying to fetch status, please try again',
-                ephemeral: true,
-            });
+            generalError(interaction, 'Something went wrong when trying to fetch status, please try again');
 
             return true;
         }

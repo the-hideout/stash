@@ -138,11 +138,6 @@ discordClient.on('messageCreate', async (message) => {
 
         return true;
     }
-
-    // If somebody said something to us
-    if (message.channel.type === 'DM') {
-        commands['!help'](message);
-    }
 });
 
 discordClient.on('interactionCreate', async (interaction) => {
