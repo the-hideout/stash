@@ -2,4 +2,3 @@ node_modules
 .env
 config-dev.json
 config.json
-backups/
