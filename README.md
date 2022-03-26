@@ -35,7 +35,7 @@ This bot is open source and supported by the team behind [tarkov.dev](https://ta
 
 ## Development 🔨
 
-For development you need to crate 2 files in your local directory. One is for registering commands and one is for running the bot.
+For development you need to create two files in your local directory. One is for registering commands and one is for running the bot.
 
 The files are:
 
