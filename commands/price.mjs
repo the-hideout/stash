@@ -31,7 +31,7 @@ const defaultFunction = {
             return true;
         }
 
-        searchString = searchString.toLowerCase().trim().replace(/"/g, '\\"');
+        searchString = searchString.toLowerCase().trim().replace('\\', '\\\\').replace('\"', '\\"');
 
         console.log(`price ${searchString}`);
 
