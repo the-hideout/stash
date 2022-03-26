@@ -31,7 +31,10 @@ const defaultFunction = {
             return true;
         }
 
-        searchString = searchString.toLowerCase().trim().replace('\\', '\\\\').replace('\"', '\\"');
+        searchString = searchString.toLowerCase().trim();
+        
+        // Sanitize for graphql query
+        searchString = searchString.replaceAll('\\', '\\\\').replaceAll('\"', '\\"')
 
         console.log(`price ${searchString}`);
 
