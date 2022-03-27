@@ -151,3 +151,14 @@ bot    | Filling autocomplete cache
 bot    | fill-autocomplete-cache: 944.249ms
 bot    | Logged in as stash-dev#1234!
 ```
+
+## Deployment 🚀
+
+Deploying the bot is very easy! Just do the following:
+
+1. Write the code for your changes
+2. Open a pull request
+3. Get a review and ensure CI is passing
+4. Merge! Instantly upon merging your changes are deployed to the Heroku instance running the bot and your changes will go live
+
+> Note: If you added a brand new slash command, it can take up to one hour for it to be registered by Discord globally
