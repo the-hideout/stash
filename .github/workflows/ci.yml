@@ -11,20 +11,36 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [16.x]
-
     steps:
       - name: Checkout
         uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # pin@v2
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # pin@v3.0.0
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
         with:
-          node-version: ${{ matrix.node-version }}
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
 
       - name: Install
         run: npm ci
 
       # TODO add tests here
+
+  deploy:
+    if: github.event_name == 'push'
+    needs: [test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Register Slash Commands
+        env:
+          NODE_ENV: ci
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
+        run: node deploy-commands.mjs

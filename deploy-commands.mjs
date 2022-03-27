@@ -3,7 +3,15 @@ import fs from 'fs';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 
-const { clientId, token } = JSON.parse(fs.readFileSync('config.json'));
+var clientId;
+var token;
+
+if (process.env.NODE_ENV === "ci") {
+    clientId = process.env.DISCORD_CLIENT_ID;
+    token = process.env.DISCORD_TOKEN;
+} else {
+    var { clientId, token } = JSON.parse(fs.readFileSync('config.json'));
+}
 
 const commands = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.mjs'));
