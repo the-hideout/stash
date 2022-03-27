@@ -1,6 +1,6 @@
 # Stash 🤖
 
-[![CodeQL](https://github.com/the-hideout/stash/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/the-hideout/stash/actions/workflows/codeql-analysis.yml)
+[![ci](https://github.com/the-hideout/stash/actions/workflows/ci.yml/badge.svg)](https://github.com/the-hideout/stash/actions/workflows/ci.yml) [![CodeQL](https://github.com/the-hideout/stash/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/the-hideout/stash/actions/workflows/codeql-analysis.yml)
 
 Stash is a Discord bot that helps you play Escape from Tarkov!
 
