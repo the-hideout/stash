@@ -41,6 +41,7 @@ const defaultFunction = {
             .setName('ammo_type')
             .setDescription('Enter the ammo type')
             .setChoices(ammoTypes)
+            .setRequired(true)
         ),
     async execute(interaction) {
         let searchString = '';
