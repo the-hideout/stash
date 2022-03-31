@@ -1,3 +1,5 @@
+// About command to show info about the bot
+
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
     MessageEmbed,
