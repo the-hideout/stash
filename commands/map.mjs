@@ -12,6 +12,7 @@ const defaultFunction = {
         .addStringOption(option => option
             .setName('maplist')
             .setDescription('Enter a list of maps to include')
+            .setRequired(true)
         ),
     async execute(interaction) {
         const inputMaps = interaction.options.getString('maplist');

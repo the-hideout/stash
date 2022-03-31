@@ -17,7 +17,8 @@ const defaultFunction = {
         .addStringOption(option => {
             return option.setName('name')
                 .setDescription('Item name to search for')
-                .setAutocomplete(true);
+                .setAutocomplete(true)
+                .setRequired(true);
         }),
     async execute(interaction) {
         let searchString = interaction.options.getString('name');

@@ -10,6 +10,7 @@ const defaultFunction = {
             .setRequired(true)
             .setDescription("Enter your message")
             .setName("message")
+            .setRequired(true)
         ),
     async execute(interaction) {
         const { client, member } = interaction;
