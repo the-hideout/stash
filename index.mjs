@@ -49,6 +49,15 @@ await fillCache();
 discordClient.on('ready', () => {
     console.log(`Logged in as ${discordClient.user.tag}!`);
 
+    const message = "🟢 Systems now online";
+
+    console.log(message);
+
+    discordClient.users.fetch(process.env.ADMIN_ID, false)
+        .then((user) => {
+            user.send(message);
+        });
+
     discordClient.user.setActivity('tarkov.dev', {
         type: 'PLAYING',
     });
@@ -72,7 +81,7 @@ discordClient.on('guildCreate', async (guild) => {
 
     try {
         const owner = await guild.fetchOwner();
-        owner.send(`Thank you so much for adding the Stash bot to your Discord!\n\rTo get more information on how the bot works, try !help or /help to get started.`);
+        owner.send(`Thank you so much for adding the Stash bot to your Discord!\n\rTo get more information on how the bot works, try /help to get started.`);
     } catch (someError) {
         console.error(someError);
     }
