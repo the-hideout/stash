@@ -7,6 +7,7 @@ import ttRequest from '../modules/tt-request.mjs';
 import getCurrencies from '../modules/get-currencies.mjs';
 import getCraftsBarters from '../modules/get-crafts-barters.mjs';
 import colors from '../modules/colors.js';
+import moment from 'moment';
 
 const MAX_ITEMS = 2;
 
@@ -54,7 +55,7 @@ const defaultFunction = {
             let body = "**Price and Item Details:**\n";
             embed.setTitle(item.name);
             embed.setURL(item.link);
-            embed.setFooter(`Last Updated: ${item.updated}`);
+            embed.setFooter({text: `Last Updated: ${moment(item.updated).format('MMMM Do YYYY, h:mm:ss a')}`});
 
 
             if (item.iconLink) {
@@ -239,7 +240,7 @@ const defaultFunction = {
                 const itemname = response.data.itemsByName[i].name;
 
                 if (itemname.length + 4 + otheritems.length > 2048) {
-                    ending.setFooter("Not all results shown.");
+                    ending.setFooter({text: "Not all results shown."});
 
                     break;
                 }
