@@ -16,7 +16,7 @@ const defaultFunction = {
         const embed = new MessageEmbed();
         const helpCommand = interaction.options.getString('command');
 
-        if (!helpCommand || !commands[helpCommand]) {
+        if (!commands[helpCommand]) {
             embed.setTitle("Available Commands");
             embed.setDescription(`Need Help or Have Questions?
         [Come visit us in our server.](https://discord.gg/XPAsKGHSzH)`);
@@ -34,7 +34,7 @@ const defaultFunction = {
 
         const cmd = commands[helpCommand];
 
-        embed.setTitle("!" + helpCommand + " command help");
+        embed.setTitle("/" + helpCommand + " command help");
         embed.addField(cmd.syntax, cmd.description + "\r\n\r\nExamples:\r\n" + cmd.examples);
 
         await interaction.editReply({ embeds: [embed] });
