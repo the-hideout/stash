@@ -21,81 +21,15 @@ const defaultFunction = {
                 .setRequired(true);
         }),
     async execute(interaction) {
+        // Get the search string from the user invoked command
         let searchString = interaction.options.getString('name');
 
-        if (!searchString) {
-            await interaction.editReply({
-                content: 'You need to specify a search term',
-                ephemeral: true,
-            });
+        // Make a graphql query to get the item data from the API
+        let response = await graphql_query(interaction, searchString);
 
-            return true;
-        }
-
-        searchString = searchString.toLowerCase().trim();
-        
-        // Sanitize for graphql query
-        searchString = searchString.replaceAll('\\', '\\\\').replaceAll('\"', '\\"')
-
-        console.log(`price ${searchString}`);
-
-        const query = `query {
-            itemsByName(name: "${searchString}") {
-                id
-                name
-                normalizedName
-                shortName
-                updated
-                width
-                height
-                iconLink
-                imageLink
-                link
-                avg24hPrice
-                traderPrices {
-                    price
-                    trader {
-                        id
-                        name
-                    }
-                }
-                buyFor {
-                    source
-                    price
-                    currency
-                    requirements {
-                        type
-                        value
-                    }
-                }
-            }
-        }`;
-        let response;
-        try {
-            response = await ttRequest({ graphql: query });
-        } catch (error) {
-            console.error(error);
-        }
-
-        if (!response.hasOwnProperty('data') || !response.data.hasOwnProperty('itemsByName')) {
-            console.log('Got no data');
-
-            return false;
-        }
-
-        if (response.hasOwnProperty('errors')) {
-            for (const errorIndex in response.errors) {
-                console.error("Item search error: " + response.errors[errorIndex].message);
-            }
-        }
-
-        if (response.data.itemsByName.length === 0) {
-            await interaction.editReply({
-                content: 'Your search term matched no items',
-                ephemeral: true,
-            });
-
-            return true;
+        // If we failed to get a response from the graphql_query, return
+        if (!response) {
+            return;
         }
 
         let embeds = [];
@@ -321,6 +255,102 @@ const defaultFunction = {
         await interaction.editReply({ embeds: embeds });
     },
 };
+
+// A helper function to make a graphql query to get item data from the API
+// :param interaction: The interaction object to edit the reply with
+// :param searchString: The search string to search for via the graphql API
+// :return response: The graphql response object - False (bool) if anything fails
+async function graphql_query(interaction, searchString) {
+    // If no search string is provided, send a message and return
+    if (!searchString) {
+        await interaction.editReply({
+            content: 'You need to specify a search term',
+            ephemeral: true,
+        });
+        return false;
+    }
+
+    // Sanitize the search string for the graphql query
+    searchString = searchString.toLowerCase().trim();
+    searchString = searchString.replaceAll('\\', '\\\\').replaceAll('\"', '\\"');
+
+    // Log the command
+    console.log(`price ${searchString}`);
+
+    const query = `query {
+        itemsByName(name: "${searchString}") {
+            id
+            name
+            normalizedName
+            shortName
+            updated
+            width
+            height
+            iconLink
+            imageLink
+            link
+            avg24hPrice
+            traderPrices {
+                price
+                trader {
+                    id
+                    name
+                }
+            }
+            buyFor {
+                source
+                price
+                currency
+                requirements {
+                    type
+                    value
+                }
+            }
+        }
+    }`;
+
+    // Send the graphql query
+    let response;
+    try {
+        response = await ttRequest({ graphql: query });
+    } catch (error) {
+        // If an error occured -> log it, send a response to the user, and exit
+        console.error(error);
+        await interaction.editReply({
+            content: 'An error occured while trying to contact api.tarkov.dev',
+            ephemeral: true,
+        });
+        return false;
+    }
+
+    // If we did not get usable data from the API, send a message and return
+    if (!response.hasOwnProperty('data') || !response.data.hasOwnProperty('itemsByName')) {
+        await interaction.editReply({
+            content: 'Got no data from the API (oh no)',
+            ephemeral: true,
+        });
+        return false;
+    }
+
+    // If we have errors, loop through and log them - Attempt to continue with execution
+    if (response.hasOwnProperty('errors')) {
+        for (const errorIndex in response.errors) {
+            console.error("Item search error: " + response.errors[errorIndex].message);
+        }
+    }
+
+    // If no items matched the search string, send a message and return
+    if (response.data.itemsByName.length === 0) {
+        await interaction.editReply({
+            content: 'Your search term matched no items',
+            ephemeral: true,
+        });
+        return false;
+    }
+
+    // If everything else succeeded, return the API response
+    return response;
+}
 
 function get_item_tier(price) {
     var color;
