@@ -45,17 +45,13 @@ const defaultFunction = {
                 name
                 normalizedName
                 shortName
-                basePrice
                 updated
                 width
                 height
                 iconLink
-                wikiLink
                 imageLink
                 link
-                types
                 avg24hPrice
-                recoilModifier
                 traderPrices {
                     price
                     trader {
@@ -124,6 +120,7 @@ const defaultFunction = {
             let body = "**Price and Item Details:**\n";
             embed.setTitle(item.name);
             embed.setURL(item.link);
+            embed.setFooter(`Last Updated: ${item.updated}`);
 
 
             if (item.iconLink) {
