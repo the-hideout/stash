@@ -55,7 +55,7 @@ const defaultFunction = {
             let body = "**Price and Item Details:**\n";
             embed.setTitle(item.name);
             embed.setURL(item.link);
-            embed.setFooter({text: `Last Updated: ${moment(item.updated).format('MMMM Do YYYY, h:mm:ss a')}`});
+            embed.setFooter({text: `Last Updated: ${moment(item.updated).format('MMMM Do YYYY, h:mm:ss a')} UTC`});
 
 
             if (item.iconLink) {
