@@ -73,7 +73,6 @@ const defaultFunction = {
         let response;
         try {
             response = await ttRequest({ graphql: query });
-            console.log(response.data);
         } catch (error) {
             console.error(error);
         }
@@ -121,6 +120,7 @@ const defaultFunction = {
             let body = "**Price and Item Details:**\n";
             embed.setTitle(item.name);
             embed.setURL(item.link);
+            embed.setFooter(`Last Updated: ${item.updated}`);
 
 
             if (item.iconLink) {
