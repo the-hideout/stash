@@ -45,17 +45,13 @@ const defaultFunction = {
                 name
                 normalizedName
                 shortName
-                basePrice
                 updated
                 width
                 height
                 iconLink
-                wikiLink
                 imageLink
                 link
-                types
                 avg24hPrice
-                recoilModifier
                 traderPrices {
                     price
                     trader {
@@ -77,6 +73,7 @@ const defaultFunction = {
         let response;
         try {
             response = await ttRequest({ graphql: query });
+            console.log(response.data);
         } catch (error) {
             console.error(error);
         }
