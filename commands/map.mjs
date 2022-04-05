@@ -8,33 +8,20 @@ import getMapEmbed from '../modules/get-map-embed.js';
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('map')
-        .setDescription('Replies with a random map')
+        .setDescription('Get detailed information about a map')
         .addStringOption(option => option
             .setName('maplist')
-            .setDescription('Enter a list of maps to include')
+            .setDescription('Select a map')
             .setRequired(true)
+            .setChoices(allMaps)
         ),
+
     async execute(interaction) {
         const inputMaps = interaction.options.getString('maplist');
-        let randomMaps = allMaps;
-
-        if (inputMaps) {
-            randomMaps = inputMaps.split(' ');
-        }
 
         console.log(`map ${inputMaps}`);
 
-        const outputMap = randomMaps[Math.floor(Math.random() * randomMaps.length)];
-
-        // If we have a non-custom list just return that
-        if (!allMaps.includes(outputMap)) {
-            await interaction.editReply({ content: outputMap });
-
-            return true;
-        }
-
-        const embed = await getMapEmbed(outputMap);
-
+        const embed = await getMapEmbed(inputMaps);
 
         await interaction.editReply({
             embeds: [embed],
