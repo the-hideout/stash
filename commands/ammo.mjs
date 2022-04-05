@@ -27,6 +27,7 @@ const ammoTypes = [
     ['23x75mm', '23x75mm'],
     ['20/70', '20/70'],
     ['12.7x55mm', '12.7x55mm'],
+    ['.366 TKM', '.366 TKM'],
 ];
 
 const ammoResponse = await got('https://raw.githubusercontent.com/TarkovTracker/tarkovdata/master/ammunition.json', {
