@@ -30,9 +30,12 @@ const ammoTypes = [
     ['.366 TKM', '.366 TKM'],
 ];
 
-const ammoResponse = await got('https://raw.githubusercontent.com/TarkovTracker/tarkovdata/master/ammunition.json', {
-    responseType: 'json',
-}).json();
+async function getAmmoResponse() {
+    const ammoResponse = await got('https://raw.githubusercontent.com/TarkovTracker/tarkovdata/master/ammunition.json', {
+        responseType: 'json',
+    }).json();
+    return ammoResponse;
+}
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
@@ -75,7 +78,7 @@ const defaultFunction = {
             return true;
         }
 
-        const table = new asciiTable;
+        const table = new asciiTable();
         const tableData = [];
 
         table.removeBorder();
@@ -87,6 +90,8 @@ const defaultFunction = {
             'Frag',
             'Velo',
         ]);
+
+        const ammoResponse = await getAmmoResponse();
 
         for (const id in ammoResponse) {
             if (!ammoResponse[id].name.toLowerCase().includes(searchString.toLowerCase())) {
