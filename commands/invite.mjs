@@ -8,6 +8,7 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName("invite")
         .setDescription("Get an invite link to invite the bot to another Discord server"),
+
     async execute(interaction) {
         const embed = new MessageEmbed();
         embed.setTitle("Stash Invite Link 🔗");

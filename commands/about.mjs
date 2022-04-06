@@ -40,7 +40,7 @@ const defaultFunction = {
 
         let contributorsString = '';
 
-        for (const contributor of data?.body) {
+        for (const contributor of data.body) {
             contributorsString = `${contributorsString}, ${contributor.login}`;
         }
 
@@ -50,7 +50,7 @@ const defaultFunction = {
             embed.addField('Contributors', contributorsString);
         }
 
-        await interaction.editReply({ embeds: [embed] });
+        interaction.editReply({ embeds: [embed] });
     },
 };
 

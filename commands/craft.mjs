@@ -18,6 +18,7 @@ const defaultFunction = {
                 .setAutocomplete(true)
                 .setRequired(true);
         }),
+
     async execute(interaction) {
         const searchString = interaction.options.getString('name');
 
@@ -134,7 +135,7 @@ const defaultFunction = {
                 const bitemname = matchedCrafts[i].rewardItems[0].item.name + " (" + matchedCrafts[i].source + ")";
 
                 if (bitemname.length + 4 + otheritems.length > 2048) {
-                    ending.setFooter("Not all results shown.");
+                    embed.setFooter({ text: "Not all results shown." });
 
                     break;
                 }

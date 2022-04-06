@@ -12,6 +12,7 @@ const defaultFunction = {
             .setName("message")
             .setRequired(true)
         ),
+
     async execute(interaction) {
         const { client, member } = interaction;
         const details = interaction.options.getString("message");

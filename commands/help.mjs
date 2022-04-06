@@ -12,6 +12,7 @@ const defaultFunction = {
         .addStringOption(option => option
             .setName('command')
             .setDescription('Get help about command')),
+
     async execute(interaction) {
         const embed = new MessageEmbed();
         const helpCommand = interaction.options.getString('command');

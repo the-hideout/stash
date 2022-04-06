@@ -131,8 +131,7 @@ const defaultFunction = {
                 const bitemname = matchedBarters[i].rewardItems[0].item.name + " (" + matchedBarters[i].source + ")";
 
                 if (bitemname.length + 4 + otheritems.length > 2048) {
-                    ending.setFooter("Not all results shown.");
-
+                    ending.setFooter({text: "Not all results shown.",});
                     break;
                 }
                 otheritems += bitemname + "\r\n";
