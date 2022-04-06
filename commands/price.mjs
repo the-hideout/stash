@@ -21,6 +21,7 @@ const defaultFunction = {
                 .setAutocomplete(true)
                 .setRequired(true);
         }),
+
     async execute(interaction) {
         // Get the search string from the user invoked command
         let searchString = interaction.options.getString('name');

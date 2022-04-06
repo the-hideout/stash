@@ -55,20 +55,15 @@ const defaultFunction = {
             return true;
         }
 
-        // console.log(currentStatus);
-
         const globalStatus = currentStatus.currentStatuses.find(status => status.name === 'Global');
 
         embed.setTitle(globalStatus.message);
         embed.setURL('https://status.escapefromtarkov.com/');
-        if (currentStatus.messages[0]?.content) {
+
+        if (currentStatus.messages.length > 0) {
             embed.setDescription(currentStatus.messages[0].content);
         }
-        // embed.setAuthor({
-        //     name: 'Built by tarkov.dev',
-        //     iconURL: 'https://tarkov.dev/apple-touch-icon.png',
-        //     url: 'https://tarkov.dev',
-        // });
+
         embed.setColor(colorCodes[globalStatus.status]);
 
         for (const message of currentStatus.currentStatuses) {
