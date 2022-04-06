@@ -78,6 +78,8 @@ const defaultFunction = {
                 }
             }
 
+            let tierPrice = item.avg24hPrice;
+            let sellTo = 'Flea Market';
             if (item.avg24hPrice > 0) {
                 let fleaPrice = parseInt(item.avg24hPrice).toLocaleString() + "₽";
 
@@ -94,23 +96,29 @@ const defaultFunction = {
                     fleaPrice += "\r\n" + Math.round(parseInt(item.avg24hPrice) / size).toLocaleString() + "₽/slot";
                 }
                 embed.addField("Flea Price (low)", fleaPrice, true);
+                
+                if (item.lastLowPrice < tierPrice) tierPrice = item.lastLowPrice;
             }
 
             if (bestTraderName) {
+                if (bestTraderPrice > tierPrice) {
+                    tierPrice = bestTraderPrice;
+                    sellTo = bestTraderName;
+                }
                 let traderVal = bestTraderPrice.toLocaleString() + "₽";
-
-                body += `• Sell to: \`${bestTraderName}\` for \`${traderVal}\`\n`;
-
-                // Calculate item tier
-                var tier = get_item_tier(bestTraderPrice);
-                embed.setColor(tier.color);
-                body += `• Item Tier: ${tier.msg}\n`;
 
                 if (size > 1) {
                     traderVal += "\r\n" + Math.round(bestTraderPrice / size).toLocaleString() + "₽/slot";
                 }
                 embed.addField(bestTraderName + " Value", traderVal, true);
             }
+
+            body += `• Sell to: \`${sellTo}\` for \`${tierPrice.toLocaleString() + "₽"}\`\n`;
+
+            // Calculate item tier
+            var tier = get_item_tier(tierPrice / (item.width * item.height));
+            embed.setColor(tier.color);
+            body += `• Item Tier: ${tier.msg}\n`;
 
             for (const offerindex in item.buyFor) {
                 const offer = item.buyFor[offerindex];
@@ -357,13 +365,13 @@ async function graphql_query(interaction, searchString) {
 function get_item_tier(price) {
     var color;
     var tier_msg;
-    if (price >= 25000) {
+    if (price >= 40000) {
         color = colors.yellow;
         tier_msg = "⭐ Legendary ⭐";
-    } else if (price >= 12500) {
+    } else if (price >= 25000) {
         color = colors.green;
         tier_msg = "🟢 Great";
-    } else if (price >= 8000) {
+    } else if (price >= 11000) {
         color = colors.blue;
         tier_msg = "🔵 Average";
     } else {
