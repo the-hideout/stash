@@ -6,7 +6,7 @@ import {
 import ttRequest from '../modules/tt-request.mjs';
 import getCurrencies from '../modules/get-currencies.mjs';
 import getCraftsBarters from '../modules/get-crafts-barters.mjs';
-import colors from '../modules/colors.js';
+import lootTier from '../modules/loot-tier.js';
 import moment from 'moment';
 
 const MAX_ITEMS = 2;
@@ -116,7 +116,7 @@ const defaultFunction = {
             body += `• Sell to: \`${sellTo}\` for \`${tierPrice.toLocaleString() + "₽"}\`\n`;
 
             // Calculate item tier
-            var tier = get_item_tier(tierPrice / (item.width * item.height));
+            var tier = lootTier(tierPrice / (item.width * item.height), item.types.includes('noFlea'));
             embed.setColor(tier.color);
             body += `• Item Tier: ${tier.msg}\n`;
 
@@ -316,6 +316,7 @@ async function graphql_query(interaction, searchString) {
                     value
                 }
             }
+            types
         }
     }`;
 
@@ -360,27 +361,6 @@ async function graphql_query(interaction, searchString) {
 
     // If everything else succeeded, return the API response
     return response;
-}
-
-function get_item_tier(price) {
-    var color;
-    var tier_msg;
-    if (price >= 40000) {
-        color = colors.yellow;
-        tier_msg = "⭐ Legendary ⭐";
-    } else if (price >= 25000) {
-        color = colors.green;
-        tier_msg = "🟢 Great";
-    } else if (price >= 11000) {
-        color = colors.blue;
-        tier_msg = "🔵 Average";
-    } else {
-        color = colors.red;
-        tier_msg = "🔴 Poor";
-    }
-
-    return { color: color, msg: tier_msg };
-
 }
 
 export default defaultFunction;

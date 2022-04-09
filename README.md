@@ -87,6 +87,7 @@ Next, you will need to edit the `.env` file and add the appropriate values as se
 ```ini
 DISCORD_API_TOKEN=<value_here>
 ADMIN_ID=<value_here>
+NODE_ENV=development
 ```
 
 The `DISCORD_API_TOKEN` can be found here:
@@ -130,9 +131,7 @@ Next, there are two ways to start the bot:
 To start the bot locally, run the following commands:
 
 ```console
-$ export DISCORD_API_TOKEN=<token>
-$ export NODE_ENV=development
-$ node index.mjs
+$ npm run dev
 Filling autocomplete cache
 fill-autocomplete-cache: 590.582ms
 Logged in as stash-dev#1234!
