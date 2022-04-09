@@ -27,7 +27,15 @@ const defaultFunction = {
         let searchString = interaction.options.getString('name');
 
         // Make a graphql query to get the item data from the API
-        let response = await graphql_query(interaction, searchString);
+        let response = false;
+        let responses = false;
+        try {
+            responses = await Promise.all([graphql_query(interaction, searchString), getCraftsBarters]);
+            response = responses[0];
+        } catch (error) {
+            console.log('/price command query error', error);
+            return;
+        }
 
         // If we failed to get a response from the graphql_query, return
         if (!response) {
@@ -36,8 +44,8 @@ const defaultFunction = {
 
         let embeds = [];
 
-        const currencies = await getCurrencies();
-        const { crafts, barters } = await getCraftsBarters();
+        const currencies = getCurrencies();
+        const { crafts, barters } = responses[1];
 
         for (const item of response.data.itemsByName) {
             if (item.shortName.toLowerCase() !== searchString) {
@@ -134,7 +142,7 @@ const defaultFunction = {
                 for (const reqindex in offer.requirements) {
                     const req = offer.requirements[reqindex];
 
-                    if (req.type == 'loyaltyLevel') {
+                    if (req.type == 'loyaltyLevel' && req.value) {
                         level = req.value;
                     } else if (req.type == 'questCompleted') {
                         quest = req.value;

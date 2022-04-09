@@ -36,7 +36,7 @@ const defaultFunction = {
         const matchedCrafts = [];
 
         const { crafts } = await getCraftsBarters();
-        const currencies = await getCurrencies();
+        const currencies = getCurrencies();
 
         for (const id in crafts) {
             const craft = crafts[id];
