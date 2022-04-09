@@ -16,8 +16,8 @@ import autocomplete, { fillCache } from './modules/autocomplete.mjs';
 import got from 'got';
 
 Sentry.init({
-  dsn: "https://ed4cc8e31fd6417998db23fb37819bec@o1189140.ingest.sentry.io/6312417",
-  tracesSampleRate: 1.0,
+    dsn: "https://ed4cc8e31fd6417998db23fb37819bec@o1189140.ingest.sentry.io/6312417",
+    tracesSampleRate: 1.0,
 });
 
 // if(process.env.NODE_ENV === 'production'){
@@ -204,8 +204,13 @@ if (process.env.NODE_ENV === 'production') {
     let healthcheck = new cron.CronJob('*/45 * * * * *', () => {
         got(
             `https://status.tarkov.dev/api/push/${process.env.HEALTH_ENDPOINT}?msg=OK`,
-            { timeout: { request: 5000 } }).catch(function (e) { console.log('healthcheck error:', e); }
-        );
+            {
+                headers: { "user-agent": "stash-tarkov-dev" },
+                timeout: { request: 5000 }
+            }).catch(function (e) {
+                console.log('healthcheck error:', e);
+            }
+            );
     });
     healthcheck.start();
 

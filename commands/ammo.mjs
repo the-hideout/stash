@@ -33,6 +33,7 @@ const ammoTypes = [
 async function getAmmoResponse() {
     const ammoResponse = await got('https://raw.githubusercontent.com/TarkovTracker/tarkovdata/master/ammunition.json', {
         responseType: 'json',
+        headers: { "user-agent": "stash-tarkov-dev" }
     }).json();
     return ammoResponse;
 }

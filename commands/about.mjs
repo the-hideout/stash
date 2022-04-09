@@ -17,6 +17,7 @@ const defaultFunction = {
         try {
             data = await got('https://api.github.com/repos/the-hideout/stash/contributors', {
                 responseType: 'json',
+                headers: { "user-agent": "stash-tarkov-dev" }
             });
         } catch (loadError) {
             console.error(loadError);
