@@ -9,6 +9,7 @@ const getMapData = async () => {
 
     const response = await got('https://raw.githubusercontent.com/the-hideout/tarkov-dev/master/src/data/maps.json', {
         responseType: 'json',
+        headers: { "user-agent": "stash-tarkov-dev" }
     });
 
     mapData = response.body;

@@ -17,6 +17,7 @@ const ttRequest = async (options) => {
         const response = await got.post('https://api.tarkov.dev/graphql', {
             responseType: 'json',
             body: requestBody,
+            headers: { "user-agent": "stash-tarkov-dev" }
         });
 
         return response.body;
