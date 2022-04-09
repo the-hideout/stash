@@ -35,7 +35,7 @@ const defaultFunction = {
         const matchedBarters = [];
 
         const { barters } = await getCraftsBarters();
-        const currencies = await getCurrencies();
+        const currencies = getCurrencies();
 
         for (const bid in barters) {
             const barter = barters[bid];

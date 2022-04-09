@@ -15,10 +15,14 @@ import commands from './classic-commands/index.mjs';
 import autocomplete, { fillCache } from './modules/autocomplete.mjs';
 import got from 'got';
 
-Sentry.init({
-    dsn: "https://ed4cc8e31fd6417998db23fb37819bec@o1189140.ingest.sentry.io/6312417",
-    tracesSampleRate: 1.0,
-});
+if (process.env.NODE_ENV === 'production') {
+    Sentry.init({
+        dsn: "https://ed4cc8e31fd6417998db23fb37819bec@o1189140.ingest.sentry.io/6312417",
+        tracesSampleRate: 1.0,
+    });
+} else {
+    console.log('Bypassing Sentry in dev environment');
+}
 
 // if(process.env.NODE_ENV === 'production'){
 //     console.log('Setting up rollbar');

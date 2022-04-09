@@ -6,6 +6,7 @@ const colors = {
     white: "#FFFFFF",
     cyan: "#00FFFF",
     black: "#000000",
+    purple: "#886ce4"
 };
 
 export default colors;

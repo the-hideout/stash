@@ -8,6 +8,8 @@ const { clientId, guildId, token } = JSON.parse(fs.readFileSync('config-dev.json
 const commands = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.mjs'));
 
+process.env.REGISTERING_COMMANDS = 'TRUE';
+
 for (const file of commandFiles) {
 	const command = await import(`./commands/${file}`);
 	commands.push(command.default.data.toJSON());
