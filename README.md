@@ -30,6 +30,7 @@ This bot is open source and supported by the team behind [tarkov.dev](https://ta
 | `/about` | - | View details about the bot |
 | `/issue` | `/issue message: <text>` | Report an issue with the bot |
 | `/invite` | - | Get a Discord invite link for the bot to join it to another server |
+| `/tier` | - | Show the criteria for loot tiers |
 
 ---
 
