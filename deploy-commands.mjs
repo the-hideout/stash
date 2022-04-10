@@ -13,6 +13,8 @@ if (process.env.NODE_ENV === "ci") {
     var { clientId, token } = JSON.parse(fs.readFileSync('config.json'));
 }
 
+process.env.REGISTERING_COMMANDS = 'TRUE';
+
 const commands = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.mjs'));
 
