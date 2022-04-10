@@ -30,7 +30,7 @@ const defaultFunction = {
         let response = false;
         let responses = false;
         try {
-            responses = await Promise.all([graphql_query(interaction, searchString), getCraftsBarters]);
+            responses = await Promise.all([graphql_query(interaction, searchString), getCraftsBarters()]);
             response = responses[0];
         } catch (error) {
             console.log('/price command query error', error);
