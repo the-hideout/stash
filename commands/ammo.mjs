@@ -1,84 +1,60 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
-    MessageEmbed,
-    MessageActionRow,
-    MessageSelectMenu,
+    MessageEmbed
 } from 'discord.js';
-import got from 'got';
 import asciiTable from 'ascii-table';
+import getAmmo from "../modules/get-ammo.mjs";
 
-const ammoTypes = [
-    ['7.62x51mm', '7.62x51mm'],
-    ['7.62x39mm', '7.62x39mm'],
-    ['5.56x45mm', '5.56x45mm'],
-    ['5.45x39mm', '5.45x39mm'],
-    ['7.62x54mm', '7.62x54mm'],
-    ['9x39mm', '9x39mm'],
-    ['9x19mm', '9x19mm'],
-    ['9x18mm', '9x18mm'],
-    ['9x21mm', '9x21mm'],
-    ['12/70', '12/70'],
-    ['4.6x30mm', '4.6x30mm'],
-    //['.357 Magnum', '.357 Magnum'],
-    ['.338 Lapua', '.338 Lapua'],
-    ['.300 Blackout', '.300 Blackout'],
-    ['.45 ACP', '.45 ACP'],
-    ['5.7x28mm', '5.7x28mm'],
-    ['7.62x25mm', '7.62x25mm'],
-    ['23x75mm', '23x75mm'],
-    ['20/70', '20/70'],
-    ['12.7x55mm', '12.7x55mm'],
-    ['.366 TKM', '.366 TKM'],
-];
-
-async function getAmmoResponse() {
-    const ammoResponse = await got('https://raw.githubusercontent.com/TarkovTracker/tarkovdata/master/ammunition.json', {
-        responseType: 'json',
-        headers: { "user-agent": "stash-tarkov-dev" }
-    }).json();
-    return ammoResponse;
-}
+const ammoLabels = {
+    Caliber12g: '12/70',
+    Caliber20g: '20/70',
+    Caliber23x75: '23x75mm',
+    Caliber30x29: '30x29mm',
+    Caliber366TKM: '.366 TKM',
+    Caliber40x46: '40x46mm',
+    Caliber46x30: '4.6x30mm',
+    Caliber57x28: '5.7x28mm',
+    Caliber556x45NATO: '5.56x45mm',
+    Caliber762x25TT: '7.62x25mm',
+    Caliber762x35: '.300 Blackout',
+    Caliber545x39: '5.45x39mm',
+    Caliber762x51: '7.62x51mm',
+    Caliber762x39: '7.62x39mm',
+    Caliber762x54R: '7.62x54mm',
+    Caliber86x70: '.338 Lapua',
+    Caliber9x18PM: '9x18mm',
+    Caliber9x19PARA: '9x19mm',
+    Caliber9x21: '9x21mm',
+    Caliber9x33R: '.357 Magnum',
+    Caliber9x39: '9x39mm',
+    Caliber127x55: '12.7x55mm',
+    Caliber1143x23ACP: '.45 ACP',
+  };
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('ammo')
         .setDescription('get ammunition information')
         .addStringOption(option => option
-            .setName('ammo_type')
+            .setName('name')
             .setDescription('Enter the ammo type')
-            .setChoices(ammoTypes)
+            .setAutocomplete(true)
             .setRequired(true)
         ),
     async execute(interaction) {
-        let searchString = '';
-        if (interaction.type === 'MESSAGE_COMPONENT') {
-            searchString = interaction.values[0];
-        } else {
-            searchString = interaction.options.getString('ammo_type');
-        }
-        console.log('ammo ' + searchString);
+        const searchString = interaction.options.getString('name');
 
         if (!searchString) {
-            const row = new MessageActionRow()
-                .addComponents(
-                    new MessageSelectMenu()
-                        .setCustomId('select')
-                        .setPlaceholder('Nothing selected')
-                        .addOptions(ammoTypes.map(ammoType => {
-                            return {
-                                label: ammoType[0],
-                                value: ammoType[1],
-                            };
-                        })),
-                );
             await interaction.editReply({
-                content: 'Select caliber',
-                components: [row],
-                // ephemeral: true,
+                content: 'You need to specify an ammo type',
+                ephemeral: true,
             });
 
             return true;
         }
+
+        const embed = new MessageEmbed();
+        embed.setURL(`https://tarkov.dev/ammo`);
 
         const table = new asciiTable();
         const tableData = [];
@@ -93,27 +69,52 @@ const defaultFunction = {
             'Velo',
         ]);
 
-        const ammoResponse = await getAmmoResponse();
+        const ammoResponse = await getAmmo();
+        let caliber = false;
+        let penIcon = -1;
+        for (const id in ammoResponse) {
+            const ammo = ammoResponse[id];
+            if (ammo.item.name.toLowerCase().includes(searchString.toLowerCase())) {
+                caliber = ammo.caliber;
+                break;
+            }
+        }
+        if (!caliber) {
+            await interaction.editReply({
+                content: 'No matching ammo found',
+                ephemeral: true,
+            });
+
+            return true;
+        }
+
+        let caliberLabel = ammoLabels[caliber];
+        if (!caliberLabel) caliberLabel = caliber.replace('Caliber', '');
+        embed.setTitle(`${caliberLabel} Ammo Table`);
 
         for (const id in ammoResponse) {
-            if (!ammoResponse[id].name.toLowerCase().includes(searchString.toLowerCase())) {
+            const ammo = ammoResponse[id];
+            if (ammo.caliber !== caliber) {
                 continue;
             }
-
-            let damage = ammoResponse[id].ballistics.damage;
-            let projectileCount = ammoResponse[id].projectileCount;
+            if (!embed.thumbnail || penIcon < ammo.penetrationPower) {
+                embed.setThumbnail(ammo.item.iconLink);
+                if (embed.thumbnail) penIcon = ammo.penetrationPower;
+            }
+            let damage = ammo.damage;
+            let projectileCount = ammo.projectileCount;
 
             if (projectileCount > 1) {
                 damage = damage * projectileCount;
             }
 
             tableData.push([
-                ammoResponse[id].shortName,
-                ammoResponse[id].ballistics.penetrationPower,
+                ammo.item.shortName,
+                ammo.penetrationPower,
                 damage,
-                ammoResponse[id].ballistics.armorDamage,
-                Math.floor(ammoResponse[id].ballistics.fragmentationChance * 100),
-                ammoResponse[id].ballistics.initialSpeed,
+                ammo.armorDamage,
+                Math.floor(ammo.fragmentationChance * 100),
+                ammo.initialSpeed,
             ]);
         }
 
@@ -137,9 +138,6 @@ const defaultFunction = {
             table.setAlign(i, asciiTable.LEFT);
         }
 
-        const embed = new MessageEmbed();
-        embed.setURL(`https://tarkov.dev/ammo`);
-        embed.setTitle(`${searchString} Ammo Table`);
         embed.setDescription('```' + table.toString() + '```');
         await interaction.editReply({ embeds: [embed] });
     },
