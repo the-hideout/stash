@@ -1,7 +1,6 @@
 import ttRequest from "./tt-request.mjs";
+import getAmmo from "../modules/get-ammo.mjs";
 
-//let nameCache = false;
-//let lookupCache = {};
 const caches = {
     default: {
         nameCache: false,
@@ -12,6 +11,10 @@ const caches = {
         lookupCache: {}
     },
     craft: {
+        nameCache: false,
+        lookupCache: {}
+    },
+    ammo: {
         nameCache: false,
         lookupCache: {}
     }
@@ -89,6 +92,13 @@ async function fillCache() {
             return;
         });
         caches.craft.nameCache.sort();
+
+        const ammoResponse = await getAmmo();
+
+        caches.ammo.nameCache = ammoResponse.map(ammo => {
+            return ammo.item.name;
+        });
+        caches.ammo.nameCache.sort();
     } catch (requestError) {
         console.error(requestError);
     }
@@ -114,7 +124,11 @@ function autocomplete(interaction) {
         return [...lookupCache[searchString]];
     }
 
-    lookupCache[searchString] = nameCache.filter(name => name.toLowerCase().includes(searchString.toLowerCase()));
+    if (interaction.commandName === 'ammo') {
+        lookupCache[searchString] = nameCache.filter(name => name.toLowerCase().replace(/\./g, '').includes(searchString.toLowerCase().replace(/\./g, '')));
+    } else {
+        lookupCache[searchString] = nameCache.filter(name => name.toLowerCase().includes(searchString.toLowerCase()));
+    }
 
     return [...lookupCache[searchString]];
 };

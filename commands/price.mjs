@@ -105,7 +105,7 @@ const defaultFunction = {
                 }
                 embed.addField("Flea Price (low)", fleaPrice, true);
                 
-                if (item.lastLowPrice < tierPrice) tierPrice = item.lastLowPrice;
+                if (item.lastLowPrice < tierPrice || tierPrice == 0) tierPrice = item.lastLowPrice;
             }
 
             if (bestTraderName) {
@@ -308,6 +308,7 @@ async function graphql_query(interaction, searchString) {
             imageLink
             link
             avg24hPrice
+            lastLowPrice
             traderPrices {
                 price
                 trader {
