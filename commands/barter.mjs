@@ -110,7 +110,7 @@ const defaultFunction = {
                 embed.addField(req.item.name, itemCost.toLocaleString() + "₽ x " + req.count, true);
             }
 
-            embed.addField("Total", totalCost.toLocaleString() + "₽", true);
+            embed.addField("Total", totalCost.toLocaleString() + "₽", false);
 
             embeds.push(embed);
 
