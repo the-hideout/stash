@@ -71,6 +71,9 @@ const defaultFunction = {
             const craft = matchedCrafts[i];
             let totalCost = 0;
             const embed = new MessageEmbed();
+            const toolsEmbed = new MessageEmbed();
+            toolsEmbed.setTitle('Required Tools');
+            let toolCost = 0;
 
             let title = craft.rewardItems[0].item.name;
 
@@ -110,6 +113,21 @@ const defaultFunction = {
                     }
                 }
 
+                let isTool = false;
+                for (let i = 0; i < req.attributes.length; i++) {
+                    if (req.attributes[i].type === 'tool') {
+                        isTool = true;
+                        break;
+                    }
+                }
+                if (isTool) {
+                    toolCost += itemCost * req.count;
+                    toolsEmbed.addField(req.item.name, itemCost.toLocaleString() + "₽ x " + req.count, true);
+                    if(!toolsEmbed.thumbnail) {
+                        toolsEmbed.setThumbnail(req.item.iconLink);
+                    }
+                    continue;
+                }
                 totalCost += itemCost * req.count;
                 //totalCost += req.item.avg24hPrice * req.count;
                 embed.addField(req.item.name, itemCost.toLocaleString() + "₽ x " + req.count, true);
@@ -117,6 +135,10 @@ const defaultFunction = {
             embed.addField("Total", totalCost.toLocaleString() + "₽", true);
 
             embeds.push(embed);
+            if (toolsEmbed.fields.length > 0) {
+                toolsEmbed.addField("Total", toolCost.toLocaleString() + "₽", true);
+                embeds.push(toolsEmbed);
+            }
 
             if (i == MAX_CRAFTS - 1) {
                 break;

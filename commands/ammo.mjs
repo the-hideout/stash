@@ -19,6 +19,7 @@ const ammoTypes = [
     ['9x21mm', '9x21mm'],
     ['12/70', '12/70'],
     ['4.6x30mm', '4.6x30mm'],
+    //['.357 Magnum', '.357 Magnum'],
     ['.338 Lapua', '.338 Lapua'],
     ['.300 Blackout', '.300 Blackout'],
     ['.45 ACP', '.45 ACP'],
