@@ -21,4 +21,3 @@ const generalError = async (interaction, message) => {
 };
 
 export default generalError;
-

@@ -30,7 +30,7 @@ const defaultFunction = {
             return true;
         }
 
-        console.log(`barter ${searchString}`);
+        console.log(`Barter ${searchString}`);
 
         const matchedBarters = [];
 
@@ -42,14 +42,12 @@ const defaultFunction = {
 
             if (barter.rewardItems[0].item.name.toLowerCase().includes(searchString.toLowerCase())) {
                 matchedBarters.push(barter);
-
                 continue;
             }
 
             for (const requiredItems of barter.requiredItems) {
                 if (requiredItems.item.name.toLowerCase().includes(searchString.toLowerCase())) {
                     matchedBarters.push(barter);
-
                     break;
                 }
             }

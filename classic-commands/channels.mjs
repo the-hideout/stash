@@ -30,7 +30,6 @@ const channels = (message, client) => {
 
     sendTo.send(response)
         .catch(console.error);
-    // .then(console.log)
 };
 
 export default channels;

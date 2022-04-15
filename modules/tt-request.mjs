@@ -2,7 +2,7 @@ import got from 'got';
 
 const ttRequest = async (options) => {
     if (!options.hasOwnProperty('graphql')) {
-        throw new Error("you must provide graphql");
+        throw new Error("You must provide graphql");
     }
 
     if (options.hasOwnProperty('channel') && options.channel.sendTyping) {

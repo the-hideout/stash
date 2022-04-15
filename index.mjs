@@ -64,55 +64,31 @@ discordClient.on('ready', () => {
     console.log(message);
 
     discordClient.users.fetch(process.env.ADMIN_ID, false)
-        .then((user) => {
+        .then(user => {
             user.send(message);
         });
 
-    discordClient.user.setActivity('tarkov.dev', {
+    discordClient.user.setActivity('Tarkov.dev', {
         type: 'PLAYING',
     });
 });
 
 discordClient.login(process.env.DISCORD_API_TOKEN);
 
-discordClient.on('guildCreate', async (guild) => {
+discordClient.on('guildCreate', async guild => {
     if (!guild.available) {
         return false;
     }
-
-    const message = `Joined server ${guild.name} with ${guild.memberCount} members (${guild.id})!`;
-
-    console.log(message);
-
-    discordClient.users.fetch(process.env.ADMIN_ID, false)
-        .then((user) => {
-            user.send(message);
-        });
 
     try {
         const owner = await guild.fetchOwner();
-        owner.send(`Thank you so much for adding the Stash bot to your Discord!\n\rTo get more information on how the bot works, try /help to get started.`);
-    } catch (someError) {
-        console.error(someError);
+        owner.send(`Thank you so much for adding the Stash bot to your Discord!\n\rTo get more information on how the bot works, try \`/help\` to get started.`);
+    } catch (error) {
+        console.error(error);
     }
 });
 
-discordClient.on('guildDelete', (guild) => {
-    if (!guild.available) {
-        return false;
-    }
-
-    const message = `Kicked from server ${guild.name} with ${guild.memberCount} members (${guild.id})!`;
-
-    console.log(message);
-
-    discordClient.users.fetch(process.env.ADMIN_ID, false)
-        .then((user) => {
-            user.send(message);
-        });
-});
-
-discordClient.on('messageCreate', async (message) => {
+discordClient.on('messageCreate', async message => {
     if (message.channel.type != 'DM' && message.channel.type != 'GUILD_TEXT') {
         return false;
     }
@@ -151,15 +127,15 @@ discordClient.on('messageCreate', async (message) => {
 
         try {
             commands[command](message, discordClient);
-        } catch (someError) {
-            console.error(someError);
+        } catch (error) {
+            console.error(error);
         }
 
         return true;
     }
 });
 
-discordClient.on('interactionCreate', async (interaction) => {
+discordClient.on('interactionCreate', async interaction => {
     if (interaction.isAutocomplete()) {
         let options = autocomplete(interaction);
 
@@ -211,13 +187,12 @@ if (process.env.NODE_ENV === 'production') {
             {
                 headers: { "user-agent": "stash-tarkov-dev" },
                 timeout: { request: 5000 }
-            }).catch(function (e) {
-                console.log('healthcheck error:', e);
-            }
-            );
+            }).catch(error => {
+                console.log('Healthcheck error:', error);
+            });
     });
     healthcheck.start();
 
 } else {
-    console.log("healthcheck disabled");
+    console.log("Healthcheck disabled");
 }

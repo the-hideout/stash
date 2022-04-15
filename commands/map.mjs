@@ -19,7 +19,7 @@ const defaultFunction = {
     async execute(interaction) {
         const inputMaps = interaction.options.getString('maplist');
 
-        console.log(`map ${inputMaps}`);
+        console.log(`Map ${inputMaps}`);
 
         const embed = await getMapEmbed(inputMaps);
 

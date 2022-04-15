@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-The `main` branch of this repo is considered active and supported for all security concerns
+The `main` branch of this repo is considered active and supported for all security concerns.
 
 ## Reporting a Vulnerability
 

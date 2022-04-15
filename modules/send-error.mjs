@@ -36,4 +36,3 @@ const sendError = async (client, member, details) => {
 }
 
 export default sendError;
-

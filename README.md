@@ -4,7 +4,7 @@
 
 Stash is a Discord bot that helps you play Escape from Tarkov!
 
-This is the official [tarkov.dev](https://tarkov.dev) Discord bot.
+This is the official [Tarkov.dev](https://tarkov.dev) Discord bot.
 
 To add the bot to your server, just click the link below:
 
@@ -12,9 +12,9 @@ To add the bot to your server, just click the link below:
 
 ## About 💡
 
-This bot takes all the data from [tarkov.dev](https://tarkov.dev) and exposes it in a user-friendly way.
+This bot takes all the data from [Tarkov.dev](https://tarkov.dev) and exposes it in a user-friendly way.
 
-This bot is open source and supported by the team behind [tarkov.dev](https://tarkov.dev).
+This bot is open source and supported by the team behind [Tarkov.dev](https://tarkov.dev).:banana: 
 
 ### Commands 💬
 
@@ -37,7 +37,7 @@ This bot is open source and supported by the team behind [tarkov.dev](https://ta
 
 ## Development 🔨
 
-For development you need to create two files in your local directory. One is for registering commands and one is for running the bot.
+For development you need to create two files in your local directory. One is for registering commands and the other one is for running the bot.
 
 The files are:
 
@@ -46,7 +46,7 @@ The files are:
 
 ### Create a Disord Bot
 
-Before you can test the bot out locally, you will need to create a Discord bot to authenticate with.
+Before you can test the bot locally, you will need to create a Discord bot.
 
 Create your bot:
 
@@ -66,7 +66,7 @@ An example of the `config-dev.json` file can be found at the root of this repo a
 
 #### clientId
 
-The `clientId` can be found in your Discord bot's general information under `APPLICATION_ID` [https://discord.com/developers/applications/](https://discord.com/developers/applications/)
+The `clientId` can be found in your [Discord bot's general information](https://discord.com/developers/applications) under `APPLICATION_ID`.
 
 ![client id](./assets/2-copy-app-id.png)
 

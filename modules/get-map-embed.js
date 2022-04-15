@@ -32,7 +32,7 @@ const getMapEmbed = async (outputMap) => {
     displayDuration = displayDuration.replace('min', 'minutes');
 
     // Get left and right real tarkov time
-    var left, right;
+    let left, right;
     if (outputMap.includes('factory')) {
         // If the map is Factory, set the times to static values
         left = "15:00";

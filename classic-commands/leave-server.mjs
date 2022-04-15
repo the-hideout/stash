@@ -19,7 +19,6 @@ const leaveServer = (message, client) => {
 
     sendTo.send(response)
         .catch(console.error);
-    // .then(console.log)
 };
 
 export default leaveServer;

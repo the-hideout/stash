@@ -94,8 +94,7 @@ if (process.env.REGISTERING_COMMANDS !== 'TRUE') {
 }
 
 function get_item_tier(price, noFlea) {
-    var color;
-    var tier_msg;
+    let color, tier_msg;
     if (price >= tiers.legendary) {
         color = colors.yellow;
         tier_msg = "⭐ Legendary ⭐";
