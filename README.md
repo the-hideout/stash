@@ -14,7 +14,7 @@ To add the bot to your server, just click the link below:
 
 This bot takes all the data from [Tarkov.dev](https://tarkov.dev) and exposes it in a user-friendly way.
 
-This bot is open source and supported by the team behind [Tarkov.dev](https://tarkov.dev).:banana: 
+This bot is open source and supported by the team behind [Tarkov.dev](https://tarkov.dev).
 
 ### Commands 💬
 
