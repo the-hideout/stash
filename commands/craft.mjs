@@ -132,11 +132,11 @@ const defaultFunction = {
                 //totalCost += req.item.avg24hPrice * req.count;
                 embed.addField(req.item.name, itemCost.toLocaleString() + "₽ x " + req.count, true);
             }
-            embed.addField("Total", totalCost.toLocaleString() + "₽", true);
+            embed.addField("Total", totalCost.toLocaleString() + "₽", false);
 
             embeds.push(embed);
             if (toolsEmbed.fields.length > 0) {
-                toolsEmbed.addField("Total", toolCost.toLocaleString() + "₽", true);
+                toolsEmbed.addField("Total", toolCost.toLocaleString() + "₽", false);
                 embeds.push(toolsEmbed);
             }
 
