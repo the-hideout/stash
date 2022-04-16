@@ -166,7 +166,6 @@ discordClient.on('interactionCreate', async interaction => {
     await interaction.deferReply();
 
     try {
-        console.log(command.default.data.name);
         await command.default.execute(interaction);
     } catch (error) {
         console.error(error);

@@ -30,8 +30,6 @@ const defaultFunction = {
             return true;
         }
 
-        console.log(`Barter ${searchString}`);
-
         const matchedBarters = [];
 
         const { barters } = await getCraftsBarters();

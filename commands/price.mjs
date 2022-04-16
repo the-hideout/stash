@@ -291,9 +291,6 @@ async function graphql_query(interaction, searchString) {
     searchString = searchString.toLowerCase().trim();
     searchString = searchString.replaceAll('\\', '\\\\').replaceAll('\"', '\\"');
 
-    // Log the command
-    console.log(`Price ${searchString}`);
-
     const query = `query {
         itemsByName(name: "${searchString}") {
             id
