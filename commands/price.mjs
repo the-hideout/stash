@@ -53,7 +53,6 @@ const defaultFunction = {
             }
 
             response.data.itemsByName = [item];
-
             break;
         }
 
@@ -124,7 +123,7 @@ const defaultFunction = {
             body += `• Sell to: \`${sellTo}\` for \`${tierPrice.toLocaleString() + "₽"}\`\n`;
 
             // Calculate item tier
-            var tier = lootTier(tierPrice / (item.width * item.height), item.types.includes('noFlea'));
+            let tier = lootTier(tierPrice / (item.width * item.height), item.types.includes('noFlea'));
             embed.setColor(tier.color);
             body += `• Item Tier: ${tier.msg}\n`;
 
@@ -291,9 +290,6 @@ async function graphql_query(interaction, searchString) {
     // Sanitize the search string for the graphql query
     searchString = searchString.toLowerCase().trim();
     searchString = searchString.replaceAll('\\', '\\\\').replaceAll('\"', '\\"');
-
-    // Log the command
-    console.log(`price ${searchString}`);
 
     const query = `query {
         itemsByName(name: "${searchString}") {

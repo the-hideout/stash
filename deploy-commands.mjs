@@ -3,14 +3,14 @@ import fs from 'fs';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 
-var clientId;
-var token;
+let clientId;
+let token;
 
 if (process.env.NODE_ENV === "ci") {
     clientId = process.env.DISCORD_CLIENT_ID;
     token = process.env.DISCORD_TOKEN;
 } else {
-    var { clientId, token } = JSON.parse(fs.readFileSync('config.json'));
+    let { clientId, token } = JSON.parse(fs.readFileSync('config.json'));
 }
 
 process.env.REGISTERING_COMMANDS = 'TRUE';

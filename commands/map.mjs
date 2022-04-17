@@ -19,8 +19,6 @@ const defaultFunction = {
     async execute(interaction) {
         const inputMaps = interaction.options.getString('maplist');
 
-        console.log(`map ${inputMaps}`);
-
         const embed = await getMapEmbed(inputMaps);
 
         await interaction.editReply({

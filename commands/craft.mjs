@@ -31,7 +31,7 @@ const defaultFunction = {
             return true;
         }
 
-        console.log(`craft ${searchString}`);
+        console.log(`Craft ${searchString}`);
 
         const matchedCrafts = [];
 
@@ -43,14 +43,12 @@ const defaultFunction = {
 
             if (craft.rewardItems[0].item.name.toLowerCase().includes(searchString.toLowerCase())) {
                 matchedCrafts.push(craft);
-
                 continue;
             }
 
             for (const requiredItems of craft.requiredItems) {
                 if (requiredItems.item.name.toLowerCase().includes(searchString.toLowerCase())) {
                     matchedCrafts.push(craft);
-
                     break;
                 }
             }
