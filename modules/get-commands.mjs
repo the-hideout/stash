@@ -5,9 +5,9 @@ const commands = {
         examples: '/help barter',
     },
     'map': {
-        syntax: '/map [mapname mapname] [-mapname]',
+        syntax: '/map mapname',
         description: 'Get a map and some info about it',
-        examples: '/map woods\r\n/map customs shoreline interchange',
+        examples: '/map woods\r\n/map customs',
     },
     'price': {
         syntax: '/price itemname',
