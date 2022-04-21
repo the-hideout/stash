@@ -235,6 +235,9 @@ const defaultFunction = {
                 embed.setDescription('No prices available.');
             }
 
+            // Add the item weight
+            body += `• Weight: \`${item.weight} kg\`\n`;
+
             // Add the item description
             embed.setDescription(body);
 
@@ -295,11 +298,11 @@ async function graphql_query(interaction, searchString) {
         itemsByName(name: "${searchString}") {
             id
             name
-            normalizedName
             shortName
             updated
             width
             height
+            weight
             iconLink
             imageLink
             link
