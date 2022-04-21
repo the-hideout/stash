@@ -236,7 +236,13 @@ const defaultFunction = {
             }
 
             // Add the item weight
-            body += `• Weight: \`${item.weight} kg\`\n`;
+            try {
+                body += `• Weight: \`${item.weight} kg\`\n`;
+            } catch (e) {
+                console.log(e);
+                body += `• Weight: \`failed to get item weight\`\n`;
+            }
+            
 
             // Add the item description
             embed.setDescription(body);
