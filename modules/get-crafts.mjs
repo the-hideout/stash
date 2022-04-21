@@ -1,4 +1,4 @@
-import ttRequest from "./tt-request.mjs";
+import graphqlRequest from "./graphql-request.mjs";
 
 const getCrafts = async () => {
     const craftsQuery = `query {
@@ -35,7 +35,7 @@ const getCrafts = async () => {
         }
     }`;
 
-    const responses = await ttRequest({
+    const responses = await graphqlRequest({
         graphql: craftsQuery,
     });
 

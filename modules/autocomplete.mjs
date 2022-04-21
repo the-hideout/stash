@@ -1,4 +1,4 @@
-import ttRequest from "./tt-request.mjs";
+import graphqlRequest from "./graphql-request.mjs";
 import getAmmo from "../modules/get-ammo.mjs";
 
 const caches = {
@@ -35,7 +35,7 @@ async function fillCache() {
     console.log('Filling autocomplete cache');
     console.time('Fill-autocomplete-cache');
     try {
-        const itemNamesResponse = await ttRequest({
+        const itemNamesResponse = await graphqlRequest({
             graphql: `query {
                 itemsByType(type: any) {
                     name
@@ -45,7 +45,7 @@ async function fillCache() {
 
         caches.default.nameCache = itemNamesResponse.data.itemsByType.map(item => item.name);
 
-        const barterResponse = await ttRequest({
+        const barterResponse = await graphqlRequest({
             graphql: `query {
                 barters {
                     rewardItems {
@@ -69,7 +69,7 @@ async function fillCache() {
         });
         caches.barter.nameCache.sort();
 
-        const craftResponse = await ttRequest({
+        const craftResponse = await graphqlRequest({
             graphql: `query {
                 crafts {
                     rewardItems {

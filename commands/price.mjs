@@ -3,7 +3,7 @@ import {
     MessageEmbed,
 } from 'discord.js';
 
-import ttRequest from '../modules/tt-request.mjs';
+import graphqlRequest from '../modules/graphql-request.mjs';
 import getCurrencies from '../modules/get-currencies.mjs';
 import getCraftsBarters from '../modules/get-crafts-barters.mjs';
 import lootTier from '../modules/loot-tier.js';
@@ -235,6 +235,15 @@ const defaultFunction = {
                 embed.setDescription('No prices available.');
             }
 
+            // Add the item weight
+            try {
+                body += `• Weight: \`${item.weight} kg\`\n`;
+            } catch (e) {
+                console.log(e);
+                body += `• Weight: \`failed to get item weight\`\n`;
+            }
+            
+
             // Add the item description
             embed.setDescription(body);
 
@@ -295,11 +304,11 @@ async function graphql_query(interaction, searchString) {
         itemsByName(name: "${searchString}") {
             id
             name
-            normalizedName
             shortName
             updated
             width
             height
+            weight
             iconLink
             imageLink
             link
@@ -328,7 +337,7 @@ async function graphql_query(interaction, searchString) {
     // Send the graphql query
     let response;
     try {
-        response = await ttRequest({ graphql: query });
+        response = await graphqlRequest({ graphql: query });
     } catch (error) {
         // If an error occured -> log it, send a response to the user, and exit
         console.error(error);
