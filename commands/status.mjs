@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import {
     MessageEmbed,
 } from 'discord.js';
-import ttRequest from '../modules/tt-request.mjs';
+import graphqlRequest from '../modules/graphql-request.mjs';
 import generalError from '../modules/general-error.mjs';
 
 const statusCodes = [
@@ -28,7 +28,7 @@ const defaultFunction = {
         let currentStatus;
 
         try {
-            const statusResponse = await ttRequest({
+            const statusResponse = await graphqlRequest({
                 graphql: `{
                     status {
                         currentStatuses {

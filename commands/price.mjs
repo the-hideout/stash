@@ -3,7 +3,7 @@ import {
     MessageEmbed,
 } from 'discord.js';
 
-import ttRequest from '../modules/tt-request.mjs';
+import graphqlRequest from '../modules/graphql-request.mjs';
 import getCurrencies from '../modules/get-currencies.mjs';
 import getCraftsBarters from '../modules/get-crafts-barters.mjs';
 import lootTier from '../modules/loot-tier.js';
@@ -337,7 +337,7 @@ async function graphql_query(interaction, searchString) {
     // Send the graphql query
     let response;
     try {
-        response = await ttRequest({ graphql: query });
+        response = await graphqlRequest({ graphql: query });
     } catch (error) {
         // If an error occured -> log it, send a response to the user, and exit
         console.error(error);

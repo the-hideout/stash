@@ -2,7 +2,7 @@ import got from 'got';
 
 const url = 'https://api.tarkov.dev/graphql';
 
-const ttRequest = async (options) => {
+const graphqlRequest = async (options) => {
     if (!options.hasOwnProperty('graphql')) {
         throw new Error("You must provide graphql");
     }
@@ -30,4 +30,4 @@ const ttRequest = async (options) => {
     }
 };
 
-export default ttRequest;
+export default graphqlRequest;

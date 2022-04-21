@@ -1,4 +1,4 @@
-import ttRequest from '../modules/tt-request.mjs';
+import graphqlRequest from '../modules/graphql-request.mjs';
 import colors from '../modules/colors.js';
 
 const tiers = {
@@ -32,7 +32,7 @@ const updateTiers = async () => {
     // Send the graphql query
     let response;
     try {
-        response = await ttRequest({ graphql: query });
+        response = await graphqlRequest({ graphql: query });
     } catch (error) {
         // If an error occured -> log it, send a response to the user, and exit
         console.error(error);

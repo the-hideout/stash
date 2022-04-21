@@ -1,4 +1,4 @@
-import ttRequest from "./tt-request.mjs";
+import graphqlRequest from "./graphql-request.mjs";
 
 let currencies = {
     'RUB': 1,
@@ -25,7 +25,7 @@ const updateCurrencies = async () => {
     }`;
 
     try {
-        const response = await ttRequest({ graphql: query });
+        const response = await graphqlRequest({ graphql: query });
         currencies['USD'] = response.data.itemsByIDs[0].buyFor[0].price;
         currencies['EUR'] = response.data.itemsByIDs[1].buyFor[0].price;
     } catch (requestError){
