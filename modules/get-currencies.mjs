@@ -8,6 +8,8 @@ let currencies = {
 
 let intervalId = false;
 
+// 5696686a4bdc2da3298b456a = dollars
+// 569668774bdc2da2298b4568 = euros
 const updateCurrencies = async () => {
     const query = `query {
         itemsByIDs(ids: ["5696686a4bdc2da3298b456a", "569668774bdc2da2298b4568"]) {
