@@ -1,5 +1,7 @@
 import got from 'got';
 
+const url = 'https://api.tarkov.dev/graphql';
+
 const ttRequest = async (options) => {
     if (!options.hasOwnProperty('graphql')) {
         throw new Error("You must provide graphql");
@@ -14,7 +16,7 @@ const ttRequest = async (options) => {
             query: options.graphql,
         });
 
-        const response = await got.post('https://api.tarkov.dev/graphql', {
+        const response = await got.post(url, {
             responseType: 'json',
             body: requestBody,
             headers: { "user-agent": "stash-tarkov-dev" }
