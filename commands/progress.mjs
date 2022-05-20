@@ -8,7 +8,8 @@ const subCommands = {
         const prog = progress.getProgress(interaction.user.id);
         if (!prog) {
             await interaction.reply({
-                content: `You have no customized progress.`
+                content: `You have no customized progress.`,
+                ephemeral: true
             });
             return;
         }
