@@ -46,13 +46,7 @@ const getUsersForUpdate = () => {
     return Object.values(userProgress).filter(prog => {
         return prog.tarkovTracker.token !== false;
     }).sort((a, b) => {
-        if (a.tarkovTracker.lastUpdate < b.tarkovTracker.lastUpdate) {
-            return -1;
-        }
-        if (a.tarkovTracker.lastUpdate > b.tarkovTracker.lastUpdate) {
-            return 1;
-        }
-        return 0;
+        return a.tarkovTracker.lastUpdate - b.tarkovTracker.lastUpdate;
     });
 };
 
