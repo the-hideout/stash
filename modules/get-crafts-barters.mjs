@@ -19,6 +19,7 @@ const getCraftsBarters = async () => {
               buyFor {
                 price
                 currency
+                priceRUB
                 vendor {
                   name
                   ...on TraderOffer {
@@ -71,6 +72,7 @@ const getCraftsBarters = async () => {
               buyFor {
                 price
                 currency
+                priceRUB
                 vendor {
                   name
                   ...on TraderOffer {

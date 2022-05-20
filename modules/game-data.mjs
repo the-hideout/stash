@@ -37,7 +37,7 @@ export async function updateMaps() {
             description
             enemies
             raidDuration
-            #players
+            players
         }
     }`;
     // add players to query

@@ -1,9 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import {
-    MessageEmbed,
-} from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 
-import getCurrencies from '../modules/get-currencies.mjs';
 import getCraftsBarters from '../modules/get-crafts-barters.mjs';
 import progress from '../modules/progress.mjs';
 
@@ -38,7 +35,6 @@ const defaultFunction = {
         const matchedCrafts = [];
 
         const { crafts } = await getCraftsBarters();
-        const currencies = getCurrencies();
 
         for (const id in crafts) {
             const craft = crafts[id];
@@ -108,7 +104,7 @@ const defaultFunction = {
                         continue;
                     }
 
-                    let traderPrice = offer.price * currencies[offer.currency];
+                    let traderPrice = offer.priceRUB;
 
                     if ((traderPrice < itemCost && prog.traders[offer.vendor.trader.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
                         itemCost = traderPrice;

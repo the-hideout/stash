@@ -1,10 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import {
-    MessageEmbed,
-} from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 
-import { getTiers } from '../modules/loot-tier.js';
-import lootTier from '../modules/loot-tier.js';
+import lootTier, { getTiers } from '../modules/loot-tier.js';
 
 const defaultFunction = {
     data: new SlashCommandBuilder()

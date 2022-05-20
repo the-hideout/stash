@@ -1,8 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Message, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 
 import graphqlRequest from '../modules/graphql-request.mjs';
-import getCurrencies from '../modules/get-currencies.mjs';
 import getCraftsBarters from '../modules/get-crafts-barters.mjs';
 import lootTier from '../modules/loot-tier.js';
 import progress from '../modules/progress.mjs';
@@ -44,20 +43,19 @@ const defaultFunction = {
 
         let embeds = [];
 
-        const currencies = getCurrencies();
         const { crafts, barters } = responses[1];
 
-        for (const item of response.data.itemsByName) {
+        for (const item of response.data.items) {
             if (item.shortName.toLowerCase() !== searchString) {
                 continue;
             }
 
-            response.data.itemsByName = [item];
+            response.data.items = [item];
             break;
         }
 
-        for (let i = 0; i < response.data.itemsByName.length; i = i + 1) {
-            const item = response.data.itemsByName[i];
+        for (let i = 0; i < response.data.items.length; i = i + 1) {
+            const item = response.data.items[i];
             const embed = new MessageEmbed();
 
             let body = "**Price and Item Details:**\n";
@@ -173,7 +171,7 @@ const defaultFunction = {
                     continue;
                 }
 
-                let traderPrice = (parseInt(offer.price) * currencies[offer.currency]).toLocaleString() + "₽";
+                let traderPrice = offer.priceRUB.toLocaleString() + "₽";
                 let level = 1;
                 let quest = '';
 
@@ -205,7 +203,7 @@ const defaultFunction = {
                                 continue;
                             }
 
-                            let traderPrice = offer.price * currencies[offer.currency];
+                            let traderPrice = offer.priceRUB;
 
                             if ((traderPrice < itemCost && prog.traders[offer.vendor.trader.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
                                 itemCost = traderPrice;
@@ -238,7 +236,7 @@ const defaultFunction = {
                                 continue;
                             }
 
-                            let traderPrice = offer.price * currencies[offer.currency];
+                            let traderPrice = offer.priceRUB;
 
                             if ((traderPrice < itemCost && prog.traders[offer.vendor.trader.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
                                 itemCost = traderPrice;
@@ -280,15 +278,15 @@ const defaultFunction = {
             }
         }
 
-        if (MAX_ITEMS < response.data.itemsByName.length) {
+        if (MAX_ITEMS < response.data.items.length) {
             const ending = new MessageEmbed();
 
-            ending.setTitle("+" + (response.data.itemsByName.length - MAX_ITEMS) + " more");
+            ending.setTitle("+" + (response.data.items.length - MAX_ITEMS) + " more");
             ending.setURL("https://tarkov.dev/?search=" + encodeURIComponent(searchString));
 
             let otheritems = '';
-            for (let i = MAX_ITEMS; i < response.data.itemsByName.length; i = i + 1) {
-                const itemname = response.data.itemsByName[i].name;
+            for (let i = MAX_ITEMS; i < response.data.items.length; i = i + 1) {
+                const itemname = response.data.items[i].name;
 
                 if (itemname.length + 4 + otheritems.length > 2048) {
                     ending.setFooter({text: "Not all results shown."});
@@ -328,7 +326,7 @@ async function graphql_query(interaction, searchString) {
     searchString = searchString.replaceAll('\\', '\\\\').replaceAll('\"', '\\"');
 
     const query = `query {
-        itemsByName(name: "${searchString}") {
+        items(name: "${searchString}") {
             id
             name
             shortName
@@ -351,6 +349,7 @@ async function graphql_query(interaction, searchString) {
             buyFor {
                 price
                 currency
+                priceRUB
                 vendor {
                     name
                     ...on TraderOffer {
@@ -385,7 +384,7 @@ async function graphql_query(interaction, searchString) {
     }
 
     // If we did not get usable data from the API, send a message and return
-    if (!response.hasOwnProperty('data') || !response.data.hasOwnProperty('itemsByName')) {
+    if (!response.hasOwnProperty('data') || !response.data.hasOwnProperty('items')) {
         await interaction.deleteReply();
         await interaction.followUp({
             content: 'Got no data from the API (oh no)',
@@ -402,7 +401,7 @@ async function graphql_query(interaction, searchString) {
     }
 
     // If no items matched the search string, send a message and return
-    if (response.data.itemsByName.length === 0) {
+    if (response.data.items.length === 0) {
         await interaction.deleteReply();
         await interaction.followUp({
             content: 'Your search term matched no items',

@@ -1,7 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import {
-    MessageEmbed,
-} from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 
 import commands from '../modules/get-commands.mjs';
 

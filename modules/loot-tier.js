@@ -13,7 +13,7 @@ const arrayAverage = (array) => array.reduce((a, b) => a + b) / array.length;
 
 const updateTiers = async () => {
     const query = `query {
-        itemsByType(type: any){
+        items {
             id
             name
             avg24hPrice
@@ -40,7 +40,7 @@ const updateTiers = async () => {
     }
 
     // If we did not get usable data from the API, send a message and return
-    if (!response.hasOwnProperty('data') || !response.data.hasOwnProperty('itemsByType')) {
+    if (!response.hasOwnProperty('data') || !response.data.hasOwnProperty('items')) {
         return;
     }
 
@@ -51,7 +51,7 @@ const updateTiers = async () => {
         }
     }
 
-    const items = response.data.itemsByType;
+    const items = response.data.items;
     // get prices per slot
     const prices = [];
     for (let i = 0; i < items.length; i++) {

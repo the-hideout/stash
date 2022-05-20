@@ -102,6 +102,11 @@ const subCommands = {
         await interaction.deferReply({ephemeral: true});
         const stationId = interaction.options.getString('station');
         const level = interaction.options.getInteger('level');
+        const prog = progress.getProgress(interaction.user.id);
+        let ttWarn = '';
+        if (prog && prog.tarkovTracker.token) {
+            ttWarn = '\nNote: Progress synced via TarkovTracker will overwrite your hideout settings.';
+        }
         if (stationId === 'all') {
             const stations = await gameData.hideout.getAll();
             for (const station of stations) {
@@ -111,7 +116,7 @@ const subCommands = {
                 progress.setHideout(interaction.user.id, station.id, lvl);
             }
             await interaction.editReply({
-                content: `✅ All hideout stations set to ${level}.`,
+                content: `✅ All hideout stations set to ${level}.${ttWarn}`,
                 ephemeral: true
             });
             return;
@@ -131,7 +136,7 @@ const subCommands = {
         progress.setHideout(interaction.user.id, station.id, lvl);
 
         await interaction.editReply({
-            content: `✅ ${station.name} set to level ${lvl}.`,
+            content: `✅ ${station.name} set to level ${lvl}.${ttWarn}`,
             ephemeral: true
         });
     },
