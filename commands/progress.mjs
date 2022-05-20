@@ -7,16 +7,16 @@ import progress from '../modules/progress.mjs';
 
 const subCommands = {
     show: async interaction => {
-        const prog = progress.getProgress(interaction.user.id);
-        if (!prog) {
-            await interaction.reply({
-                content: `You have no customized progress.`,
-                ephemeral: true
-            });
-            return;
-        }
+        let prog = progress.getProgress(interaction.user.id);
         const embed = new MessageEmbed();
-        embed.setTitle(`${interaction.user.username} - Level ${prog.level}`);
+        if (!prog) {
+            prog = progress.getDefaultProgress();
+            embed.setTitle(`Default progress - Level ${prog.level}`);
+            embed.setDescription(`You do not have any saved progress. Below are the defaults used to determine craft/barter/price unlocks and flea market fees.`);
+        } else {
+            embed.setTitle(`${interaction.user.username} - Level ${prog.level}`);
+            embed.setDescription(`These values are used to determine craft/barter/price unlocks and flea market fees.`);
+        }
 
         const hideoutStatus = [];
         for (const stationId in prog.hideout) {
@@ -39,12 +39,12 @@ const subCommands = {
         }
         if (skillStatus.length > 0) embed.addField('Skills 💪', skillStatus.join('\n'), true);
 
-        if (prog.tarkovTracker.token) {
+        if (prog.tarkovTracker && prog.tarkovTracker.token) {
             let lastUpdate = moment(prog.tarkovTracker.lastUpdate).fromNow();
             if (prog.tarkovTracker.lastUpdate == 0) lastUpdate = 'never';
             const nextUpdate = moment(progress.getUpdateTime(interaction.user.id)).fromNow();
             embed.addField('TarkovTracker 🧭', `Last update: ${lastUpdate}\nNext Update: ${nextUpdate}`, false);
-        } else if (prog.tarkovTracker.lastUpdateStatus === 'invalid') {
+        } else if (prog.tarkovTracker && prog.tarkovTracker.lastUpdateStatus === 'invalid') {
             embed.addField('TarkovTracker 🧭', `❌ Invalid token`, false);
         }
 
@@ -64,11 +64,11 @@ const subCommands = {
     trader: async interaction => {
         await interaction.deferReply({ephemeral: true});
         const traderId = interaction.options.getString('trader');
-        const level = interaction.options.getString('level');
+        const level = interaction.options.getInteger('level');
         if (traderId === 'all') {
             const traders = await gameData.traders.getAll();
             for (const trader of traders) {
-                let lvl = parseInt(level);
+                let lvl = level;
                 let maxValue = trader.levels[trader.levels.length-1].level;
                 if (lvl > maxValue) lvl = maxValue;
                 progress.setTrader(interaction.user.id, trader.id, lvl);
@@ -88,7 +88,7 @@ const subCommands = {
             });
             return;
         }
-        let lvl = parseInt(level);
+        let lvl = level;
         let maxValue = trader.levels[trader.levels.length-1].level;
         if (lvl > maxValue) lvl = maxValue;
         progress.setTrader(interaction.user.id, trader.id, lvl);
@@ -101,11 +101,11 @@ const subCommands = {
     hideout: async interaction => {
         await interaction.deferReply({ephemeral: true});
         const stationId = interaction.options.getString('station');
-        const level = interaction.options.getString('level');
+        const level = interaction.options.getInteger('level');
         if (stationId === 'all') {
             const stations = await gameData.hideout.getAll();
             for (const station of stations) {
-                let lvl = parseInt(level);
+                let lvl = level;
                 let maxValue = station.levels[station.levels.length-1].level;
                 if (lvl > maxValue) lvl = maxValue;
                 progress.setHideout(interaction.user.id, station.id, lvl);
@@ -125,7 +125,7 @@ const subCommands = {
             });
             return;
         }
-        let lvl = parseInt(level);
+        let lvl = level;
         let maxValue = station.levels[station.levels.length-1].level;
         if (lvl > maxValue) lvl = maxValue;
         progress.setHideout(interaction.user.id, station.id, lvl);
@@ -170,6 +170,18 @@ const subCommands = {
             content: `✅ TarkovTracker account unlinked.`,
             ephemeral: true
         });
+    },
+    flea_market_fee: async interaction => {
+        const intel = interaction.options.getInteger('intel_center_level');
+        let mgmt = interaction.options.getInteger('hideout_management_level');
+        if (mgmt > 50) mgmt = 50;
+        if (mgmt < 0) mgmt = 0;
+        progress.setHideout(interaction.user.id, '5d484fdf654e7600691aadf8', intel);
+        progress.setSkill(interaction.user.id, 'hideoutManagement', mgmt);
+        await interaction.reply({
+            content: `✅ Intelligence Center set to ${intel}.\n✅ Hideout Management skill set to ${mgmt}.`,
+            ephemeral: true
+        });
     }
 };
 
@@ -199,15 +211,15 @@ const defaultFunction = {
                 .setRequired(true)
                 .setChoices(gameData.traders.choices(true))
             )
-            .addStringOption(option => option
+            .addIntegerOption(option => option
                 .setName('level')
                 .setDescription('The trader\'s level')
                 .setRequired(true)
                 .setChoices([
-                    ['1', '1'],
-                    ['2', '2'],
-                    ['3', '3'],
-                    ['4', '4'],
+                    ['1', 1],
+                    ['2', 2],
+                    ['3', 3],
+                    ['4', 4],
                 ])
             )
         )
@@ -220,15 +232,16 @@ const defaultFunction = {
                 .setRequired(true)
                 .setChoices(gameData.hideout.choices(true))
             )
-            .addStringOption(option => option
+            .addIntegerOption(option => option
                 .setName('level')
                 .setDescription('The station\'s level')
                 .setRequired(true)
                 .setChoices([
-                    ['Not built', '0'],
-                    ['1', '1'],
-                    ['2', '2'],
-                    ['3', '3'],
+                    ['Not built', 0],
+                    ['1', 1],
+                    ['2', 2],
+                    ['3', 3],
+                    ['4', 4],
                 ])
             )
         )
@@ -259,6 +272,26 @@ const defaultFunction = {
         .addSubcommand(subcommand => subcommand
             .setName('unlink')
             .setDescription('Unlink your TarkovTools account')
+        )
+        .addSubcommand(subcommand => subcommand
+            .setName('flea_market_fee')
+            .setDescription('Set your progress to accurately calculate flea market fees')    
+            .addIntegerOption(option => option
+                .setName('intel_center_level')
+                .setDescription('Intelligence Center level')
+                .setRequired(true)
+                .setChoices([
+                    ['Not built', 0],
+                    ['1', 1],
+                    ['2', 2],
+                    ['3', 3],
+                ])
+            )
+            .addIntegerOption(option => option
+                .setName('hideout_management_level')
+                .setDescription('Hideout Management skill level')
+                .setRequired(true)
+            )
         ),
 
     async execute(interaction) {

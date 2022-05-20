@@ -214,17 +214,17 @@ if (process.env.NODE_ENV !== 'ci') {
             if (!user.skills[skill.id]) user.skills[skill.id] = 0;
         }
     }
-    /*const hideout = await gameData.hideout.getAll();
+    const hideout = await gameData.hideout.getAll();
     for (const station of hideout) {
         const maxLevel = station.levels[station.levels.length-1].level;
         defaultProgress.hideout[station.id] = maxLevel;
-        for (const id in userProgress) {
+        /*for (const id in userProgress) {
             const user = userProgress[id];
             if (typeof user.hideout[station.id] === 'undefined') {
                 user.hideout[station.id] = 0;
             }
-        }
-    }*/
+        }*/
+    }
     tarkovTrackerTimeout = setTimeout(updateTarkovTracker, 1000 * 60);
     tarkovTrackerTimeout.unref();
 }
