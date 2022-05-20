@@ -1,5 +1,7 @@
 import {SlashCommandBuilder} from '@discordjs/builders';
 import {MessageEmbed} from 'discord.js';
+import moment from 'moment';
+
 import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress.mjs';
 
@@ -38,10 +40,10 @@ const subCommands = {
         if (skillStatus.length > 0) embed.addField('Skills 💪', skillStatus.join('\n'), true);
 
         if (prog.tarkovTracker.token) {
-            let lastUpdate = new Date(prog.tarkovTracker.lastUpdate);
+            let lastUpdate = moment(prog.tarkovTracker.lastUpdate).fromNow();
             if (prog.tarkovTracker.lastUpdate == 0) lastUpdate = 'never';
-            const nextUpdate = progress.getUpdateTime(interaction.user.id);
-            embed.addField('TarkovTracker 🧭', `Last update: ${lastUpdate}\nNext Update: ${nextUpdate} minute(s)`, false);
+            const nextUpdate = moment(progress.getUpdateTime(interaction.user.id)).fromNow();
+            embed.addField('TarkovTracker 🧭', `Last update: ${lastUpdate}\nNext Update: ${nextUpdate}`, false);
         } else if (prog.tarkovTracker.lastUpdateStatus === 'invalid') {
             embed.addField('TarkovTracker 🧭', `❌ Invalid token`, false);
         }
@@ -156,9 +158,9 @@ const subCommands = {
         }
 
         progress.setToken(interaction.user.id, token);
-        const updateTime = progress.getUpdateTime(interaction.user.id);
+        const updateTime = moment(progress.getUpdateTime(interaction.user.id)).fromNow();
         await interaction.reply({
-            content: `✅ Your hideout progress will update from TarkovTracker in approximately ${updateTime} minute${updateTime > 1 ? 's' : ''}.`,
+            content: `✅ Your hideout progress will update from TarkovTracker ${updateTime}.`,
             ephemeral: true
         });
     },

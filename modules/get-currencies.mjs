@@ -37,6 +37,7 @@ const updateCurrencies = async () => {
 
 if (process.env.NODE_ENV !== 'ci') {
     intervalId = setInterval(updateCurrencies, 1000 * 60 * 60);
+    intervalId.unref();
     updateCurrencies();
 }
 

@@ -1,12 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 
+import moment from 'moment';
+
 import {getProgress} from "./tarkovtracker.js";
 import gameData, { getFlea } from "./game-data.mjs";
 
 let userProgress = {};
 
-const usersJsonPath = path.join('./', 'cache', 'users.json');
+const usersJsonPath = path.join('./cache', 'users.json');
 
 const defaultProgress = {
     level: 15,
@@ -54,6 +56,8 @@ const getUsersForUpdate = () => {
     });
 };
 
+let tarkovTrackerTimeout = false;
+
 const updateTarkovTracker = async () => {
     const users = getUsersForUpdate();
     const hideout = await gameData.hideout.getAll();
@@ -90,7 +94,8 @@ const updateTarkovTracker = async () => {
         }
     }
     saveUserProgress();
-    setTimeout(updateTarkovTracker, 1000 * 60);
+    tarkovTrackerTimeout = setTimeout(updateTarkovTracker, 1000 * 60);
+    tarkovTrackerTimeout.unref();
 };
 
 const saveUserProgress = () => {
@@ -174,6 +179,13 @@ const optimalFleaPrice = async (id, baseValue, lowerBound, upperBound) => {
 
 if (process.env.NODE_ENV !== 'ci') {
     try {
+        fs.mkdirSync('./cache');
+    } catch (createError){
+        if(createError.code !== 'EEXIST'){
+            console.error(createError);
+        }
+    }
+    try {
         const savedUsers = fs.readFileSync(usersJsonPath);
         userProgress = JSON.parse(savedUsers);
     } catch (error) {
@@ -213,7 +225,8 @@ if (process.env.NODE_ENV !== 'ci') {
             }
         }
     }*/
-    setTimeout(updateTarkovTracker, 1000 * 60);
+    tarkovTrackerTimeout = setTimeout(updateTarkovTracker, 1000 * 60);
+    tarkovTrackerTimeout.unref();
 }
 
 export default {
@@ -234,7 +247,7 @@ export default {
         for (let i = 0; i < users.length; i++) {
             let user = users[i];
             if (user.id !== id) continue;
-            return Math.ceil((i+1) / 25);
+            return moment(new Date()).add(Math.ceil((i+1) / 25), 'm').toDate();
         }
     },
     getProgress(id) {

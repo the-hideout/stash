@@ -8,7 +8,7 @@ services:
     restart: always
     build: ./
     volumes:
-      - ./cache:/app/cache
+      - ./cache:/usr/src/app/cache
 
 volumes:
   cache:

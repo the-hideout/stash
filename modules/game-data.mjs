@@ -174,8 +174,11 @@ const updateAll = async () => {
     ]);
 };
 
+let updateInterval = false;
+
 if (process.env.NODE_ENV !== 'ci') {
-    setInterval(updateAll, 1000 * 60 * 10);
+    updateInterval = setInterval(updateAll, 1000 * 60 * 10);
+    updateInterval.unref();
 }
 
 export default {

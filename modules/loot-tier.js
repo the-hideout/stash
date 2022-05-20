@@ -90,6 +90,7 @@ const updateTiers = async () => {
 
 if (process.env.NODE_ENV !== 'ci') {
     intervalId = setInterval(updateTiers, 1000 * 60 * 60);
+    intervalId.unref();
     updateTiers();
 }
 
