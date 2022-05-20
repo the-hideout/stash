@@ -38,7 +38,7 @@ const defaultFunction = {
         embed.setTitle("/" + helpCommand + " command help");
         embed.addField(cmd.syntax, cmd.description + "\r\n\r\nExamples:\r\n" + cmd.examples);
 
-        await interaction.editReply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });
     },
 };
 

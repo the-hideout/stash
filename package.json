@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node index.mjs",
-    "dev": "cross-env NODE_ENV=development nodemon -r dotenv/config index.mjs"
+    "dev": "cross-env NODE_ENV=development nodemon --ignore cache/ -r dotenv/config index.mjs",
+    "dev-commands": "cross-env NODE_ENV=ci node deploy-commands-dev.mjs"
   },
   "type": "module",
   "dependencies": {

@@ -2,7 +2,7 @@ import {
     SlashCommandBuilder
 } from '@discordjs/builders';
 
-import allMaps from '../modules/all-maps.js';
+import gameData from '../modules/game-data.mjs';
 import getMapEmbed from '../modules/get-map-embed.js';
 
 const defaultFunction = {
@@ -10,16 +10,17 @@ const defaultFunction = {
         .setName('map')
         .setDescription('Get detailed information about a map')
         .addStringOption(option => option
-            .setName('maplist')
+            .setName('map')
             .setDescription('Select a map')
             .setRequired(true)
-            .setChoices(allMaps)
+            .setChoices(gameData.maps.choices())
         ),
 
     async execute(interaction) {
-        const inputMaps = interaction.options.getString('maplist');
+        await interaction.deferReply();
+        const mapId = interaction.options.getString('map');
 
-        const embed = await getMapEmbed(inputMaps);
+        const embed = await getMapEmbed(mapId);
 
         await interaction.editReply({
             embeds: [embed],

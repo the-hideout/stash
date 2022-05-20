@@ -5,6 +5,7 @@ import {
 
 import getCurrencies from '../modules/get-currencies.mjs';
 import getCraftsBarters from '../modules/get-crafts-barters.mjs';
+import progress from '../modules/progress.mjs';
 
 const MAX_CRAFTS = 2;
 
@@ -20,6 +21,7 @@ const defaultFunction = {
         }),
 
     async execute(interaction) {
+        await interaction.deferReply();
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
@@ -55,7 +57,8 @@ const defaultFunction = {
         }
 
         if (matchedCrafts.length === 0) {
-            await interaction.editReply({
+            await interaction.deleteReply();
+            await interaction.followUp({
                 content: 'Found no matching crafts for that item',
                 ephemeral: true,
             });
@@ -65,12 +68,14 @@ const defaultFunction = {
 
         let embeds = [];
 
+        const prog = progress.getSafeProgress(interaction.user.id);
+
         for (let i = 0; i < matchedCrafts.length; i = i + 1) {
             const craft = matchedCrafts[i];
             let totalCost = 0;
             const embed = new MessageEmbed();
             const toolsEmbed = new MessageEmbed();
-            toolsEmbed.setTitle('Required Tools');
+            toolsEmbed.setTitle('Required Tools 🛠️');
             let toolCost = 0;
 
             let title = craft.rewardItems[0].item.name;
@@ -80,9 +85,10 @@ const defaultFunction = {
             }
 
             const measuredTime = new Date(null);
-
-            measuredTime.setSeconds(craft.duration);
-            title += "\r\n" + craft.source + " (" + measuredTime.toISOString().substr(11, 8) + ")";
+            let timeDiscount = prog.skills['crafting']*0.0075*craft.duration;
+            measuredTime.setSeconds(craft.duration - timeDiscount);
+            const locked = prog.hideout[craft.station.id] < craft.level ? '🔒' : '';
+            title += `\r\n${craft.station.name} (${measuredTime.toISOString().substr(11, 8)})${locked}`;
             embed.setTitle(title);
             embed.setURL(`${craft.rewardItems[0].item.link}#${i}`);
 
@@ -90,23 +96,21 @@ const defaultFunction = {
                 embed.setThumbnail(craft.rewardItems[0].item.iconLink);
             }
 
-            for (const ri in craft.requiredItems) {
-                const req = craft.requiredItems[ri];
+            for (const req of craft.requiredItems) {
                 let itemCost = req.item.avg24hPrice;
 
                 if (req.item.lastLowPrice > itemCost && req.item.lastLowPrice > 0) {
                     itemCost = req.item.lastLowPrice;
                 }
 
-                for (const offerindex in req.item.buyFor) {
-                    const offer = req.item.buyFor[offerindex];
-                    if (offer.source == 'fleaMarket') {
+                for (const offer of req.item.buyFor) {
+                    if (!offer.vendor.trader) {
                         continue;
                     }
 
                     let traderPrice = offer.price * currencies[offer.currency];
 
-                    if (traderPrice < itemCost || itemCost == 0) {
+                    if ((traderPrice < itemCost && prog.traders[offer.vendor.trader.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
                         itemCost = traderPrice;
                     }
                 }
@@ -126,9 +130,16 @@ const defaultFunction = {
                     }
                     continue;
                 }
-                totalCost += itemCost * req.count;
+                let quantity = req.count;
+                // water filter consumption rate reduction
+                if (craft.station.id === '5d484fc8654e760065037abf' && req.item.id === '5d1b385e86f774252167b98a') {
+                    let time = prog.skills['crafting']*0.0075*quantity;
+                    let consumption = prog.skills['hideoutManagement']*0.005*quantity;
+                    quantity = Math.round((quantity - time - consumption) * 100) /100;
+                }
+                totalCost += itemCost * quantity;
                 //totalCost += req.item.avg24hPrice * req.count;
-                embed.addField(req.item.name, itemCost.toLocaleString() + "₽ x " + req.count, true);
+                embed.addField(req.item.name, itemCost.toLocaleString() + "₽ x " + quantity, true);
             }
             embed.addField("Total", totalCost.toLocaleString() + "₽", false);
 

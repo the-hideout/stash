@@ -1,12 +1,11 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import {
-    MessageEmbed,
-} from 'discord.js';
+import { Message, MessageEmbed } from 'discord.js';
 
 import graphqlRequest from '../modules/graphql-request.mjs';
 import getCurrencies from '../modules/get-currencies.mjs';
 import getCraftsBarters from '../modules/get-crafts-barters.mjs';
 import lootTier from '../modules/loot-tier.js';
+import progress from '../modules/progress.mjs';
 import moment from 'moment';
 
 const MAX_ITEMS = 2;
@@ -23,6 +22,7 @@ const defaultFunction = {
         }),
 
     async execute(interaction) {
+        await interaction.deferReply();
         // Get the search string from the user invoked command
         let searchString = interaction.options.getString('name');
 
@@ -34,7 +34,7 @@ const defaultFunction = {
             response = responses[0];
         } catch (error) {
             console.log('/price command query error', error);
-            return;
+            throw error;
         }
 
         // If we failed to get a response from the graphql_query, return
@@ -65,6 +65,7 @@ const defaultFunction = {
             embed.setURL(item.link);
             embed.setFooter({text: `🕑 Last Updated: ${moment(item.updated).fromNow()}`});
 
+            const prog = progress.getSafeProgress(interaction.user.id);
 
             if (item.iconLink) {
                 embed.setThumbnail(item.iconLink);
@@ -86,30 +87,70 @@ const defaultFunction = {
             }
 
             let tierPrice = item.avg24hPrice;
+            let tierFee = 0;
             let sellTo = 'Flea Market';
             if (item.avg24hPrice > 0) {
+                tierFee = await progress.getFleaMarketFee(interaction.user.id, item.avg24hPrice, item.basePrice);
+                //tierPrice -= avgFee;
                 let fleaPrice = parseInt(item.avg24hPrice).toLocaleString() + "₽";
 
                 if (size > 1) {
                     fleaPrice += "\r\n" + Math.round(parseInt(item.avg24hPrice) / size).toLocaleString() + "₽/slot";
                 }
+                fleaPrice += `\r\n\r\n Fee: ~${tierFee.toLocaleString()}₽`;
+                fleaPrice += `\r\n Net: ${parseInt(item.avg24hPrice-tierFee).toLocaleString()}₽`;
+                if (size > 1) {
+                    fleaPrice += `\r\n ${Math.round(parseInt(item.avg24hPrice-tierFee) / size).toLocaleString()}₽/slot`;
+                }
+
                 embed.addField("Flea Price (avg)", fleaPrice, true);
             }
 
             if (item.lastLowPrice > 0) {
+                const lowFee = await progress.getFleaMarketFee(interaction.user.id, item.lastLowPrice, item.basePrice);
                 let fleaPrice = parseInt(item.lastLowPrice).toLocaleString() + "₽";
 
                 if (size > 1) {
-                    fleaPrice += "\r\n" + Math.round(parseInt(item.avg24hPrice) / size).toLocaleString() + "₽/slot";
+                    fleaPrice += "\r\n" + Math.round(parseInt(item.lastLowPrice) / size).toLocaleString() + "₽/slot";
                 }
+                fleaPrice += `\r\n\r\n Fee: ~${lowFee.toLocaleString()}₽`;
+                fleaPrice += `\r\n Net: ${parseInt(item.lastLowPrice-lowFee).toLocaleString()}₽`;
+                if (size > 1) {
+                    fleaPrice += `\r\n ${Math.round(parseInt(item.lastLowPrice-lowFee) / size).toLocaleString()}₽/slot`;
+                }
+
                 embed.addField("Flea Price (low)", fleaPrice, true);
                 
-                if (item.lastLowPrice < tierPrice || tierPrice == 0) tierPrice = item.lastLowPrice;
+                if (item.lastLowPrice < tierPrice || tierPrice == 0) {
+                    tierPrice = item.lastLowPrice;
+                    tierFee = lowFee;
+                }
+            }
+
+            const optimalPrice = await progress.getOptimalFleaPrice(interaction.user.id, item.basePrice);
+            const optimalFee = await progress.getFleaMarketFee(interaction.user.id, optimalPrice, item.basePrice);
+            if (optimalPrice - optimalFee > tierPrice - tierFee && optimalPrice < tierPrice) {
+                tierPrice = optimalPrice;
+                tierFee = optimalFee;
+
+                let fleaPrice = parseInt(optimalPrice).toLocaleString() + "₽";
+
+                if (size > 1) {
+                    fleaPrice += "\r\n" + Math.round(parseInt(optimalPrice) / size).toLocaleString() + "₽/slot";
+                }
+                fleaPrice += `\r\n\r\n Fee: ~${optimalFee.toLocaleString()}₽`;
+                fleaPrice += `\r\n Net: ${parseInt(optimalPrice-optimalFee).toLocaleString()}₽`;
+                if (size > 1) {
+                    fleaPrice += `\r\n ${Math.round(parseInt(optimalPrice-optimalFee) / size).toLocaleString()}₽/slot`;
+                }
+
+                embed.addField("Flea Price (optimal)", fleaPrice, true);
             }
 
             if (bestTraderName) {
-                if (bestTraderPrice > tierPrice) {
+                if (bestTraderPrice > (tierPrice - tierFee)) {
                     tierPrice = bestTraderPrice;
+                    tierFee = 0;
                     sellTo = bestTraderName;
                 }
                 let traderVal = bestTraderPrice.toLocaleString() + "₽";
@@ -127,10 +168,8 @@ const defaultFunction = {
             embed.setColor(tier.color);
             body += `• Item Tier: ${tier.msg}\n`;
 
-            for (const offerindex in item.buyFor) {
-                const offer = item.buyFor[offerindex];
-
-                if (offer.source == 'fleaMarket') {
+            for (const offer of item.buyFor) {
+                if (!offer.vendor.trader) {
                     continue;
                 }
 
@@ -138,49 +177,37 @@ const defaultFunction = {
                 let level = 1;
                 let quest = '';
 
-                for (const reqindex in offer.requirements) {
-                    const req = offer.requirements[reqindex];
-
-                    if (req.type == 'loyaltyLevel' && req.value) {
-                        level = req.value;
-                    } else if (req.type == 'questCompleted') {
-                        quest = req.value;
-                    }
+                if (offer.vendor.minTraderLevel) {
+                    level = offer.vendor.minTraderLevel;
                 }
-
-                if (quest) {
+                if (offer.vendor.taskUnlock) {
                     quest = ' +Task';
                 }
 
-                let trader = offer.source.charAt(0).toUpperCase() + offer.source.slice(1);
-
-                embed.addField(`${trader} LL${level}${quest} Price`, traderPrice);
+                const locked = prog.traders[offer.vendor.trader.id] < level ? '🔒' : '';
+                const title = `${offer.vendor.name} LL${level}${quest} Price${locked}`;
+                embed.addField(title, traderPrice, true);
             }
 
-            for (const barterIndex in barters) {
-                const b = barters[barterIndex];
-
+            for (const b of barters) {
                 if (b.rewardItems[0].item.id == item.id) {
                     let barterCost = 0;
 
-                    for (const reqIndex in b.requiredItems) {
-                        const req = b.requiredItems[reqIndex];
+                    for (const req of b.requiredItems) {
                         let itemCost = req.item.avg24hPrice;
 
                         if (req.item.lastLowPrice > itemCost && req.item.lastLowPrice > 0) {
                             itemCost = req.item.lastLowPrice;
                         }
 
-                        for (const offerindex in req.item.buyFor) {
-                            const offer = req.item.buyFor[offerindex];
-
-                            if (offer.source == 'fleaMarket') {
+                        for (const offer of req.item.buyFor) {
+                            if (!offer.vendor.trader) {
                                 continue;
                             }
 
                             let traderPrice = offer.price * currencies[offer.currency];
 
-                            if (traderPrice < itemCost || itemCost == 0) {
+                            if ((traderPrice < itemCost && prog.traders[offer.vendor.trader.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
                                 itemCost = traderPrice;
                             }
                         }
@@ -189,34 +216,31 @@ const defaultFunction = {
                     }
 
                     barterCost = Math.round(barterCost / b.rewardItems[0].count).toLocaleString() + "₽";
-                    embed.addField(b.source + " Barter", barterCost, true);
+                    const locked = prog.traders[b.trader.id] < b.level ? '🔒' : '';
+                    const title = `${b.trader.name} LL${b.level} Barter${locked}`;
+                    embed.addField(title, barterCost, true);
                 }
             }
 
-            for (const craftIndex in crafts) {
-                const c = crafts[craftIndex];
-
+            for (const c of crafts) {
                 if (c.rewardItems[0].item.id == item.id) {
                     let craftCost = 0;
 
-                    for (const reqIndex in c.requiredItems) {
-                        const req = c.requiredItems[reqIndex];
+                    for (const req of c.requiredItems) {
                         let itemCost = req.item.avg24hPrice;
 
                         if (req.item.lastLowPrice > itemCost && req.item.lastLowPrice > 0) {
                             itemCost = req.item.lastLowPrice;
                         }
 
-                        for (const offerindex in req.item.buyFor) {
-                            const offer = req.item.buyFor[offerindex];
-
-                            if (offer.source == 'fleaMarket') {
+                        for (const offer of req.item.buyFor) {
+                            if (!offer.vendor.trader) {
                                 continue;
                             }
 
                             let traderPrice = offer.price * currencies[offer.currency];
 
-                            if (traderPrice < itemCost || itemCost == 0) {
+                            if ((traderPrice < itemCost && prog.traders[offer.vendor.trader.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
                                 itemCost = traderPrice;
                             }
                         }
@@ -227,7 +251,9 @@ const defaultFunction = {
                         craftCost += ' (' + c.rewardItems[0].count + ')';
                     }
 
-                    embed.addField(c.source + " Craft", craftCost, true);
+                    const locked = prog.hideout[c.station.id] < c.level ? '🔒' : '';
+                    const title = `${c.station.name} level ${c.level} Craft${locked}`;
+                    embed.addField(title, craftCost, true);
                 }
             }
 
@@ -289,7 +315,8 @@ const defaultFunction = {
 async function graphql_query(interaction, searchString) {
     // If no search string is provided, send a message and return
     if (!searchString) {
-        await interaction.editReply({
+        await interaction.deleteReply();
+        await interaction.followUp({
             content: 'You need to specify a search term',
             ephemeral: true,
         });
@@ -322,15 +349,23 @@ async function graphql_query(interaction, searchString) {
                 }
             }
             buyFor {
-                source
                 price
                 currency
-                requirements {
-                    type
-                    value
+                vendor {
+                    name
+                    ...on TraderOffer {
+                        trader {
+                            id
+                        }
+                        minTraderLevel
+                        taskUnlock {
+                            id
+                        }
+                    }
                 }
             }
             types
+            basePrice
         }
     }`;
 
@@ -341,7 +376,8 @@ async function graphql_query(interaction, searchString) {
     } catch (error) {
         // If an error occured -> log it, send a response to the user, and exit
         console.error(error);
-        await interaction.editReply({
+        await interaction.deleteReply();
+        await interaction.followUp({
             content: 'An error occured while trying to contact api.tarkov.dev',
             ephemeral: true,
         });
@@ -350,7 +386,8 @@ async function graphql_query(interaction, searchString) {
 
     // If we did not get usable data from the API, send a message and return
     if (!response.hasOwnProperty('data') || !response.data.hasOwnProperty('itemsByName')) {
-        await interaction.editReply({
+        await interaction.deleteReply();
+        await interaction.followUp({
             content: 'Got no data from the API (oh no)',
             ephemeral: true,
         });
@@ -366,7 +403,8 @@ async function graphql_query(interaction, searchString) {
 
     // If no items matched the search string, send a message and return
     if (response.data.itemsByName.length === 0) {
-        await interaction.editReply({
+        await interaction.deleteReply();
+        await interaction.followUp({
             content: 'Your search term matched no items',
             ephemeral: true,
         });

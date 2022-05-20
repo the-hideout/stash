@@ -42,6 +42,7 @@ const defaultFunction = {
             .setRequired(true)
         ),
     async execute(interaction) {
+        await interaction.deferReply();
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {

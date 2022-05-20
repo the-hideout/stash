@@ -24,7 +24,7 @@ const defaultFunction = {
                 • ${lootTier(tiers.average -1).msg} < ${tiers.average.toLocaleString()}₽
             `);
 
-        await interaction.editReply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });
     },
 };
 

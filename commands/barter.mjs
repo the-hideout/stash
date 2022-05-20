@@ -5,6 +5,7 @@ import {
 
 import getCurrencies from '../modules/get-currencies.mjs';
 import getCraftsBarters from '../modules/get-crafts-barters.mjs';
+import progress from '../modules/progress.mjs';
 
 const MAX_BARTERS = 2;
 
@@ -19,10 +20,12 @@ const defaultFunction = {
                 .setRequired(true);
         }),
     async execute(interaction) {
+        await interaction.deferReply();
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
-            await interaction.editReply({
+            await interaction.deleteReply();
+            await interaction.followUp({
                 content: 'You need to specify a search term',
                 ephemeral: true,
             });
@@ -35,9 +38,7 @@ const defaultFunction = {
         const { barters } = await getCraftsBarters();
         const currencies = getCurrencies();
 
-        for (const bid in barters) {
-            const barter = barters[bid];
-
+        for (const barter of barters) {
             if (barter.rewardItems[0].item.name.toLowerCase().includes(searchString.toLowerCase())) {
                 matchedBarters.push(barter);
                 continue;
@@ -52,7 +53,8 @@ const defaultFunction = {
         }
 
         if (matchedBarters.length === 0) {
-            await interaction.editReply({
+            await interaction.deleteReply();
+            await interaction.followUp({
                 content: 'Found no matching barters for that item',
                 ephemeral: true,
             });
@@ -61,6 +63,8 @@ const defaultFunction = {
         }
 
         let embeds = [];
+
+        const prog = progress.getSafeProgress(interaction.user.id);
 
         for (let i = 0; i < matchedBarters.length; i = i + 1) {
             const barter = matchedBarters[i];
@@ -73,7 +77,8 @@ const defaultFunction = {
                 title += " (" + barter.rewardItems[0].count + ")";
             }
 
-            title += "\r\n" + barter.source;
+            const locked = prog.traders[barter.trader.id] < barter.level ? '🔒' : '';
+            title += `\r\n ${barter.trader.name} LL${barter.level}${locked}`;
             embed.setTitle(title);
             embed.setURL(`${barter.rewardItems[0].item.link}#${i}`);
 
@@ -81,23 +86,20 @@ const defaultFunction = {
                 embed.setThumbnail(barter.rewardItems[0].item.iconLink);
             }
 
-            for (const ri in barter.requiredItems) {
-                const req = barter.requiredItems[ri];
+            for (const req of barter.requiredItems) {
                 let itemCost = req.item.avg24hPrice;
 
                 if (req.item.lastLowPrice > itemCost && req.item.lastLowPrice > 0) {
                     itemCost = req.item.lastLowPrice;
                 }
 
-                for (const offerindex in req.item.buyFor) {
-                    const offer = req.item.buyFor[offerindex];
-
-                    if (offer.source == 'fleaMarket') {
+                for (const offer of req.item.buyFor) {
+                    if (!offer.vendor.trader) {
                         continue;
                     }
                     let traderPrice = offer.price * currencies[offer.currency];
 
-                    if (traderPrice < itemCost || itemCost == 0) {
+                    if ((traderPrice < itemCost && prog.traders[offer.vendor.trader.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
                         itemCost = traderPrice;
                     }
                 }

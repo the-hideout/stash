@@ -88,7 +88,7 @@ const updateTiers = async () => {
     tiers.average = averageFloor;
 };
 
-if (process.env.REGISTERING_COMMANDS !== 'TRUE') {
+if (process.env.NODE_ENV !== 'ci') {
     intervalId = setInterval(updateTiers, 1000 * 60 * 60);
     updateTiers();
 }

@@ -2,54 +2,52 @@ import {
     MessageEmbed,
 } from 'discord.js';
 
-import getMapData from './get-map-data.mjs';
+import gameData from '../modules/game-data.mjs';
 import realTimeToTarkovTime from './time.mjs';
 
-const getMapEmbed = async (outputMap) => {
-    const mapData = await getMapData();
+const getMapEmbed = async (mapId) => {
+    const mapData = await gameData.maps.getAll();
     const embed = new MessageEmbed();
 
-    let mapKey = outputMap;
-
-    if (outputMap === 'factory (night)') {
-        mapKey = 'factory';
-    }
-
-    const selectedMapData = mapData.find(mapObject => mapObject.key === mapKey);
-    let displayDuration = selectedMapData.duration;
-
-    // If the selected map has multiple durations, use the night or day time if specified
-    if (selectedMapData.duration.includes('/')) {
-        const [day, night] = selectedMapData.duration.split('/');
-        if (outputMap.includes('night')) {
-            displayDuration = night;
-        } else {
-            displayDuration = day;
-        }
-    }
-
-    // Format the duration text
-    displayDuration = displayDuration.replace('min', 'minutes');
+    const selectedMapData = mapData.find(mapObject => mapObject.id === mapId);
+    let displayDuration = `${selectedMapData.raidDuration} minutes`;
 
     // Get left and right real tarkov time
-    let left, right;
-    if (outputMap.includes('factory')) {
+    let left = realTimeToTarkovTime(new Date(), true);
+    let right = realTimeToTarkovTime(new Date(), false);
+    let displayTime = `${left} - ${right}`;
+    if (selectedMapData.name.includes('Factory')) {
         // If the map is Factory, set the times to static values
-        left = "15:00";
-        right = "03:00";
-    } else {
-        // Get the realtime in Tarkov
-        left = realTimeToTarkovTime(new Date(), true);
-        right = realTimeToTarkovTime(new Date(), false);
+        if (selectedMapData.name.includes('Night')) {
+            displayTime = '03:00';
+        } else {
+            displayTime = '15:00';
+        }
+    } 
+
+    let displayPlayers = '???';
+    if (selectedMapData.players) {
+        displayPlayers = selectedMapData.players;
+    }
+
+    let mapUrl = false; `https://tarkov.dev/map/${selectedMapData.key}`;
+    if (selectedMapData.key) {
+        mapUrl = `https://tarkov.dev/map/${selectedMapData.key}`;
+    } else if (selectedMapData.wiki) {
+        mapUrl = selectedMapData.wiki;
     }
 
     // Construct the embed
-    embed.setTitle(outputMap.charAt(0).toUpperCase() + outputMap.slice(1));
-    embed.setURL(`https://tarkov.dev/map/${mapKey}`);
+    embed.setTitle(selectedMapData.name);
+    if (mapUrl) {
+        embed.setURL(mapUrl);
+    }
     embed.addField('Duration ⌛', displayDuration, true);
-    embed.addField('Players 👥', selectedMapData.players, true);
-    embed.addField('Time 🕑', `${left} - ${right}`, true);
-    embed.setImage(`https://tarkov.dev/maps/${mapKey}.jpg`);
+    embed.addField('Players 👥', displayPlayers, true);
+    embed.addField('Time 🕑', displayTime, true);
+    if (selectedMapData.key) {
+        embed.setImage(`https://tarkov.dev/maps/${selectedMapData.key}.jpg`);
+    }
 
     // If the map was made by a contributor, give them credit
     if (selectedMapData.source) {
