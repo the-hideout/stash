@@ -304,6 +304,9 @@ const defaultFunction = {
 
         await interaction.editReply({ embeds: embeds });
     },
+    examples: [
+        '/price bitcoin'
+    ]
 };
 
 // A helper function to make a graphql query to get item data from the API

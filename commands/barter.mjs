@@ -137,6 +137,7 @@ const defaultFunction = {
 
         await interaction.editReply({ embeds: embeds });
     },
+    examples: '/barter slick'
 };
 
 export default defaultFunction;

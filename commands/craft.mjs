@@ -162,7 +162,7 @@ const defaultFunction = {
                 const bitemname = matchedCrafts[i].rewardItems[0].item.name + " (" + matchedCrafts[i].source + ")";
 
                 if (bitemname.length + 4 + otheritems.length > 2048) {
-                    embed.setFooter({ text: "Not all results shown." });
+                    ending.setFooter({ text: "Not all results shown." });
 
                     break;
                 }
@@ -175,6 +175,7 @@ const defaultFunction = {
 
         await interaction.editReply({ embeds: embeds });
     },
+    examples: '/craft 7n31'
 };
 
 export default defaultFunction;

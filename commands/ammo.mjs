@@ -140,6 +140,9 @@ const defaultFunction = {
         embed.setDescription('```' + table.toString() + '```');
         await interaction.editReply({ embeds: [embed] });
     },
+    examples: [
+        '/ammo 7.62x51mm'
+    ]
 };
 
 export default defaultFunction;

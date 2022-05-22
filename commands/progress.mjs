@@ -302,6 +302,11 @@ const defaultFunction = {
     async execute(interaction) {
         subCommands[interaction.options._subcommand](interaction);
     },
+    examples: {
+        level: ['/progress level 42'],
+        trader: ['/progress trader Prapor 3', '/progress trader Therapist 2'],
+        link: '/progress link [TarkovTracker token]'
+    }
 };
 
 export default defaultFunction;

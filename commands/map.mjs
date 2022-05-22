@@ -71,6 +71,10 @@ const defaultFunction = {
             embeds: [embed],
         });
     },
+    examples: [
+        '/map woods',
+        '/map customs'
+    ]
 };
 
 export default defaultFunction;
