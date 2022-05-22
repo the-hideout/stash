@@ -19,7 +19,7 @@ const defaultFunction = {
 
         sendError(client, member, details);
 
-        interaction.editReply({
+        interaction.reply({
             content: "Thanks for reporting, we're on it!",
             ephemeral: true,
         });

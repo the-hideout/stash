@@ -11,6 +11,7 @@ const defaultFunction = {
         .setName('about')
         .setDescription('Tells you a bit about the bot'),
     async execute(interaction) {
+        await interaction.deferReply();
         const embed = new MessageEmbed();
         let data;
 

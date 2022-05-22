@@ -16,7 +16,7 @@ const defaultFunction = {
 
         embed.setDescription(`I have been online for: ${uptimeFmt}`);
         embed.setFooter({"text": "Format HH:MM:SS"});
-        await interaction.editReply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });
     },
 };
 

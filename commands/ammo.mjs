@@ -1,7 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import {
-    MessageEmbed
-} from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import asciiTable from 'ascii-table';
 import getAmmo from "../modules/get-ammo.mjs";
 
@@ -42,6 +40,7 @@ const defaultFunction = {
             .setRequired(true)
         ),
     async execute(interaction) {
+        await interaction.deferReply();
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
@@ -141,6 +140,9 @@ const defaultFunction = {
         embed.setDescription('```' + table.toString() + '```');
         await interaction.editReply({ embeds: [embed] });
     },
+    examples: [
+        '/ammo 7.62x51mm'
+    ]
 };
 
 export default defaultFunction;

@@ -119,7 +119,7 @@ In order to copy certain values (such as channel/guild/user IDs) you need to ena
 Before you start the bot you will need to register the Slash commands in your test server:
 
 ```console
-$ node deploy-commands-dev.mjs
+$ npm run dev-commands
 Successfully registered application commands.
 ```
 

@@ -163,17 +163,22 @@ discordClient.on('interactionCreate', async interaction => {
         return false;
     }
 
-    await interaction.deferReply();
+    //await interaction.deferReply();
 
     try {
         await command.default.execute(interaction);
     } catch (error) {
         console.error(error);
 
-        await interaction.editReply({
+        const message = {
             content: 'There was an error while executing this command!',
             ephemeral: true,
-        });
+        };
+        if (interaction.deferred) {
+            await interaction.editReply(message);
+        } else {
+            await interaction.reply(message);
+        }
     }
 });
 

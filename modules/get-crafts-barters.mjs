@@ -3,7 +3,11 @@ import graphqlRequest from "./graphql-request.mjs";
 const getCraftsBarters = async () => {
     const query = `query {
         crafts {
-          source
+          station {
+            id
+            name
+          }
+          level
           duration
           requiredItems {
             item {
@@ -13,9 +17,21 @@ const getCraftsBarters = async () => {
               avg24hPrice
               lastLowPrice
               buyFor {
-                source
                 price
                 currency
+                priceRUB
+                vendor {
+                  name
+                  ...on TraderOffer {
+                    trader {
+                      id
+                    }
+                    minTraderLevel
+                    taskUnlock {
+                      id
+                    }
+                  }
+                }
                 requirements {
                   type
                   value
@@ -39,7 +55,14 @@ const getCraftsBarters = async () => {
           }
         }
         barters {
-          source
+          trader {
+            id
+            name
+          }
+          level
+          taskUnlock {
+            id
+          }
           requiredItems {
             item {
               id
@@ -47,9 +70,21 @@ const getCraftsBarters = async () => {
               avg24hPrice
               lastLowPrice
               buyFor {
-                source
                 price
                 currency
+                priceRUB
+                vendor {
+                  name
+                  ...on TraderOffer {
+                    trader {
+                      id
+                    }
+                    minTraderLevel
+                    taskUnlock {
+                      id
+                    }
+                  }
+                }
                 requirements {
                   type
                   value

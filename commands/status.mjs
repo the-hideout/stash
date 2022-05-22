@@ -24,6 +24,7 @@ const defaultFunction = {
         .setName('status')
         .setDescription('Gives you the current server status'),
     async execute(interaction) {
+        await interaction.deferReply();
         const embed = new MessageEmbed();
         let currentStatus;
 
