@@ -45,7 +45,7 @@ const subCommands = {
             const nextUpdate = moment(progress.getUpdateTime(interaction.user.id)).fromNow();
             embed.addField('TarkovTracker 🧭', `Last update: ${lastUpdate}\nNext update: ${nextUpdate}`, false);
         } else if (prog.tarkovTracker && prog.tarkovTracker.lastUpdateStatus === 'invalid') {
-            embed.addField('TarkovTracker 🧭', `❌ Invalid token`, false);
+            embed.addField('TarkovTracker 🧭', '[❌ Invalid token](https://tarkovtracker.io/settings/)', false);
         }
 
         await interaction.reply({
@@ -74,8 +74,7 @@ const subCommands = {
                 progress.setTrader(interaction.user.id, trader.id, lvl);
             }
             await interaction.editReply({
-                content: `✅ All traders set to ${level}.`,
-                ephemeral: true
+                content: `✅ All traders set to ${level}.`
             });
             return;
         }
@@ -83,8 +82,7 @@ const subCommands = {
         const trader = await gameData.traders.get(traderId);
         if (!trader) {
             await interaction.editReply({
-                content: '❌ No matching trader found.',
-                ephemeral: true
+                content: '❌ No matching trader found.'
             });
             return;
         }
@@ -94,8 +92,7 @@ const subCommands = {
         progress.setTrader(interaction.user.id, trader.id, lvl);
 
         await interaction.editReply({
-            content: `✅ ${trader.name} set to LL${lvl}.`,
-            ephemeral: true
+            content: `✅ ${trader.name} set to LL${lvl}.`
         });
     },
     hideout: async interaction => {
@@ -105,7 +102,7 @@ const subCommands = {
         const prog = progress.getProgress(interaction.user.id);
         let ttWarn = '';
         if (prog && prog.tarkovTracker.token) {
-            ttWarn = '\nNote: Progress synced via TarkovTracker will overwrite your hideout settings.';
+            ttWarn = '\nNote: Progress synced via [TarkovTracker](https://tarkovtracker.io/settings/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.';
         }
         if (stationId === 'all') {
             const stations = await gameData.hideout.getAll();
@@ -116,8 +113,7 @@ const subCommands = {
                 progress.setHideout(interaction.user.id, station.id, lvl);
             }
             await interaction.editReply({
-                content: `✅ All hideout stations set to ${level}.${ttWarn}`,
-                ephemeral: true
+                content: `✅ All hideout stations set to ${level}.${ttWarn}`
             });
             return;
         }
@@ -125,8 +121,7 @@ const subCommands = {
         const station = await gameData.hideout.get(stationId);
         if (!station) {
             await interaction.editReply({
-                content: '❌ No matching hideout station found.',
-                ephemeral: true
+                content: '❌ No matching hideout station found.'
             });
             return;
         }
@@ -136,8 +131,7 @@ const subCommands = {
         progress.setHideout(interaction.user.id, station.id, lvl);
 
         await interaction.editReply({
-            content: `✅ ${station.name} set to level ${lvl}.${ttWarn}`,
-            ephemeral: true
+            content: `✅ ${station.name} set to level ${lvl}.${ttWarn}`
         });
     },
     skill: async interaction => {
@@ -156,7 +150,7 @@ const subCommands = {
         const token = interaction.options.getString('token');
         if (!token) {
             await interaction.reply({
-                content: `❌ You must supply your TarkovTracker API token to link your account.`,
+                content: `❌ You must supply your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.`,
                 ephemeral: true
             });
             return;
