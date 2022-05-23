@@ -16,6 +16,7 @@ const getCraftsBarters = async () => {
               iconLink
               avg24hPrice
               lastLowPrice
+              link
               buyFor {
                 price
                 currency
@@ -69,6 +70,7 @@ const getCraftsBarters = async () => {
               name
               avg24hPrice
               lastLowPrice
+              link
               buyFor {
                 price
                 currency

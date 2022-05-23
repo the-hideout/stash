@@ -43,7 +43,7 @@ const subCommands = {
             let lastUpdate = moment(prog.tarkovTracker.lastUpdate).fromNow();
             if (prog.tarkovTracker.lastUpdate == 0) lastUpdate = 'never';
             const nextUpdate = moment(progress.getUpdateTime(interaction.user.id)).fromNow();
-            embed.addField('TarkovTracker 🧭', `Last update: ${lastUpdate}\nNext Update: ${nextUpdate}`, false);
+            embed.addField('TarkovTracker 🧭', `Last update: ${lastUpdate}\nNext update: ${nextUpdate}`, false);
         } else if (prog.tarkovTracker && prog.tarkovTracker.lastUpdateStatus === 'invalid') {
             embed.addField('TarkovTracker 🧭', `❌ Invalid token`, false);
         }

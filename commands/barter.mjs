@@ -122,7 +122,7 @@ const defaultFunction = {
             let otheritems = '';
 
             for (let i = MAX_BARTERS; i < matchedBarters.length; i = i + 1) {
-                const bitemname = matchedBarters[i].rewardItems[0].item.name + " (" + matchedBarters[i].source + ")";
+                const bitemname = matchedBarters[i].rewardItems[0].item.name + " (" + `${matchedBarters[i].trader.name} LL${matchedBarters[i].level}` + ")";
 
                 if (bitemname.length + 4 + otheritems.length > 2048) {
                     ending.setFooter({text: "Not all results shown.",});
