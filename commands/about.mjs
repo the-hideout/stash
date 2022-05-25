@@ -32,7 +32,7 @@ const defaultFunction = {
             iconURL: 'https://assets.tarkov.dev/tarkov-dev-icon.png',
             url: 'https://tarkov.dev.com',
         });
-        embed.addField('Bugs? Missing features? Chat with us on discord!', 'https://discord.gg/XPAsKGHSzH', true);
+        embed.addField('Bugs? Missing features? Chat with us on Discord!', 'https://discord.gg/XPAsKGHSzH', true);
         embed.addField('Want to contribute to the bot or checkout the source code? View the project on GitHub!', 'https://github.com/the-hideout/stash', true);
         embed.addField('Want to check the status of our services (api, website, bot, etc)?', 'https://status.tarkov.dev', true);
         // embed.addField('Like it? Support on Patreon', 'https://www.patreon.com/kokarn', true);
