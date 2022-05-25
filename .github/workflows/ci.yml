@@ -5,15 +5,32 @@ on:
     branches:
       - main
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
+
+  new-pr:
+    permissions:
+      pull-requests: write
+      contents: read
+
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+
+    steps:
+      # Comment on new PR requests with deployment instructions
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # pin@v3.0.2
+      - name: comment
+        uses: GrantBirki/comment@5f428382792637d756694f5e0ca49ba56354125c # pin@v2.0.0
+        with:
+          file: .github/new-pr-comment.md
+
   test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # pin@v2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # pin@v3.0.2
 
       - name: Cache node modules
         uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # pin@v2
@@ -34,12 +51,13 @@ jobs:
 
   deploy:
     if: github.event_name == 'push'
-    needs: [test]
+    needs: [ test ]
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout
-        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # pin@v2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # pin@v3.0.2
 
       - name: Cache node modules
         uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # pin@v2
@@ -62,6 +80,13 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
         run: node deploy-commands.mjs
+
+      - name: Deploy to Heroku
+        uses: AkhileshNS/heroku-deploy@79ef2ae4ff9b897010907016b268fd0f88561820 # pin@v3.12.12
+        with:
+          heroku_app_name: stash-eft
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
 
       - name: Create Sentry release
         uses: getsentry/action-release@744e4b262278339b79fb39c8922efcae71e98e39 # pin@v1
