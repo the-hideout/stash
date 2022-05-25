@@ -9,3 +9,5 @@ If you are new, please check out the deployment process below to understand how 
     > Comment `.deploy` on this pull request to trigger a deploy. If anything goes wrong, rollback with `.deploy main`
 
 4. 🎉 Merge!
+
+> Note: An example pull request demonstrating the deployment process is available [here](https://github.com/the-hideout/stash/pull/31)
