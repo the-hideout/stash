@@ -1,0 +1,28 @@
+name: branch-deploy
+
+on:
+  issue_comment:
+    types: [ created ]
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: branch-deploy
+        id: branch-deploy
+        uses: GrantBirki/branch-deploy@8290f4d0376d06d0ecd74c05363bc045e7e6950a # pin@v1.4.1
+
+      - name: Checkout
+        if: steps.branch-deploy.outputs.continue == 'true'
+        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # pin@v2
+        with:
+          ref: ${{ steps.branch-deploy.outputs.ref }}
+
+      - name: Deploy to Heroku
+        uses: AkhileshNS/heroku-deploy@79ef2ae4ff9b897010907016b268fd0f88561820 # pin@v3.12.12
+        with:
+          heroku_app_name: stash-eft
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
