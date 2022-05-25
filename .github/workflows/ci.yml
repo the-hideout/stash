@@ -5,7 +5,7 @@ on:
     branches:
       - main
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   test:
@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # pin@v2
+        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # pin@v2
 
       - name: Cache node modules
         uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # pin@v2
@@ -34,12 +34,13 @@ jobs:
 
   deploy:
     if: github.event_name == 'push'
-    needs: [test]
+    needs: [ test ]
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout
-        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # pin@v2
+        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # pin@v2
 
       - name: Cache node modules
         uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # pin@v2
@@ -62,6 +63,13 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
         run: node deploy-commands.mjs
+
+      - name: Deploy to Heroku
+        uses: AkhileshNS/heroku-deploy@79ef2ae4ff9b897010907016b268fd0f88561820 # pin@v3.12.12
+        with:
+          heroku_app_name: stash-eft
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
 
       - name: Create Sentry release
         uses: getsentry/action-release@744e4b262278339b79fb39c8922efcae71e98e39 # pin@v1
