@@ -10,6 +10,10 @@ on:
 jobs:
 
   new-pr:
+    permissions:
+      pull-requests: write
+      contents: read
+
     if: github.event_name == 'pull_request' && github.event.action == 'opened'
     runs-on: ubuntu-latest
 
