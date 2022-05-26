@@ -159,10 +159,10 @@ const defaultFunction = {
             let otheritems = '';
 
             for (let i = MAX_CRAFTS; i < matchedCrafts.length; i = i + 1) {
-                const bitemname = matchedCrafts[i].rewardItems[0].item.name + " (" + `${matchedCrafts[i].station.name} level ${matchedCrafts[i].level}` + ")";
+                const bitemname = `[${matchedCrafts[i].rewardItems[0].item.name}](${matchedCrafts[i].rewardItems[0].item.link}) (${matchedCrafts[i].station.name} level ${matchedCrafts[i].level})`;
 
                 if (bitemname.length + 4 + otheritems.length > 2048) {
-                    ending.setFooter({ text: "Not all results shown." });
+                    ending.setFooter({text: `${matchedCrafts.length-i} additional results not shown.`,});
 
                     break;
                 }
