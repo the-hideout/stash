@@ -286,15 +286,15 @@ const defaultFunction = {
 
             let otheritems = '';
             for (let i = MAX_ITEMS; i < response.data.items.length; i = i + 1) {
-                const itemname = response.data.items[i].name;
+                const itemname = `[${response.data.items[i].name}](${response.data.items[i].link})`;
 
-                if (itemname.length + 4 + otheritems.length > 2048) {
-                    ending.setFooter({text: "Not all results shown."});
+                if (itemname.length + 2 + otheritems.length > 2048) {
+                    ending.setFooter({text: `${response.data.items.length-i} additional results not shown.`,});
 
                     break;
                 }
 
-                otheritems += itemname + "\r\n";
+                otheritems += itemname + "\n";
             }
 
             ending.setDescription(otheritems);

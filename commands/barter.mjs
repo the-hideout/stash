@@ -122,13 +122,13 @@ const defaultFunction = {
             let otheritems = '';
 
             for (let i = MAX_BARTERS; i < matchedBarters.length; i = i + 1) {
-                const bitemname = matchedBarters[i].rewardItems[0].item.name + " (" + `${matchedBarters[i].trader.name} LL${matchedBarters[i].level}` + ")";
+                const bitemname = `[${matchedBarters[i].rewardItems[0].item.name}](${matchedBarters[i].rewardItems[0].item.link}) (${matchedBarters[i].trader.name} LL${matchedBarters[i].level})`;
 
-                if (bitemname.length + 4 + otheritems.length > 2048) {
-                    ending.setFooter({text: "Not all results shown.",});
+                if (bitemname.length + 2 + otheritems.length > 2048) {
+                    ending.setFooter({text: `${matchedBarters.length-i} additional results not shown.`,});
                     break;
                 }
-                otheritems += bitemname + "\r\n";
+                otheritems += bitemname + "\n";
             }
             ending.setDescription(otheritems);
 
