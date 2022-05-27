@@ -84,7 +84,7 @@ const defaultFunction = {
             let timeDiscount = prog.skills['crafting']*0.0075*craft.duration;
             measuredTime.setSeconds(craft.duration - timeDiscount);
             const locked = prog.hideout[craft.station.id] < craft.level ? '🔒' : '';
-            title += `\r\n${craft.station.name} (${measuredTime.toISOString().substr(11, 8)})${locked}`;
+            title += `\n${craft.station.name} level ${craft.level} (${measuredTime.toISOString().substr(11, 8)})${locked}`;
             embed.setTitle(title);
             embed.setURL(`${craft.rewardItems[0].item.link}#${i}`);
 
@@ -159,10 +159,10 @@ const defaultFunction = {
             let otheritems = '';
 
             for (let i = MAX_CRAFTS; i < matchedCrafts.length; i = i + 1) {
-                const bitemname = matchedCrafts[i].rewardItems[0].item.name + " (" + matchedCrafts[i].source + ")";
+                const bitemname = `[${matchedCrafts[i].rewardItems[0].item.name}](${matchedCrafts[i].rewardItems[0].item.link}) (${matchedCrafts[i].station.name} level ${matchedCrafts[i].level})`;
 
                 if (bitemname.length + 4 + otheritems.length > 2048) {
-                    ending.setFooter({ text: "Not all results shown." });
+                    ending.setFooter({text: `${matchedCrafts.length-i} additional results not shown.`,});
 
                     break;
                 }

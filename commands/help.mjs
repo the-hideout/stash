@@ -22,15 +22,15 @@ function buildSyntax(command, subcommand) {
         subCommands = true;
     }
     if (!subCommands) {
-        return `${stem} ${getCommandOptions(command)}`;
+        return `${stem}${getCommandOptions(command)}`;
     } 
     const syntaxes = {};
     for (const sub of command.options) {
-        const subCommandSyntax = `${stem} ${sub.name} ${getCommandOptions(sub)}`;
+        const subCommandSyntax = `${stem} ${sub.name}${getCommandOptions(sub)}`;
         if (subcommand && sub.name == sub.name) {
             return subCommandSyntax;
         }
-        syntaxes[sub.name] = `${stem} ${sub.name} ${getCommandOptions(sub)}`;
+        syntaxes[sub.name] = `${stem} ${sub.name}${getCommandOptions(sub)}`;
     }
     return syntaxes;
 };
@@ -70,13 +70,10 @@ const defaultFunction = {
         if (!commands[helpCommand]) {
             embed.setTitle("Available Commands");
             embed.setDescription(`Need Help or Have Questions?
-        [Come visit us in our server.](https://discord.gg/XPAsKGHSzH)`);
-
-            for (const command in commands) {
-                const cmd = commands[command];
-
-                embed.addField(cmd.syntax, cmd.description);
-            }
+        [Come visit us in our server.](https://discord.gg/XPAsKGHSzH)
+        You can learn more about the bot's commands by entering:`);
+            embed.addField('/help [command]', 'Where [command] is one of the following commands: \n'
+            +Object.keys(commands).join('\n'));
 
             await interaction.reply({ embeds: [embed] });
 
