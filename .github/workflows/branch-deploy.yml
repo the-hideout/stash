@@ -1,0 +1,61 @@
+name: branch-deploy
+
+on:
+  issue_comment:
+    types: [ created ]
+
+permissions:
+  pull-requests: write
+  deployments: write
+  contents: read
+
+jobs:
+  deploy:
+    name: deploy
+    if: ${{ github.event.issue.pull_request }} # only run on pull request comments
+    runs-on: ubuntu-latest
+    environment: production-secrets
+
+    steps:
+      - name: branch-deploy
+        id: branch-deploy
+        uses: GrantBirki/branch-deploy@8290f4d0376d06d0ecd74c05363bc045e7e6950a # pin@v1.4.1
+
+      - name: Checkout
+        if: steps.branch-deploy.outputs.continue == 'true'
+        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # pin@v2
+        with:
+          ref: ${{ steps.branch-deploy.outputs.ref }}
+
+      - name: Cache node modules
+        if: steps.branch-deploy.outputs.continue == 'true'
+        uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # pin@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Install Dependencies
+        if: steps.branch-deploy.outputs.continue == 'true'
+        run: npm install
+
+      - name: Register Slash Commands
+        if: steps.branch-deploy.outputs.continue == 'true'
+        env:
+          NODE_ENV: ci
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
+        run: node deploy-commands.mjs
+
+      - name: Deploy to Heroku
+        if: steps.branch-deploy.outputs.continue == 'true'
+        uses: AkhileshNS/heroku-deploy@79ef2ae4ff9b897010907016b268fd0f88561820 # pin@v3.12.12
+        with:
+          heroku_app_name: stash-eft
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
