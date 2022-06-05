@@ -15,12 +15,15 @@ const servers = (message, client) => {
     let reach = 0;
 
     client.guilds.cache.each(server => {
-        embed.addField(server.name, server.id, true);
         serverCount = serverCount + 1;
-        reach = reach + server.memberCount;
+        server.members.cache.each(member => {
+            if (!member.user.bot) {
+                reach = reach + 1;
+            }
+        });
     });
     embed.setTitle(`Servers (${serverCount})`);
-    embed.setDescription(`Total reach: ${reach} users`);
+    embed.setDescription(`Total reach: ${reach.toLocaleString()} users`);
 
     if (embed.length == 0) {
         message.react('❌');
