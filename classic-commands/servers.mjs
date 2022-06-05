@@ -16,11 +16,13 @@ const servers = (message, client) => {
 
     client.guilds.cache.each(server => {
         serverCount = serverCount + 1;
+        let serverUsers = 0;
         server.members.cache.each(member => {
             if (!member.user.bot) {
-                reach = reach + 1;
+                serverUsers++;
             }
         });
+        reach += serverUsers;
     });
     embed.setTitle(`Servers (${serverCount})`);
     embed.setDescription(`Total reach: ${reach.toLocaleString()} users`);
