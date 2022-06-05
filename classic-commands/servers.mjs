@@ -5,7 +5,7 @@ import {
 // Admin only command that returns the servers and the reach the bot has
 const servers = (message, client) => {
     // The the message comes from a user other than the bot admin, return
-    if (message.author.id !== process.env.ADMIN_ID) {
+    if (!process.env.ADMIN_ID || !process.env.ADMIN_ID.split(',').includes(message.author.id)) {
         return false;
     }
 
