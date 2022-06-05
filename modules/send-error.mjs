@@ -3,7 +3,7 @@ import {
 } from 'discord.js';
 
 const sendError = async (client, member, details) => {
-    let reportTo = await client.users.fetch(process.env.ADMIN_ID, false);
+    let reportTo = await client.users.fetch(process.env.ADMIN_ID.split(',')[0], false);
     const embed = new MessageEmbed();
 
     if (client.guilds.cache.has(process.env.ISSUE_SERVER_ID)) {
