@@ -64,12 +64,10 @@ discordClient.on('ready', () => {
     console.log(message);
 
     if (process.env.ADMIN_ID) {
-        process.env.ADMIN_ID.split(',').forEach(id => {
-            discordClient.users.fetch(id, false)
+        discordClient.users.fetch(process.env.ADMIN_ID.split(',')[0], false)
             .then(user => {
                 user.send(message);
-            });       
-        });
+            }); 
     }
 
     discordClient.user.setActivity('Tarkov.dev', {
