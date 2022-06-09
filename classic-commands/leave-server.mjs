@@ -1,5 +1,5 @@
 const leaveServer = (message, client) => {
-    if (message.author.id !== process.env.ADMIN_ID) {
+    if (!process.env.ADMIN_ID || !process.env.ADMIN_ID.split(',').includes(message.author.id)) {
         return false;
     }
 
