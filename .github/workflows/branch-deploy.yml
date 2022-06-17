@@ -7,7 +7,7 @@ on:
 permissions:
   pull-requests: write
   deployments: write
-  contents: read
+  contents: write
 
 jobs:
   deploy:
@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: branch-deploy
         id: branch-deploy
-        uses: GrantBirki/branch-deploy@5d7ea46552d858242fa4bf16625e9f29b1ee1b63 # pin@v1.4.2
+        uses: github/branch-deploy@fb5baec9eccc077f582d8850521b8bc3043f550f # pin@v2.0.0
 
       - name: Checkout
         if: steps.branch-deploy.outputs.continue == 'true'
