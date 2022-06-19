@@ -75,11 +75,9 @@ const defaultFunction = {
             let bestTraderName = false;
             let bestTraderPrice = -1;
 
-            for (const traderIndex in item.traderPrices) {
-                const traderPrice = item.traderPrices[traderIndex];
-
-                if (traderPrice.price > bestTraderPrice) {
-                    bestTraderPrice = traderPrice.price;
+            for (const traderPrice of item.traderPrices) {
+                if (traderPrice.priceRUB > bestTraderPrice) {
+                    bestTraderPrice = traderPrice.priceRUB;
                     bestTraderName = traderPrice.trader.name;
                 }
             }
@@ -344,6 +342,8 @@ async function graphql_query(interaction, searchString) {
             lastLowPrice
             traderPrices {
                 price
+                priceRUB
+                currency
                 trader {
                     id
                     name
