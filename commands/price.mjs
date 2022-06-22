@@ -377,7 +377,7 @@ async function graphql_query(interaction, searchString) {
     if (response.data.items.length === 0) {
         await interaction.deleteReply();
         await interaction.followUp({
-            content: 'Your search term matched no items',
+            content: `Found no matching items for "${searchString}"`,
             ephemeral: true,
         });
         return false;
