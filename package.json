@@ -28,6 +28,7 @@
     "jquery": "^3.6.0",
     "moment": "^2.29.2",
     "nodemon": "^2.0.15",
-    "rollbar": "^2.24.0"
+    "rollbar": "^2.24.0",
+    "turndown": "^7.1.1"
   }
 }
