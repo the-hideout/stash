@@ -208,6 +208,26 @@ const defaultFunction = {
                             }
                         }
 
+                        let bestSellPrice = 0;
+                        for (const offer of req.item.sellFor) {
+                            if (!offer.vendor.trader) {
+                                continue;
+                            }
+                            if (offer.priceRUB > bestSellPrice) {
+                                bestSellPrice = offer.priceRUB;
+                            }
+                        }
+
+                        if (itemCost === 0) {
+                            itemCost = bestSellPrice;
+        
+                            const isDogTag = req.attributes.some(att => att.name === 'minLevel');
+                            if (isDogTag) {
+                                const tagLevel = req.attributes.find(att => att.name === 'minLevel').value;
+                                itemCost = bestSellPrice * tagLevel;
+                            }
+                        }
+
                         barterCost += itemCost * req.count;
                     }
 
