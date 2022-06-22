@@ -4,7 +4,7 @@ import { MessageEmbed } from 'discord.js';
 import getCraftsBarters from '../modules/get-crafts-barters.mjs';
 import progress from '../modules/progress.mjs';
 
-const MAX_BARTERS = 2;
+const MAX_BARTERS = 3;
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
