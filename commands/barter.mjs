@@ -100,8 +100,30 @@ const defaultFunction = {
                     }
                 }
 
+                let bestSellPrice = 0;
+                for (const offer of req.item.sellFor) {
+                    if (!offer.vendor.trader) {
+                        continue;
+                    }
+                    if (offer.priceRUB > bestSellPrice) {
+                        bestSellPrice = offer.priceRUB;
+                    }
+                }
+
+                let reqName = req.item.name;
+                if (itemCost === 0) {
+                    itemCost = bestSellPrice;
+
+                    const isDogTag = req.attributes.some(att => att.name === 'minLevel');
+                    if (isDogTag) {
+                        const tagLevel = req.attributes.find(att => att.name === 'minLevel').value;
+                        itemCost = bestSellPrice * tagLevel;
+                        reqName += ' >= '+tagLevel;
+                    }
+                }
+
                 totalCost += itemCost * req.count;
-                embed.addField(req.item.name, itemCost.toLocaleString() + "₽ x " + req.count, true);
+                embed.addField(reqName, itemCost.toLocaleString() + "₽ x " + req.count, true);
             }
 
             embed.addField("Total", totalCost.toLocaleString() + "₽", false);

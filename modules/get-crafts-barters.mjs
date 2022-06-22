@@ -13,6 +13,7 @@ const getCraftsBarters = async () => {
             item {
               id
               name
+              basePrice
               iconLink
               avg24hPrice
               lastLowPrice
@@ -68,6 +69,7 @@ const getCraftsBarters = async () => {
             item {
               id
               name
+              basePrice
               avg24hPrice
               lastLowPrice
               link
@@ -92,6 +94,23 @@ const getCraftsBarters = async () => {
                   value
                 }
               }
+              sellFor {
+                price
+                currency
+                priceRUB
+                vendor {
+                  name
+                  ...on TraderOffer {
+                    trader {
+                      id
+                    }
+                  }
+                }
+              }
+            }
+            attributes {
+              name
+              value
             }
             count
           }
