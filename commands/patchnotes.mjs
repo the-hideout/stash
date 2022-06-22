@@ -1,7 +1,8 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageEmbed } from 'discord.js';
 import got from 'got';
-import cheerio  from'cheerio';
+import * as cheerio from 'cheerio';
+import TurndownService from 'turndown';
 
 let lastCheck = new Date(0);
 let patchNotes = false;
@@ -19,23 +20,8 @@ const getPatchNotes = async () => {
     const title = $('.main_content .header h1').text();
     const date = $('.main_content .header span').text();
     const content = $('.main_content .container .article');
-    let notes = '';
-    content.children().each(index => {
-        const node = content.children()[index];
-        if (node.name === 'p') {
-            if ($(node).text().trim()) {
-                notes += $(node).text()+'\n\n';
-            }
-        } else if (node.name === 'ul') {
-            const ul = $(node);
-            ul.children().each(i => {
-                const li = ul.children()[i];
-                notes += `- ${$(li).text()}\n`;
-            });
-        } else {
-            notes += $(node).text()+'\n';
-        }
-    });
+    const turndownService = new TurndownService();
+    const notes = turndownService.turndown(content.html());
     lastCheck = new Date();
     patchNotes = {
         title: title,
