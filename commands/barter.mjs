@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageEmbed } from 'discord.js';
 
-import getCraftsBarters from '../modules/get-crafts-barters.mjs';
+import getItemsByName from '../modules/get-items.mjs';
 import progress from '../modules/progress.mjs';
 
 const MAX_BARTERS = 3;
@@ -32,26 +32,21 @@ const defaultFunction = {
 
         const matchedBarters = [];
 
-        const { barters } = await getCraftsBarters();
+        const response = await getItemsByName(searchString.toLowerCase());
 
-        for (const barter of barters) {
-            if (barter.rewardItems[0].item.name.toLowerCase().includes(searchString.toLowerCase())) {
+        for (const item of response.data.items) {
+            for (const barter of item.bartersFor) {
                 matchedBarters.push(barter);
-                continue;
             }
-
-            for (const requiredItems of barter.requiredItems) {
-                if (requiredItems.item.name.toLowerCase().includes(searchString.toLowerCase())) {
-                    matchedBarters.push(barter);
-                    break;
-                }
+            for (const barter of item.bartersUsing) {
+                matchedBarters.push(barter);
             }
         }
 
         if (matchedBarters.length === 0) {
             await interaction.deleteReply();
             await interaction.followUp({
-                content: 'Found no matching barters for that item',
+                content: `Found no matching barters for "${searchString}"`,
                 ephemeral: true,
             });
 

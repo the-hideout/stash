@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageEmbed } from 'discord.js';
 
-import getCraftsBarters from '../modules/get-crafts-barters.mjs';
+import getItemsByName from '../modules/get-items.mjs';
 import progress from '../modules/progress.mjs';
 
 const MAX_CRAFTS = 2;
@@ -30,32 +30,23 @@ const defaultFunction = {
             return true;
         }
 
-        console.log(`Craft ${searchString}`);
-
         const matchedCrafts = [];
 
-        const { crafts } = await getCraftsBarters();
+        const response = await getItemsByName(searchString.toLowerCase());
 
-        for (const id in crafts) {
-            const craft = crafts[id];
-
-            if (craft.rewardItems[0].item.name.toLowerCase().includes(searchString.toLowerCase())) {
+        for (const item of response.data.items) {
+            for (const craft of item.craftsFor) {
                 matchedCrafts.push(craft);
-                continue;
             }
-
-            for (const requiredItems of craft.requiredItems) {
-                if (requiredItems.item.name.toLowerCase().includes(searchString.toLowerCase())) {
-                    matchedCrafts.push(craft);
-                    break;
-                }
+            for (const craft of item.craftsUsing) {
+                matchedCrafts.push(craft);
             }
         }
 
         if (matchedCrafts.length === 0) {
             await interaction.deleteReply();
             await interaction.followUp({
-                content: 'Found no matching crafts for that item',
+                content: `Found no matching crafts for "${searchString}"`,
                 ephemeral: true,
             });
 

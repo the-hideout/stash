@@ -1,8 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageEmbed } from 'discord.js';
 
-import graphqlRequest from '../modules/graphql-request.mjs';
-import getCraftsBarters from '../modules/get-crafts-barters.mjs';
+import getItemsByName from '../modules/get-items.mjs';
 import lootTier from '../modules/loot-tier.js';
 import progress from '../modules/progress.mjs';
 import moment from 'moment';
@@ -27,10 +26,8 @@ const defaultFunction = {
 
         // Make a graphql query to get the item data from the API
         let response = false;
-        let responses = false;
         try {
-            responses = await Promise.all([graphql_query(interaction, searchString), getCraftsBarters()]);
-            response = responses[0];
+            response = await graphql_query(interaction, searchString);
         } catch (error) {
             console.log('/price command query error', error);
             throw error;
@@ -42,8 +39,6 @@ const defaultFunction = {
         }
 
         let embeds = [];
-
-        const { crafts, barters } = responses[1];
 
         for (const item of response.data.items) {
             if (item.shortName.toLowerCase() !== searchString) {
@@ -185,7 +180,7 @@ const defaultFunction = {
                 embed.addField(title, traderPrice, true);
             }
 
-            for (const b of barters) {
+            for (const b of item.bartersFor) {
                 if (b.rewardItems[0].item.id == item.id) {
                     let barterCost = 0;
 
@@ -238,7 +233,7 @@ const defaultFunction = {
                 }
             }
 
-            for (const c of crafts) {
+            for (const c of item.craftsFor) {
                 if (c.rewardItems[0].item.id == item.id) {
                     let craftCost = 0;
 
@@ -346,55 +341,10 @@ async function graphql_query(interaction, searchString) {
     searchString = searchString.toLowerCase().trim();
     searchString = searchString.replaceAll('\\', '\\\\').replaceAll('\"', '\\"');
 
-    const query = `query {
-        items(name: "${searchString}") {
-            id
-            name
-            shortName
-            updated
-            width
-            height
-            weight
-            iconLink
-            imageLink
-            link
-            avg24hPrice
-            lastLowPrice
-            traderPrices {
-                price
-                priceRUB
-                currency
-                trader {
-                    id
-                    name
-                }
-            }
-            buyFor {
-                price
-                currency
-                priceRUB
-                vendor {
-                    name
-                    ...on TraderOffer {
-                        trader {
-                            id
-                        }
-                        minTraderLevel
-                        taskUnlock {
-                            id
-                        }
-                    }
-                }
-            }
-            types
-            basePrice
-        }
-    }`;
-
     // Send the graphql query
     let response;
     try {
-        response = await graphqlRequest({ graphql: query });
+        response = await getItemsByName(searchString);//graphqlRequest({ graphql: query });
     } catch (error) {
         // If an error occured -> log it, send a response to the user, and exit
         console.error(error);
@@ -427,7 +377,7 @@ async function graphql_query(interaction, searchString) {
     if (response.data.items.length === 0) {
         await interaction.deleteReply();
         await interaction.followUp({
-            content: 'Your search term matched no items',
+            content: `Found no matching items for "${searchString}"`,
             ephemeral: true,
         });
         return false;
