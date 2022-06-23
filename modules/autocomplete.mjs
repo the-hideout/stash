@@ -77,7 +77,6 @@ async function fillCache() {
             return item.craftsFor.length > 0 || item.craftsUsing.length > 0;
         }).forEach(item => {
             craftNameCache = [...new Set([...craftNameCache, item.name])];
-            return;
         });
         caches.craft.nameCache = craftNameCache.sort();
     } catch (requestError) {
