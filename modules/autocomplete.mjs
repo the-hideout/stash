@@ -46,6 +46,18 @@ async function fillCache() {
                         name
                         id
                     }
+                    bartersFor {
+                        level
+                    }
+                    bartersUsing {
+                        level
+                    }
+                    craftsFor {
+                        level
+                    }
+                    craftsUsing {
+                        level
+                    }
                 }
             }`
         });
@@ -66,50 +78,19 @@ async function fillCache() {
         });
         caches.stim.nameCache.sort();
 
-        const barterResponse = await graphqlRequest({
-            graphql: `query {
-                barters {
-                    rewardItems {
-                        item {
-                            name
-                        }
-                    }
-                    requiredItems {
-                        item {
-                            name
-                        }
-                    }
-                }
-            }`
-        });
-
         caches.barter.nameCache = [];
-        barterResponse.data.barters.map(barter => {
-            caches.barter.nameCache = [...new Set([...caches.barter.nameCache, ...[...new Set([...barter.rewardItems.map(item => item.item.name), ...barter.requiredItems.map(item => item.item.name)])]])];
-            return;
+        itemNamesResponse.data.items.filter(item => {
+            return item.bartersFor.length > 0 || item.bartersUsing.length > 0;
+        }).forEach(item => {
+            caches.barter.nameCache = [...new Set([...caches.barter.nameCache, item.name])];
         });
         caches.barter.nameCache.sort();
 
-        const craftResponse = await graphqlRequest({
-            graphql: `query {
-                crafts {
-                    rewardItems {
-                        item {
-                            name
-                        }
-                    }
-                    requiredItems {
-                        item {
-                            name
-                        }
-                    }
-                }
-            }`
-        });
-
         caches.craft.nameCache = [];
-        craftResponse.data.crafts.map(craft => {
-            caches.craft.nameCache = [...new Set([...caches.craft.nameCache, ...[...new Set([...craft.rewardItems.map(item => item.item.name), ...craft.requiredItems.map(item => item.item.name)])]])];
+        itemNamesResponse.data.items.filter(item => {
+            return item.craftsFor.length > 0 || item.craftsUsing.length > 0;
+        }).forEach(item => {
+            caches.craft.nameCache = [...new Set([...caches.craft.nameCache, item.name])];
             return;
         });
         caches.craft.nameCache.sort();
@@ -146,6 +127,12 @@ function autocomplete(interaction) {
 
     return [...lookupCache[searchString]];
 };
+
+let updateInterval = false;
+if (process.env.NODE_ENV !== 'ci') {
+    updateInterval = setInterval(fillCache, 1000 * 60 * 10);
+    updateInterval.unref();
+}
 
 export {
     fillCache,
