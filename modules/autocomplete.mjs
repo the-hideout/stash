@@ -115,7 +115,6 @@ function autocomplete(interaction) {
 
 let updateInterval = false;
 if (process.env.NODE_ENV !== 'ci') {
-    console.log('setting interval');
     updateInterval = setInterval(() => fillCache(), 1000 * 60 * 10);
     updateInterval.unref();
 } 
