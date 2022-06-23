@@ -24,18 +24,6 @@ const caches = {
 }
 
 async function fillCache() {
-    let cacheFilled = true;
-    for (const cacheName in caches) {
-        if (!caches[cacheName].nameCache) {
-            cacheFilled = false;
-            break;
-        }
-    }
-    if (cacheFilled) {
-        return true;
-    }
-
-    console.log('Filling autocomplete cache');
     console.time('Fill-autocomplete-cache');
     try {
         const itemNamesResponse = await graphqlRequest({
@@ -78,22 +66,24 @@ async function fillCache() {
         });
         caches.stim.nameCache.sort();
 
-        caches.barter.nameCache = [];
+        let barterNameCache = [];
         itemNamesResponse.data.items.filter(item => {
             return item.bartersFor.length > 0 || item.bartersUsing.length > 0;
         }).forEach(item => {
-            caches.barter.nameCache = [...new Set([...caches.barter.nameCache, item.name])];
+            barterNameCache = [...new Set([...barterNameCache, item.name])];
         });
-        caches.barter.nameCache.sort();
+        barterNameCache.sort();
+        caches.barter.nameCache = barterNameCache;
 
-        caches.craft.nameCache = [];
+        let craftNameCache = [];
         itemNamesResponse.data.items.filter(item => {
             return item.craftsFor.length > 0 || item.craftsUsing.length > 0;
         }).forEach(item => {
-            caches.craft.nameCache = [...new Set([...caches.craft.nameCache, item.name])];
+            craftNameCache = [...new Set([...craftNameCache, item.name])];
             return;
         });
-        caches.craft.nameCache.sort();
+        craftNameCache.sort();
+        caches.craft.nameCache = craftNameCache;
     } catch (requestError) {
         console.error(requestError);
     }
@@ -130,9 +120,10 @@ function autocomplete(interaction) {
 
 let updateInterval = false;
 if (process.env.NODE_ENV !== 'ci') {
-    updateInterval = setInterval(fillCache, 1000 * 60 * 10);
+    console.log('setting interval');
+    updateInterval = setInterval(() => fillCache(), 1000 * 60 * 10);
     updateInterval.unref();
-}
+} 
 
 export {
     fillCache,
