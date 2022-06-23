@@ -69,7 +69,8 @@ async function fillCache() {
             return item.bartersFor.length > 0 || item.bartersUsing.length > 0;
         }).forEach(item => {
             barterNameCache = [...new Set([...barterNameCache, item.name])];
-        }).sort();
+        });
+        barterNameCache.sort();
         caches.barter.nameCache = barterNameCache;
 
         let craftNameCache = [];
@@ -78,7 +79,8 @@ async function fillCache() {
         }).forEach(item => {
             craftNameCache = [...new Set([...craftNameCache, item.name])];
             return;
-        }).sort();
+        });
+        craftNameCache.sort();
         caches.craft.nameCache = craftNameCache;
     } catch (requestError) {
         console.error(requestError);
