@@ -64,21 +64,22 @@ async function fillCache() {
             return item.name;
         }).sort();
 
-        let barterNameCache = [];
+        let barterNameSet = new Set();
         itemNamesResponse.data.items.filter(item => {
             return item.bartersFor.length > 0 || item.bartersUsing.length > 0;
         }).forEach(item => {
-            barterNameCache = [...new Set([...barterNameCache, item.name])];
+            barterNameSet.add(item.name);
         });
-        caches.barter.nameCache = barterNameCache.sort();
+        caches.barter.nameCache = [...barterNameSet].sort();
 
-        let craftNameCache = [];
+        let craftNameSet = new Set();
         itemNamesResponse.data.items.filter(item => {
             return item.craftsFor.length > 0 || item.craftsUsing.length > 0;
         }).forEach(item => {
-            craftNameCache = [...new Set([...craftNameCache, item.name])];
+
+            craftNameSet.add(item.name);
         });
-        caches.craft.nameCache = craftNameCache.sort();
+        caches.craft.nameCache = [...craftNameSet].sort();
     } catch (requestError) {
         console.error(requestError);
     }
