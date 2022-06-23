@@ -76,7 +76,6 @@ async function fillCache() {
         itemNamesResponse.data.items.filter(item => {
             return item.craftsFor.length > 0 || item.craftsUsing.length > 0;
         }).forEach(item => {
-
             craftNameSet.add(item.name);
         });
         caches.craft.nameCache = [...craftNameSet].sort();
