@@ -56,23 +56,20 @@ async function fillCache() {
             return item.category.id === '5485a8684bdc2da71d8b4567';
         }).map(item => {
             return item.name;
-        });
-        caches.ammo.nameCache.sort();
+        }).sort();
 
         caches.stim.nameCache = itemNamesResponse.data.items.filter(item => {
             return item.category.id === '5448f3a64bdc2d60728b456a';
         }).map(item => {
             return item.name;
-        });
-        caches.stim.nameCache.sort();
+        }).sort();
 
         let barterNameCache = [];
         itemNamesResponse.data.items.filter(item => {
             return item.bartersFor.length > 0 || item.bartersUsing.length > 0;
         }).forEach(item => {
             barterNameCache = [...new Set([...barterNameCache, item.name])];
-        });
-        barterNameCache.sort();
+        }).sort();
         caches.barter.nameCache = barterNameCache;
 
         let craftNameCache = [];
@@ -81,8 +78,7 @@ async function fillCache() {
         }).forEach(item => {
             craftNameCache = [...new Set([...craftNameCache, item.name])];
             return;
-        });
-        craftNameCache.sort();
+        }).sort();
         caches.craft.nameCache = craftNameCache;
     } catch (requestError) {
         console.error(requestError);
