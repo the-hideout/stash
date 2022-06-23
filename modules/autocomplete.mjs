@@ -1,5 +1,4 @@
 import graphqlRequest from "./graphql-request.mjs";
-import getAmmo from "../modules/get-ammo.mjs";
 
 const caches = {
     default: {
@@ -15,6 +14,10 @@ const caches = {
         lookupCache: {}
     },
     ammo: {
+        nameCache: false,
+        lookupCache: {}
+    },
+    stim: {
         nameCache: false,
         lookupCache: {}
     }
@@ -37,13 +40,31 @@ async function fillCache() {
     try {
         const itemNamesResponse = await graphqlRequest({
             graphql: `query {
-                itemsByType(type: any) {
+                items {
                     name
+                    category {
+                        name
+                        id
+                    }
                 }
             }`
         });
 
-        caches.default.nameCache = itemNamesResponse.data.itemsByType.map(item => item.name);
+        caches.default.nameCache = itemNamesResponse.data.items.map(item => item.name);
+
+        caches.ammo.nameCache = itemNamesResponse.data.items.filter(item => {
+            return item.category.id === '5485a8684bdc2da71d8b4567';
+        }).map(item => {
+            return item.name;
+        });
+        caches.ammo.nameCache.sort();
+
+        caches.stim.nameCache = itemNamesResponse.data.items.filter(item => {
+            return item.category.id === '5448f3a64bdc2d60728b456a';
+        }).map(item => {
+            return item.name;
+        });
+        caches.stim.nameCache.sort();
 
         const barterResponse = await graphqlRequest({
             graphql: `query {
@@ -92,13 +113,6 @@ async function fillCache() {
             return;
         });
         caches.craft.nameCache.sort();
-
-        const ammoResponse = await getAmmo();
-
-        caches.ammo.nameCache = ammoResponse.map(ammo => {
-            return ammo.item.name;
-        });
-        caches.ammo.nameCache.sort();
     } catch (requestError) {
         console.error(requestError);
     }

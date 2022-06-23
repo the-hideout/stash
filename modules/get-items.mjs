@@ -13,6 +13,32 @@ const getItemsByName = async (searchString) => {
             iconLink
             imageLink
             link
+            category {
+                name
+                id
+            }
+            properties {
+                ...on ItemPropertiesAmmo {
+                    caliber
+                    penetrationPower
+                    damage
+                    armorDamage
+                    fragmentationChance
+                    initialSpeed
+                }
+                ...on ItemPropertiesStim {
+                    cures
+                    stimEffects {
+                        type
+                        chance
+                        delay
+                        duration
+                        value
+                        percent
+                        skillName
+                    }
+                }
+            }
             avg24hPrice
             lastLowPrice
             traderPrices {
