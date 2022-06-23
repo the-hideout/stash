@@ -1,5 +1,4 @@
 import graphqlRequest from "./graphql-request.mjs";
-import getAmmo from "../modules/get-ammo.mjs";
 
 const caches = {
     default: {
