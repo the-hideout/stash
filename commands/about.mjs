@@ -26,7 +26,7 @@ const defaultFunction = {
 
         embed.setTitle('Stash - EFT Discord Bot');
         embed.setURL('https://github.com/the-hideout/stash');
-        embed.setDescription('The official Tarkov.dev Discord bot! An open source project by The-Hideout to help you play Escape from Tarkov.');
+        embed.setDescription('The official Tarkov.dev Discord bot! An open source project by the-hideout to help you play Escape from Tarkov.');
         embed.setAuthor({
             name: 'Stash - An Escape from Tarkov Discord bot!',
             iconURL: 'https://assets.tarkov.dev/tarkov-dev-icon.png',
