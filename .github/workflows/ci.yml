@@ -14,7 +14,7 @@ jobs:
       pull-requests: write
       contents: read
 
-    if: github.event_name == 'pull_request' && github.event.action == 'opened' && ${{ github.event.pull_request.head.repo.full_name == 'the-hideout/stash' }}
+    if: github.event_name == 'pull_request' && github.event.action == 'opened' && github.event.pull_request.head.repo.fork != 'true'
     runs-on: ubuntu-latest
 
     steps:
