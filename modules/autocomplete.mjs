@@ -70,8 +70,7 @@ async function fillCache() {
         }).forEach(item => {
             barterNameCache = [...new Set([...barterNameCache, item.name])];
         });
-        barterNameCache.sort();
-        caches.barter.nameCache = barterNameCache;
+        caches.barter.nameCache = barterNameCache.sort();
 
         let craftNameCache = [];
         itemNamesResponse.data.items.filter(item => {
@@ -80,8 +79,7 @@ async function fillCache() {
             craftNameCache = [...new Set([...craftNameCache, item.name])];
             return;
         });
-        craftNameCache.sort();
-        caches.craft.nameCache = craftNameCache;
+        caches.craft.nameCache = craftNameCache.sort();
     } catch (requestError) {
         console.error(requestError);
     }
