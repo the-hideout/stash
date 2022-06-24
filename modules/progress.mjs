@@ -17,6 +17,8 @@ const defaultProgress = {
     skills: {}
 };
 
+const tarkovTrackerUpdateIntervalMinutes = 1;
+
 const buildDefaultProgress = id => {
     const progress = {
         id: id,
@@ -86,7 +88,7 @@ const updateTarkovTracker = async () => {
         }
     }
     saveUserProgress();
-    setTimeout(updateTarkovTracker, 1000 * 60).unref();
+    setTimeout(updateTarkovTracker, 1000 * 60 * tarkovTrackerUpdateIntervalMinutes).unref();
 };
 
 const saveUserProgress = () => {
@@ -216,7 +218,7 @@ if (process.env.NODE_ENV !== 'ci') {
             }
         }*/
     }
-    setTimeout(updateTarkovTracker, 1000 * 60).unref();
+    setTimeout(updateTarkovTracker, 1000 * 60 * tarkovTrackerUpdateIntervalMinutes).unref();
 }
 
 export default {
