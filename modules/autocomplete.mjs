@@ -23,6 +23,8 @@ const caches = {
     }
 }
 
+const updateIntervalMinutes = 10;
+
 async function fillCache() {
     console.time('Fill-autocomplete-cache');
     try {
@@ -50,19 +52,22 @@ async function fillCache() {
             }`
         });
 
-        caches.default.nameCache = itemNamesResponse.data.items.map(item => item.name);
+        caches.default.nameCache = itemNamesResponse.data.items.map(item => item.name).sort();
+        caches.default.lookupCache = {};
 
         caches.ammo.nameCache = itemNamesResponse.data.items.filter(item => {
             return item.category.id === '5485a8684bdc2da71d8b4567';
         }).map(item => {
             return item.name;
         }).sort();
+        caches.ammo.lookupCache = {};
 
         caches.stim.nameCache = itemNamesResponse.data.items.filter(item => {
             return item.category.id === '5448f3a64bdc2d60728b456a';
         }).map(item => {
             return item.name;
         }).sort();
+        caches.stim.lookupCache = {};
 
         let barterNameSet = new Set();
         itemNamesResponse.data.items.filter(item => {
@@ -71,6 +76,7 @@ async function fillCache() {
             barterNameSet.add(item.name);
         });
         caches.barter.nameCache = [...barterNameSet].sort();
+        caches.barter.lookupCache = {};
 
         let craftNameSet = new Set();
         itemNamesResponse.data.items.filter(item => {
@@ -79,6 +85,7 @@ async function fillCache() {
             craftNameSet.add(item.name);
         });
         caches.craft.nameCache = [...craftNameSet].sort();
+        caches.craft.lookupCache = {};
     } catch (requestError) {
         console.error(requestError);
     }
@@ -113,10 +120,8 @@ function autocomplete(interaction) {
     return [...lookupCache[searchString]];
 };
 
-let updateInterval = false;
 if (process.env.NODE_ENV !== 'ci') {
-    updateInterval = setInterval(fillCache, 1000 * 60 * 10);
-    updateInterval.unref();
+    setInterval(fillCache, 1000 * 60 * updateIntervalMinutes).unref();
 } 
 
 export {

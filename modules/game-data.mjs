@@ -27,6 +27,8 @@ let mapChoices = [];
 let traderChoices = [];
 let hideoutChoices = [];
 
+const updateIntervalMinutes = 10;
+
 export async function updateMaps() {
     const query = `query {
         maps {
@@ -175,11 +177,8 @@ const updateAll = async () => {
     ]);
 };
 
-let updateInterval = false;
-
 if (process.env.NODE_ENV !== 'ci') {
-    updateInterval = setInterval(updateAll, 1000 * 60 * 10);
-    updateInterval.unref();
+    setInterval(updateAll, 1000 * 60 * updateIntervalMinutes).unref();
 }
 
 export default {
