@@ -52,7 +52,7 @@ async function fillCache() {
             }`
         });
 
-        caches.default.nameCache = itemNamesResponse.data.items.map(item => item.name);
+        caches.default.nameCache = itemNamesResponse.data.items.map(item => item.name).sort();
         caches.default.lookupCache = {};
 
         caches.ammo.nameCache = itemNamesResponse.data.items.filter(item => {
