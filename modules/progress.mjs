@@ -50,8 +50,6 @@ const getUsersForUpdate = () => {
     });
 };
 
-let tarkovTrackerTimeout = false;
-
 const updateTarkovTracker = async () => {
     const users = getUsersForUpdate();
     const hideout = await gameData.hideout.getAll();
@@ -88,8 +86,7 @@ const updateTarkovTracker = async () => {
         }
     }
     saveUserProgress();
-    tarkovTrackerTimeout = setTimeout(updateTarkovTracker, 1000 * 60);
-    tarkovTrackerTimeout.unref();
+    setTimeout(updateTarkovTracker, 1000 * 60).unref();
 };
 
 const saveUserProgress = () => {
@@ -219,8 +216,7 @@ if (process.env.NODE_ENV !== 'ci') {
             }
         }*/
     }
-    tarkovTrackerTimeout = setTimeout(updateTarkovTracker, 1000 * 60);
-    tarkovTrackerTimeout.unref();
+    setTimeout(updateTarkovTracker, 1000 * 60).unref();
 }
 
 export default {

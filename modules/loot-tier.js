@@ -7,7 +7,7 @@ const tiers = {
     average: 11000
 };
 
-let intervalId = false;
+const updateIntervalMinutes = 60;
 
 const arrayAverage = (array) => array.reduce((a, b) => a + b) / array.length;
 
@@ -89,8 +89,7 @@ const updateTiers = async () => {
 };
 
 if (process.env.NODE_ENV !== 'ci') {
-    intervalId = setInterval(updateTiers, 1000 * 60 * 60);
-    intervalId.unref();
+    setInterval(updateTiers, 1000 * 60 * updateIntervalMinutes).unref();
     updateTiers();
 }
 
@@ -120,13 +119,8 @@ const getTiers = () => {
     return tiers;
 };
 
-const cancelTierUpdate = () => {
-    clearInterval(intervalId);
-};
-
 export {
-    getTiers,
-    cancelTierUpdate,
+    getTiers
 };
 
 export default get_item_tier;
