@@ -21,7 +21,7 @@ if (process.env.NODE_ENV === 'production') {
         tracesSampleRate: 1.0,
     });
 } else {
-    console.log('Bypassing Sentry in dev environment');
+    console.log(`Bypassing Sentry in ${process.env.NODE_ENV || 'dev'} environment`);
 }
 
 // if(process.env.NODE_ENV === 'production'){
