@@ -1,8 +1,11 @@
 import graphqlRequest from "./graphql-request.mjs";
 
 const getItemsByName = async (searchString) => {
-    const craftsQuery = `query {
-        items(name: "${searchString.replaceAll('"', '\\"')}") {
+    // Sanitize the search string for the graphql query
+    searchString = searchString.toLowerCase().trim();
+    searchString = searchString.replaceAll('\\', '\\\\').replaceAll('\"', '\\"');
+    const itemsQuery = `query {
+        items(name: "${searchString}") {
             id
             name
             shortName
@@ -315,9 +318,9 @@ const getItemsByName = async (searchString) => {
             }
         }
     }`;
-
+console.log(itemsQuery);
     return graphqlRequest({
-        graphql: craftsQuery,
+        graphql: itemsQuery,
     });
 };
 

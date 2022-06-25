@@ -337,10 +337,6 @@ async function graphql_query(interaction, searchString) {
         return false;
     }
 
-    // Sanitize the search string for the graphql query
-    searchString = searchString.toLowerCase().trim();
-    searchString = searchString.replaceAll('\\', '\\\\').replaceAll('\"', '\\"');
-
     // Send the graphql query
     let response;
     try {
@@ -356,6 +352,13 @@ async function graphql_query(interaction, searchString) {
         return false;
     }
 
+    // If we have errors, loop through and log them - Attempt to continue with execution
+    if (response.hasOwnProperty('errors')) {
+        for (const error of response.errors) {
+            console.error("Item search error: " + error.message, JSON.stringify(error.locations, null, 4));
+        }
+    }
+
     // If we did not get usable data from the API, send a message and return
     if (!response.hasOwnProperty('data') || !response.data.hasOwnProperty('items')) {
         await interaction.deleteReply();
@@ -364,13 +367,6 @@ async function graphql_query(interaction, searchString) {
             ephemeral: true,
         });
         return false;
-    }
-
-    // If we have errors, loop through and log them - Attempt to continue with execution
-    if (response.hasOwnProperty('errors')) {
-        for (const errorIndex in response.errors) {
-            console.error("Item search error: " + response.errors[errorIndex].message);
-        }
     }
 
     // If no items matched the search string, send a message and return
