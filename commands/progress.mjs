@@ -261,7 +261,7 @@ const defaultFunction = {
         )
         .addSubcommand(subcommand => subcommand
             .setName('link')
-            .setDescription('Link your TarkovTools account to sync hideout progress')
+            .setDescription('Link your TarkovTracker account to sync hideout progress')
             .addStringOption(option => option
                 .setName('token')
                 .setRequired(true)
@@ -270,7 +270,7 @@ const defaultFunction = {
         )
         .addSubcommand(subcommand => subcommand
             .setName('unlink')
-            .setDescription('Unlink your TarkovTools account')
+            .setDescription('Unlink your TarkovTracker account')
         )
         .addSubcommand(subcommand => subcommand
             .setName('flea_market_fee')
