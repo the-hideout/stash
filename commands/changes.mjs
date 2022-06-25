@@ -3,6 +3,7 @@ import { MessageEmbed } from 'discord.js';
 import got from 'got';
 
 const URL = 'https://tarkov-changes.com';
+const MAX_EMBED_LENGTH = 4096;
 let changes = false;
 let lastCheck = new Date(0);
 
@@ -24,6 +25,10 @@ const defaultFunction = {
         const data = await getChanges();
 
         var message = `**Changes provided by https://tarkov-changes.com**\n\n${data}`;
+
+        if (message.length >= MAX_EMBED_LENGTH) {
+            message = 'Sorry, the current change list is too long to be displayed in Discord\n\nPlease visit https://tarkov-changes.com for more information';
+        }
 
         const embed = new MessageEmbed();
         embed.setURL(URL);
