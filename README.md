@@ -31,7 +31,8 @@ This bot is open source and supported by the team behind [Tarkov.dev](https://ta
 | `/issue` | `/issue message: <text>` | Report an issue with the bot |
 | `/invite` | - | Get a Discord invite link for the bot to join it to another server |
 | `/tier` | - | Show the criteria for loot tiers |
-| `/patchnotes` | - | Get the official patchnotes for EFT |
+| `/changes` | - | Get the latest game changes from [tarkov-changes.com](https://tarkov-changes.com) |
+| `/patchnotes` | - | Get the latest *official* patchnotes for EFT |
 | `/stim` | - | Get information about a in-game stim |
 | `/uptime` | - | Get the bot's uptime |
 
