@@ -27,7 +27,7 @@ const defaultFunction = {
         var message = `**Changes provided by https://tarkov-changes.com**\n\n${data}`;
 
         if (message.length >= MAX_EMBED_LENGTH) {
-            message = 'Sorry, the current change list is too long to be displayed in Discord\n\nPlease visit https://tarkov-changes.com for more information';
+            message = `Sorry, the current change list is too long to be displayed in Discord\n\nPlease visit ${URL} for more information`;
         }
 
         const embed = new MessageEmbed();
