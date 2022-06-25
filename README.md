@@ -31,6 +31,7 @@ This bot is open source and supported by the team behind [Tarkov.dev](https://ta
 | `/issue` | `/issue message: <text>` | Report an issue with the bot |
 | `/invite` | - | Get a Discord invite link for the bot to join it to another server |
 | `/tier` | - | Show the criteria for loot tiers |
+| `/changes` | - | Get the latest game changes from [tarkov-changes.com](https://tarkov-changes.com) |
 | `/uptime` | - | Get the bot's uptime |
 
 ---
