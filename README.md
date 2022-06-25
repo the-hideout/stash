@@ -4,7 +4,7 @@
 
 Stash is a Discord bot that helps you play Escape from Tarkov!
 
-This is the official [Tarkov.dev](https://tarkov.dev) Discord bot.
+This is the official [Tarkov.dev](https://tarkov.dev) Discord bot
 
 To add the bot to your server, just click the link below:
 
@@ -12,9 +12,9 @@ To add the bot to your server, just click the link below:
 
 ## About 💡
 
-This bot takes all the data from [Tarkov.dev](https://tarkov.dev) and exposes it in a user-friendly way.
+This bot takes all the data from [Tarkov.dev](https://tarkov.dev) and exposes it in a user-friendly way
 
-This bot is open source and supported by the team behind [Tarkov.dev](https://tarkov.dev).
+This bot is open source and supported by the team behind [Tarkov.dev](https://tarkov.dev)
 
 ### Commands 💬
 
@@ -32,6 +32,8 @@ This bot is open source and supported by the team behind [Tarkov.dev](https://ta
 | `/invite` | - | Get a Discord invite link for the bot to join it to another server |
 | `/tier` | - | Show the criteria for loot tiers |
 | `/changes` | - | Get the latest game changes from [tarkov-changes.com](https://tarkov-changes.com) |
+| `/patchnotes` | - | Get the latest *official* patchnotes for EFT |
+| `/stim` | - | Get information about a in-game stim |
 | `/uptime` | - | Get the bot's uptime |
 
 ---
