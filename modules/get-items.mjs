@@ -2,7 +2,7 @@ import graphqlRequest from "./graphql-request.mjs";
 
 const getItemsByName = async (searchString) => {
     const craftsQuery = `query {
-        items(name: "${searchString}") {
+        items(name: "${searchString.replaceAll('"', '\\"')}") {
             id
             name
             shortName
