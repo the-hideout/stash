@@ -19,6 +19,7 @@
     "@sentry/tracing": "^6.19.4",
     "ascii-table": "^0.0.9",
     "cheerio": "^1.0.0-rc.11",
+    "cloudflare": "^2.9.1",
     "cron": "^1.8.2",
     "cross-env": "^7.0.3",
     "discord-api-types": "^0.26.0",
