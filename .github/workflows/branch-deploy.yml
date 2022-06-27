@@ -20,6 +20,8 @@ jobs:
       - name: branch-deploy
         id: branch-deploy
         uses: github/branch-deploy@01c7896b53789cbdc4d42eb748169bb17749540b # pin@v2.0.5
+        with:
+          admins: grantbirki
 
       - name: Checkout
         if: steps.branch-deploy.outputs.continue == 'true'
