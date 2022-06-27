@@ -36,9 +36,11 @@ const defaultFunction = {
 
         for (const item of response.data.items) {
             for (const barter of item.bartersFor) {
+                if (matchedBarters.some(mBarter => mBarter.id === barter.id)) continue;
                 matchedBarters.push(barter);
             }
             for (const barter of item.bartersUsing) {
+                if (matchedBarters.some(mBarter => mBarter.id === barter.id)) continue;
                 matchedBarters.push(barter);
             }
         }
