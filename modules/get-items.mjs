@@ -181,6 +181,7 @@ const getItemsByName = async (searchString) => {
                 }
             }
             bartersFor {
+                id
                 trader {
                     id
                     name
@@ -249,6 +250,7 @@ const getItemsByName = async (searchString) => {
                 }
             }
             bartersUsing {
+                id
                 trader {
                     id
                     name
@@ -318,7 +320,6 @@ const getItemsByName = async (searchString) => {
             }
         }
     }`;
-console.log(itemsQuery);
     return graphqlRequest({
         graphql: itemsQuery,
     });
