@@ -47,7 +47,9 @@ for (const file of commandFiles) {
     discordClient.commands.set(command.default.data.name, command);
 }
 
+console.time('Fill-autocomplete-cache');
 await fillCache();
+console.timeEnd('Fill-autocomplete-cache');
 
 discordClient.on('ready', () => {
     console.log(`Logged in as ${discordClient.user.tag}!`);
