@@ -24,15 +24,8 @@ if (process.env.NODE_ENV === 'production') {
     console.log(`Bypassing Sentry in ${process.env.NODE_ENV || 'dev'} environment`);
 }
 
-// if(process.env.NODE_ENV === 'production'){
-//     console.log('Setting up rollbar');
-
-//     new Rollbar({
-//         accessToken: '<token>',
-//         captureUncaught: true,
-//         captureUnhandledRejections: true
-//     });
-// }
+let shutdownSignalReceived = false;
+let healthcheckJob = false;
 
 const discordClient = new Client({
     intents: [
@@ -73,6 +66,18 @@ discordClient.on('ready', () => {
     discordClient.user.setActivity('Tarkov.dev', {
         type: 'PLAYING',
     });
+
+    const shutdown = () => {
+        if (shutdownSignalReceived) return;
+        shutdownSignalReceived = true;
+        console.log('Shutting down discord client');
+        if (healthcheckJob) healthcheckJob.stop();
+        discordClient.destroy();
+    };
+    process.on( 'SIGINT', shutdown);
+    process.on( 'SIGTERM', shutdown);
+    process.on( 'SIGBREAK', shutdown);
+    process.on( 'SIGHUP', shutdown);
 });
 
 discordClient.login(process.env.DISCORD_API_TOKEN);
@@ -187,7 +192,7 @@ discordClient.on('interactionCreate', async interaction => {
 if (process.env.NODE_ENV === 'production') {
     // A healthcheck cron to send a GET request to our status server
     // The cron schedule is expressed in seconds for the first value
-    let healthcheck = new cron.CronJob('*/45 * * * * *', () => {
+    healthcheckJob = new cron.CronJob('*/45 * * * * *', () => {
         got(
             `https://status.tarkov.dev/api/push/${process.env.HEALTH_ENDPOINT}?msg=OK`,
             {
@@ -197,7 +202,7 @@ if (process.env.NODE_ENV === 'production') {
                 console.log('Healthcheck error:', error);
             });
     });
-    healthcheck.start();
+    healthcheckJob.start();
 
 } else {
     console.log("Healthcheck disabled");
