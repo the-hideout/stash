@@ -20,6 +20,7 @@ if (process.env.CLOUDFLARE_TOKEN && process.env.CLOUDFLARE_ACCOUNT && process.en
     console.log('Missing env var(s) for cloudflare KV; using local storage.');
 }
 let shutdown = false;
+let savedOnShutdown = false;
 
 let userProgress = {};
 
@@ -270,7 +271,12 @@ if (process.env.NODE_ENV !== 'ci') {
             if (shutdown) return;
             shutdown = true;
             console.log('Saving user progress before exit');
-            return saveToCloudflare();
+            const saveCheck = setInterval(() => {
+                if (savedOnShutdown) clearInterval(saveCheck);
+            }, 10);
+            saveToCloudflare().then(() => {
+                savedOnShutdown = true;
+            });
         };
         process.on( 'SIGINT', saveOnExit);
         process.on( 'SIGTERM', saveOnExit);
