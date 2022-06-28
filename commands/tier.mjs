@@ -14,10 +14,10 @@ const defaultFunction = {
             .setTitle("Loot Tiers")
             .setDescription(`
                 Loot tiers are divided primarily by the per-slot value of the item:
-                • ${lootTier(tiers.legendary).msg} >= ${tiers.legendary.toLocaleString()}₽
+                • ${lootTier(tiers.legendary).msg} ≥ ${tiers.legendary.toLocaleString()}₽
                 • ${lootTier(0, true).msg}
-                • ${lootTier(tiers.great).msg} >= ${tiers.great.toLocaleString()}₽
-                • ${lootTier(tiers.average).msg} >= ${tiers.average.toLocaleString()}₽
+                • ${lootTier(tiers.great).msg} ≥ ${tiers.great.toLocaleString()}₽
+                • ${lootTier(tiers.average).msg} ≥ ${tiers.average.toLocaleString()}₽
                 • ${lootTier(tiers.average -1).msg} < ${tiers.average.toLocaleString()}₽
             `);
 

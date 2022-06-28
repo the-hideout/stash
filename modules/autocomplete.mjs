@@ -26,7 +26,6 @@ const caches = {
 const updateIntervalMinutes = 10;
 
 async function fillCache() {
-    console.time('Fill-autocomplete-cache');
     try {
         const itemNamesResponse = await graphqlRequest({
             graphql: `query {
@@ -89,8 +88,6 @@ async function fillCache() {
     } catch (requestError) {
         console.error(requestError);
     }
-
-    console.timeEnd('Fill-autocomplete-cache');
 };
 
 function autocomplete(interaction) {

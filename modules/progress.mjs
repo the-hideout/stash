@@ -8,7 +8,7 @@ import cloudflare from 'cloudflare';
 import {getProgress} from "./tarkovtracker.js";
 import gameData from "./game-data.mjs";
 
-const saveToCloudFlareIntervalMinutes = 60;
+const saveToCloudflareIntervalMinutes = 60;
 let cf, cfAccount, cfNamespace = false;
 if (process.env.CLOUDFLARE_TOKEN && process.env.CLOUDFLARE_ACCOUNT && process.env.CLOUDFLARE_NAMESPACE) {
     cf = cloudflare({
@@ -19,6 +19,8 @@ if (process.env.CLOUDFLARE_TOKEN && process.env.CLOUDFLARE_ACCOUNT && process.en
 } else {
     console.log('Missing env var(s) for cloudflare KV; using local storage.');
 }
+let shutdown = false;
+let savedOnShutdown = false;
 
 let userProgress = {};
 
@@ -184,11 +186,20 @@ const optimalFleaPrice = async (id, baseValue, lowerBound, upperBound) => {
     return highPrice;
 };
 
-const saveToCloudFlare = () => {
+const saveToCloudflare = () => {
     if (!cf) return;
+    if (process.env.NODE_ENV !== 'production') {
+        console.log(`Skipping Cloudflare save of progress in ${process.env.NODE_ENV} environment`);
+        return;
+    }
     const encoding = 'base64';
     const encoded = zlib.gzipSync(JSON.stringify(userProgress)).toString(encoding);
-    return cf.enterpriseZoneWorkersKV.add(cfAccount, cfNamespace, 'progress', encoded).catch(error => {
+    return cf.enterpriseZoneWorkersKV.add(cfAccount, cfNamespace, 'progress', encoded).then(response => {
+        if (shutdown) {
+            console.log('Saved user progress to Cloudflare');
+        }
+        return response;
+    }).catch(error => {
         console.log('Error saving user progress to Cloudflare KV', error);
     });
 };
@@ -254,7 +265,18 @@ if (process.env.NODE_ENV !== 'ci') {
     }
     setTimeout(updateTarkovTracker, 1000 * 60 * tarkovTrackerUpdateIntervalMinutes).unref();
     if (cf) {
-        setInterval(saveToCloudFlare, 1000 * 60 * saveToCloudFlareIntervalMinutes).unref();
+        setInterval(saveToCloudflare, 1000 * 60 * saveToCloudflareIntervalMinutes).unref();
+        //save user progress on shutdown
+        const saveOnExit = () => {
+            if (shutdown) return;
+            shutdown = true;
+            console.log('Saving user progress before exit');
+            return saveToCloudflare();
+        };
+        process.on( 'SIGINT', saveOnExit);
+        process.on( 'SIGTERM', saveOnExit);
+        process.on( 'SIGBREAK', saveOnExit);
+        process.on( 'SIGHUP', saveOnExit);
     }
 }
 
