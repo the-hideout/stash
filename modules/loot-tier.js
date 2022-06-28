@@ -60,7 +60,7 @@ const updateTiers = async () => {
         if (item.lastLowPrice < price && item.lastLowPrice > 0) price = item.lastLowPrice
         for (let ii = 0; ii < item.sellFor.length; ii++) {
             const traderPrice = item.sellFor[ii];
-            if (traderPrice.source === 'flearMarket') continue;
+            if (traderPrice.source === 'fleaMarket') continue;
             if (traderPrice.price > price) price = traderPrice.price;
         }
         const size = item.width * item.height;
