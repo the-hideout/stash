@@ -193,7 +193,12 @@ const saveToCloudflare = () => {
     }
     const encoding = 'base64';
     const encoded = zlib.gzipSync(JSON.stringify(userProgress)).toString(encoding);
-    return cf.enterpriseZoneWorkersKV.add(cfAccount, cfNamespace, 'progress', encoded).catch(error => {
+    return cf.enterpriseZoneWorkersKV.add(cfAccount, cfNamespace, 'progress', encoded).then(response => {
+        if (shutdown) {
+            console.log('Saved user progress to Cloudflare');
+        }
+        return response;
+    }).catch(error => {
         console.log('Error saving user progress to Cloudflare KV', error);
     });
 };
