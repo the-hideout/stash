@@ -7,7 +7,6 @@ import cloudflare from 'cloudflare';
 
 import {getProgress} from "./tarkovtracker.js";
 import gameData from "./game-data.mjs";
-import { clearInterval } from 'timers';
 
 const saveToCloudflareIntervalMinutes = 60;
 let cf, cfAccount, cfNamespace = false;
@@ -272,13 +271,6 @@ if (process.env.NODE_ENV !== 'ci') {
             if (shutdown) return;
             shutdown = true;
             console.log('Saving user progress before exit');
-            const shutdownStart = new Date();
-            const shutdownInterval = setInterval(() => {
-                console.log(`Shutting down for ${new Date() - shutdownStart}ms`);
-                if (savedOnShutdown) {
-                    clearInterval(shutdownInterval);
-                }
-            }, 100);
             return saveToCloudflare();
         };
         process.on( 'SIGINT', saveOnExit);
