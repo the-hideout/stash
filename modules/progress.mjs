@@ -19,8 +19,9 @@ if (process.env.CLOUDFLARE_TOKEN && process.env.CLOUDFLARE_ACCOUNT && process.en
 } else {
     console.log('Missing env var(s) for cloudflare KV; using local storage.');
 }
+let discordClient = false;
+const restockTimers = {};
 let shutdown = false;
-let savedOnShutdown = false;
 
 let userProgress = {};
 
@@ -46,7 +47,10 @@ const buildDefaultProgress = id => {
         level: defaultProgress.level,
         hideout: {},
         traders: {},
-        skills: {}
+        skills: {},
+        alerts: {
+            restock: []
+        }
     };
     for (const stationId in defaultProgress.hideout) {
         progress.hideout[stationId] = defaultProgress.hideout[stationId];
@@ -99,7 +103,7 @@ const updateTarkovTracker = async () => {
                 console.log(`User ${user.id} had an invalid TarkovTracker token`);
             } else {
                 user.tarkovTracker.lastUpdateStatus = error.message;
-                console.log(`Error updating progress for user ${user.id}`, error);
+                console.log(`Error updating TarkovTracker progress for user ${user.id}`, error);
             }
         }
     }
@@ -115,6 +119,7 @@ const getUserProgress = id => {
     if (!userProgress[id]) {
         userProgress[id] = buildDefaultProgress(id);
     }
+    if (!userProgress[id].alerts) userProgress[id].alerts = {restock : []};
     return userProgress[id];
 };
 
@@ -184,6 +189,50 @@ const optimalFleaPrice = async (id, baseValue, lowerBound, upperBound) => {
         }
     }
     return highPrice;
+};
+
+const addRestockAlert = async (id, traders) => {
+    if (typeof traders === 'string') traders = [traders];
+    const prog = await getUserProgress(id);
+    const restockAlerts = prog.alerts.restock;
+    for (const traderId of traders) {
+        if (!restockAlerts.includes(traderId)) restockAlerts.push(traderId);
+    }
+};
+
+const removeRestockAlert = async (id, traders) => {
+    if (typeof traders === 'string') traders = [traders];
+    const prog = await getUserProgress(id);
+    prog.alerts.restock = prog.alerts.restock.filter(traderId => !traders.includes(traderId));
+};
+
+const startRestockAlerts = async (client) => {
+    discordClient = client;
+    
+    const setRestockTimers = async () => {
+        const traders = await gameData.traders.getAll();
+        for (const trader of traders) {
+            const currentTimer = restockTimers[trader.id];
+            if (currentTimer != trader.resetTime) {
+                console.log('Setting new restock timer for '+trader.name);
+                setTimeout(() => {
+                    for (const userId in userProgress) {
+                        if (!userProgress[userId].alerts) continue;
+                        if (userProgress[userId].alerts.restock.includes(trader.id)) {
+                            discordClient.users.fetch(userId, false)
+                                .then(user => {
+                                    user.send(`🛒 ${trader.name} restock in 1 minute 🛒`);
+                                }); 
+                        }
+                    }
+                }, new Date(trader.resetTime) - new Date() - 1000 * 60).unref();
+                restockTimers[trader.id] = trader.resetTime;
+            }
+        }
+    };
+
+    gameData.events.on('updated', setRestockTimers);
+    setRestockTimers();
 };
 
 const saveToCloudflare = () => {
@@ -335,5 +384,8 @@ export default {
     },
     getOptimalFleaPrice(id, baseValue) {
         return optimalFleaPrice(id, baseValue);
-    }
+    },
+    addRestockAlert: addRestockAlert,
+    removeRestockAlert: removeRestockAlert,
+    startRestockAlerts: startRestockAlerts
 }
