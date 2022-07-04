@@ -11,9 +11,11 @@ import {
 } from 'discord.js';
 // import Rollbar from 'rollbar';
 
+import got from 'got';
+
 import commands from './classic-commands/index.mjs';
 import autocomplete, { fillCache } from './modules/autocomplete.mjs';
-import got from 'got';
+import progress from './modules/progress.mjs';
 
 if (process.env.NODE_ENV === 'production') {
     Sentry.init({
@@ -80,6 +82,7 @@ discordClient.on('ready', () => {
     process.on( 'SIGTERM', shutdown);
     process.on( 'SIGBREAK', shutdown);
     process.on( 'SIGHUP', shutdown);
+    progress.startRestockAlerts(discordClient);
 });
 
 discordClient.login(process.env.DISCORD_API_TOKEN);

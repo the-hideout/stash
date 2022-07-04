@@ -1,3 +1,4 @@
+import EventEmitter from 'events';
 import got from 'got';
 import graphqlRequest from "./graphql-request.mjs";
 
@@ -28,6 +29,8 @@ let traderChoices = [];
 let hideoutChoices = [];
 
 const updateIntervalMinutes = 10;
+
+const eventEmitter = new EventEmitter();
 
 export async function updateMaps() {
     const query = `query {
@@ -175,6 +178,7 @@ const updateAll = async () => {
         updateTraders(),
         updateHideout()
     ]);
+    eventEmitter.emit('updated');
 };
 
 if (process.env.NODE_ENV !== 'ci') {
@@ -257,5 +261,6 @@ export default {
             getHideout(),
             getFlea()
         ]);
-    }
+    },
+    events: eventEmitter
 };
