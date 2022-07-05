@@ -4,13 +4,14 @@ import got from 'got';
 import * as cheerio from 'cheerio';
 import TurndownService from 'turndown';
 
+const MAX_EMBED_LENGTH = 4096;
+const URL = 'https://www.escapefromtarkov.com/news?page=1&filter=2';
 let lastCheck = new Date(0);
 let patchNotes = false;
 
 const getPatchNotes = async () => {
     if (patchNotes && new Date() - lastCheck < 1000 * 60 * 10) return patchNotes;
-    const url = 'https://www.escapefromtarkov.com/news?page=1&filter=2';
-    const response = await got(url);
+    const response = await got(URL);
     let $ = cheerio.load(response.body);
     const first = $('ul#news-list li div.info a').first();
     const link = $(first[0]).attr('href');
@@ -40,12 +41,19 @@ const defaultFunction = {
         await interaction.deferReply();
         
         const notes = await getPatchNotes();
+
+        var message;
+        if (notes.notes.length >= MAX_EMBED_LENGTH) {
+            message = `Sorry, the current patch notes list is too long to be displayed in Discord\n\nPlease visit ${URL} for more information`;
+        } else {
+            message = notes.notes
+        }
+
         const embed = new MessageEmbed();
         embed.setURL(notes.link);
         embed.setTitle(`${notes.title}`);
         embed.setFooter({text: notes.date});
-        //embed.setThumbnail(url);
-        embed.setDescription(notes.notes);
+        embed.setDescription(message);
         await interaction.editReply({ embeds: [embed] });
     }
 };
