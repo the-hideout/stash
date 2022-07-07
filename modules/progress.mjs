@@ -315,18 +315,26 @@ if (process.env.NODE_ENV !== 'ci') {
     setTimeout(updateTarkovTracker, 1000 * 60 * tarkovTrackerUpdateIntervalMinutes).unref();
     if (cf) {
         setInterval(saveToCloudflare, 1000 * 60 * saveToCloudflareIntervalMinutes).unref();
-        //save user progress on shutdown
-        const saveOnExit = () => {
-            if (shutdown) return;
-            shutdown = true;
-            console.log('Saving user progress before exit');
-            return saveToCloudflare();
-        };
-        process.on( 'SIGINT', saveOnExit);
-        process.on( 'SIGTERM', saveOnExit);
-        process.on( 'SIGBREAK', saveOnExit);
-        process.on( 'SIGHUP', saveOnExit);
     }
+    //save user progress on shutdown
+    const saveOnExit = () => {
+        if (shutdown) return;
+        shutdown = true;
+        console.log('Saving user progress before exit');
+        const promises = [];
+        promises.push(new Promise(resolve => {
+            saveUserProgress();
+            resolve();
+        }));
+        if (cf) {
+            promises.push(saveToCloudflare());
+        }
+        return Promise.all(promises);
+    };
+    process.on( 'SIGINT', saveOnExit);
+    process.on( 'SIGTERM', saveOnExit);
+    process.on( 'SIGBREAK', saveOnExit);
+    process.on( 'SIGHUP', saveOnExit);
 }
 
 export default {
