@@ -44,7 +44,8 @@ const defaultFunction = {
 
         var message;
         if (notes.notes.length >= MAX_EMBED_LENGTH) {
-            message = `Sorry, the current patch notes list is too long to be displayed in Discord\n\nPlease visit ${URL} for more information`;
+            const truncateMessage = `...\n\nToo many notes to display.\n\nClick [here](${notes.link}) for full notes.`;
+            message = notes.notes.substring(0, MAX_EMBED_LENGTH-truncateMessage.length)+truncateMessage;
         } else {
             message = notes.notes
         }
