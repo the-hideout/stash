@@ -43,6 +43,24 @@ export async function updateMaps() {
             enemies
             raidDuration
             players
+            bosses {
+                name
+                spawnChance
+                spawnLocations {
+                    name
+                    chance
+                }
+                escorts {
+                    name
+                    amount {
+                        count
+                        chance
+                    }
+                }
+                spawnTime
+                spawnTimeRandom
+                spawnTrigger
+            }
         }
     }`;
     // add players to query
