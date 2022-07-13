@@ -80,7 +80,7 @@ const defaultFunction = {
         embed.addField('Duration ⌛', displayDuration, true);
         embed.addField('Players 👥', displayPlayers, true);
         embed.addField('Time 🕑', displayTime, true);
-        embed.addField('Bosses 💀', bossArray.join('\n', true));
+        embed.addField('Bosses 💀', bossArray.join('\n'), true);
         if (selectedMapData.key) {
             embed.setImage(`https://tarkov.dev/maps/${selectedMapData.key}.jpg`);
         }
