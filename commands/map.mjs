@@ -50,6 +50,29 @@ const defaultFunction = {
             mapUrl = selectedMapData.wiki;
         }
 
+        const bosses = {};
+        for (const boss of selectedMapData.bosses) {
+            if (!bosses[boss.name]) {
+                bosses[boss.name] = {
+                    ...boss,
+                    minSpawn: boss.spawnChance,
+                    maxSpawn: boss.spawnChance
+                };
+            }
+            if (bosses[boss.name].minSpawn > boss.spawnChance) bosses[boss.name].minSpawn = boss.spawnChance;
+            if (bosses[boss.name].maxSpawn < boss.spawnChance) bosses[boss.name].maxSpawn = boss.spawnChance;
+        }
+        console.log(bosses);
+        const bossArray = [];
+        for (const name in bosses) {
+            const boss = bosses[name];
+            let spawnChance = boss.minSpawn*100;
+            if (boss.minSpawn !== boss.maxSpawn) {
+                spawnChance = `${boss.minSpawn*100}-${boss.maxSpawn*100}`;
+            }
+            bossArray.push(`${boss.name} (${spawnChance}%)`);
+        }
+
         // Construct the embed
         embed.setTitle(selectedMapData.name);
         if (mapUrl) {
@@ -58,6 +81,7 @@ const defaultFunction = {
         embed.addField('Duration ⌛', displayDuration, true);
         embed.addField('Players 👥', displayPlayers, true);
         embed.addField('Time 🕑', displayTime, true);
+        embed.addField('Bosses ', bossArray.join('\n', true));
         if (selectedMapData.key) {
             embed.setImage(`https://tarkov.dev/maps/${selectedMapData.key}.jpg`);
         }
