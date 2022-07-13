@@ -62,7 +62,6 @@ const defaultFunction = {
             if (bosses[boss.name].minSpawn > boss.spawnChance) bosses[boss.name].minSpawn = boss.spawnChance;
             if (bosses[boss.name].maxSpawn < boss.spawnChance) bosses[boss.name].maxSpawn = boss.spawnChance;
         }
-        console.log(bosses);
         const bossArray = [];
         for (const name in bosses) {
             const boss = bosses[name];
@@ -81,7 +80,7 @@ const defaultFunction = {
         embed.addField('Duration ⌛', displayDuration, true);
         embed.addField('Players 👥', displayPlayers, true);
         embed.addField('Time 🕑', displayTime, true);
-        embed.addField('Bosses ', bossArray.join('\n', true));
+        embed.addField('Bosses 💀', bossArray.join('\n', true));
         if (selectedMapData.key) {
             embed.setImage(`https://tarkov.dev/maps/${selectedMapData.key}.jpg`);
         }
