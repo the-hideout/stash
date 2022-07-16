@@ -1,3 +1,5 @@
+import newrelic from 'newrelic';
+
 import fs from 'fs';
 import cron from 'cron';
 import * as Sentry from "@sentry/node";
@@ -178,8 +180,14 @@ discordClient.on('interactionCreate', async interaction => {
     //await interaction.deferReply();
 
     try {
+        if (process.env.NODE_ENV === 'production') {
+            newrelic.incrementMetric(`Command/${command.default.data.name}`);
+        }
         await command.default.execute(interaction);
     } catch (error) {
+        if (process.env.NODE_ENV === 'production') {
+            newrelic.incrementMetric(`Error/${command.default.data.name}`);
+        }
         console.error(error);
 
         const message = {
