@@ -20,6 +20,7 @@ const defaultFunction = {
         await interaction.deferReply();
         // Get the search string from the user invoked command
         let searchString = interaction.options.getString('name');
+        console.log(searchString);
 
         // Make a graphql query to get the item data from the API
         let response = false;
@@ -142,10 +143,6 @@ async function graphql_query(interaction, searchString) {
         });
         return false;
     }
-
-    // Sanitize the search string for the graphql query
-    searchString = searchString.toLowerCase().trim();
-    searchString = searchString.replaceAll('\\', '\\\\').replaceAll('\"', '\\"');
 
     // Send the graphql query
     let response;
