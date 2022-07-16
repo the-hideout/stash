@@ -143,10 +143,6 @@ async function graphql_query(interaction, searchString) {
         return false;
     }
 
-    // Sanitize the search string for the graphql query
-    searchString = searchString.toLowerCase().trim();
-    searchString = searchString.replaceAll('\\', '\\\\').replaceAll('\"', '\\"');
-
     // Send the graphql query
     let response;
     try {
