@@ -64,7 +64,7 @@ discordClient.on('ready', () => {
         discordClient.users.fetch(process.env.ADMIN_ID.split(',')[0], false)
             .then(user => {
                 user.send(message);
-            }); 
+            });
     }
 
     discordClient.user.setActivity('Tarkov.dev', {
@@ -78,10 +78,10 @@ discordClient.on('ready', () => {
         if (healthcheckJob) healthcheckJob.stop();
         discordClient.destroy();
     };
-    process.on( 'SIGINT', shutdown);
-    process.on( 'SIGTERM', shutdown);
-    process.on( 'SIGBREAK', shutdown);
-    process.on( 'SIGHUP', shutdown);
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
+    process.on('SIGBREAK', shutdown);
+    process.on('SIGHUP', shutdown);
     progress.startRestockAlerts(discordClient);
 });
 
