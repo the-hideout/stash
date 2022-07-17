@@ -1,3 +1,5 @@
+import newrelic from 'newrelic';
+
 import fs from 'fs';
 import cron from 'cron';
 import * as Sentry from "@sentry/node";
@@ -64,7 +66,7 @@ discordClient.on('ready', () => {
         discordClient.users.fetch(process.env.ADMIN_ID.split(',')[0], false)
             .then(user => {
                 user.send(message);
-            }); 
+            });
     }
 
     discordClient.user.setActivity('Tarkov.dev', {
@@ -78,10 +80,10 @@ discordClient.on('ready', () => {
         if (healthcheckJob) healthcheckJob.stop();
         discordClient.destroy();
     };
-    process.on( 'SIGINT', shutdown);
-    process.on( 'SIGTERM', shutdown);
-    process.on( 'SIGBREAK', shutdown);
-    process.on( 'SIGHUP', shutdown);
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
+    process.on('SIGBREAK', shutdown);
+    process.on('SIGHUP', shutdown);
     progress.startRestockAlerts(discordClient);
 });
 
@@ -178,8 +180,14 @@ discordClient.on('interactionCreate', async interaction => {
     //await interaction.deferReply();
 
     try {
+        if (process.env.NODE_ENV === 'production') {
+            newrelic.incrementMetric(`Command/${command.default.data.name}`);
+        }
         await command.default.execute(interaction);
     } catch (error) {
+        if (process.env.NODE_ENV === 'production') {
+            newrelic.incrementMetric(`Error/${command.default.data.name}`);
+        }
         console.error(error);
 
         const message = {

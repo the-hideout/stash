@@ -3,3 +3,4 @@ node_modules
 config-dev.json
 config.json
 cache/*.json
+*.log
