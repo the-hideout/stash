@@ -70,7 +70,7 @@ export async function updateBosses() {
         // Loop through each boss and push the boss name to the bossChoices array
         for (const boss of map.bosses) {
             // Check if the boss name is already in the bossChoices array
-            if (!addedBosses.includes(boss.name)) {
+            if (!addedBosses.includes(boss.name) && boss.name !== 'Rogue' && boss.name !== 'Raider') {
                 addedBosses.push(boss.name);
                 bossChoices.push([boss.name, boss.name]);
             }
