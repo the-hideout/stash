@@ -33,36 +33,6 @@ const updateIntervalMinutes = 10;
 
 const eventEmitter = new EventEmitter();
 
-export async function getBosses() {
-    if (!gameData.maps) {
-        await updateMaps();
-        return getBosses();
-    }
-
-    const bosses = [];
-
-    const addedBosses = []; // Array of bosses that were added for keeping track
-    // Loop through each map and collect the bosses
-    for (const map of gameData.maps) {
-        // Loop through each boss and add if needed
-        for (const boss of map.bosses) {
-            // Check if the boss is already added
-            if (addedBosses.includes(boss.name) || boss.name === 'Rogue' || boss.name === 'Raider') {
-                continue;
-            }
-
-            // Append the boss
-            bosses.push({
-                ...boss,
-                map: map.name
-            });
-            addedBosses.push(boss.name);
-        }
-    }
-
-    return bosses;
-};
-
 export async function updateMaps() {
     const query = `query {
         maps {
@@ -255,7 +225,6 @@ export default {
         }
     },
     bosses: {
-        getAll: getBosses,
         choices: () => {
             return bossChoices;
         }
@@ -326,7 +295,6 @@ export default {
             getMaps(),
             getTraders(),
             getHideout(),
-            getBosses(),
             getFlea()
         ]);
     },
