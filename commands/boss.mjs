@@ -29,6 +29,9 @@ const defaultFunction = {
         // Join the spawn locations into a comma separated string
         const spawnLocations = bossData.spawnLocations.map(spawnLocation => spawnLocation.name).join(', ');
 
+        // Join the escort names into a comma separated string
+        const escortNames = bossData.escorts.map(escortName => `${escortName.name} x${escortName.amount[0].count}`).join(', ').replaceAll(' x1', '');
+
         // Format the embed description body
         var description = '';
         description += `• **Spawn Locations**: ${spawnLocations}\n`;
@@ -39,6 +42,10 @@ const defaultFunction = {
         embed.setThumbnail('https://static.wikia.nocookie.net/escapefromtarkov_gamepedia/images/a/ac/Killa_Portrait.png/revision/latest/scale-to-width-down/127?cb=20220710102646');
         embed.setDescription(description)
         embed.addField('Spawn Chance 🎲', `${bossData.spawnChance * 100}%`, true);
+        if (escortNames) {
+            embed.addField('Escort 💂', escortNames, true);
+        }
+        
 
         // Send the message
         await interaction.editReply({
