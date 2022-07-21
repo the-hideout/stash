@@ -65,6 +65,13 @@ const defaultFunction = {
             }
             mapEmbeds.push(mapEmbed);
         }
+        if (mapEmbeds.length === 1) {
+            embed.addField('Map', mapEmbeds[0].title, false);
+            for (const field of mapEmbeds[0].fields) {
+                embed.addField(field.name, field.value, true);
+            }
+            mapEmbeds.length = 0;
+        }
 
         // Send the message
         await interaction.editReply({
