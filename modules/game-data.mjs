@@ -4,6 +4,7 @@ import graphqlRequest from "./graphql-request.mjs";
 
 const gameData = {
     maps: false,
+    bosses: false,
     traders: false,
     hideout: false,
     flea: false,
@@ -25,12 +26,69 @@ const mapKeys = {
 };
 
 let mapChoices = [];
+let bossChoices = [];
 let traderChoices = [];
 let hideoutChoices = [];
 
 const updateIntervalMinutes = 10;
 
 const eventEmitter = new EventEmitter();
+
+export async function updateBosses() {
+    const query = `query {
+        maps {
+            name
+            bosses {
+                name
+                spawnChance
+                spawnLocations {
+                    name
+                    chance
+                }
+                escorts {
+                    name
+                    amount {
+                        count
+                        chance
+                    }
+                }
+                spawnTime
+                spawnTimeRandom
+                spawnTrigger
+            }
+        }
+    }`;
+    const response = await graphqlRequest({ graphql: query });
+
+    // Set the gameData.bosses to a fresh empty array
+    gameData.bosses = [];
+
+    // Loop through each map and collect the bosses
+    for (const map of response.data.maps) {
+        // Loop through each boss and push the boss name to the bossChoices array
+        for (const boss of map.bosses) {
+            bossChoices.push(boss.name);
+
+            // Add the map name to the bosses dictionary
+            boss["map"] = map.name;
+
+            // Append the boss to the gameData bosses array
+            gameData.bosses.push(boss);
+        }
+    }
+
+    // Sort the bossChoices array
+    bossChoices = bossChoices.sort();
+
+    return gameData.bosses;
+};
+
+export async function getBosses() {
+    if (gameData.bosses) {
+        return gameData.bosses;
+    }
+    return updateBosses();
+};
 
 export async function updateMaps() {
     const query = `query {
@@ -65,7 +123,7 @@ export async function updateMaps() {
     }`;
     // add players to query
     const responses = await Promise.all([
-        graphqlRequest({ graphql: query }), 
+        graphqlRequest({ graphql: query }),
         got('https://raw.githubusercontent.com/the-hideout/tarkov-dev/master/src/data/maps.json', {
             responseType: 'json',
             headers: { "user-agent": "stash-tarkov-dev" }
@@ -194,6 +252,7 @@ const updateAll = async () => {
     await Promise.allSettled([
         updateMaps(),
         updateTraders(),
+        updateBosses(),
         updateHideout()
     ]);
     eventEmitter.emit('updated');
@@ -209,6 +268,13 @@ export default {
         update: updateMaps,
         choices: () => {
             return mapChoices;
+        }
+    },
+    bosses: {
+        getAll: getBosses,
+        update: updateBosses,
+        choices: () => {
+            return bossChoices;
         }
     },
     traders: {
@@ -277,6 +343,7 @@ export default {
             getMaps(),
             getTraders(),
             getHideout(),
+            getBosses(),
             getFlea()
         ]);
     },
