@@ -62,12 +62,13 @@ discordClient.on('ready', () => {
 
     console.log(message);
 
-    if (process.env.ADMIN_ID) {
-        discordClient.users.fetch(process.env.ADMIN_ID.split(',')[0], false)
-            .then(user => {
-                user.send(message);
-            });
-    }
+    // Send a DM to the admins that the bot is online
+    // if (process.env.ADMIN_ID) {
+    //     discordClient.users.fetch(process.env.ADMIN_ID.split(',')[0], false)
+    //         .then(user => {
+    //             user.send(message);
+    //         });
+    // }
 
     discordClient.user.setActivity('Tarkov.dev', {
         type: 'PLAYING',
