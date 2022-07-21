@@ -15,18 +15,31 @@ const defaultFunction = {
         ),
 
     async execute(interaction) {
-        console.log('starting boss command');
-
         await interaction.deferReply();
+
+        // Get the boss name from the command interaction
         const bossName = interaction.options.getString('boss');
 
-        const bossData = await gameData.bosses.getAll();
-        const embed = new MessageEmbed();
+        // Fetch all current boss data
+        const allBossData = await gameData.bosses.getAll();
+
+        // Only use the data for the boss specified in the command
+        const bossData = allBossData.find(boss => boss.name === bossName);
+
+        // Join the spawn locations into a comma separated string
+        const spawnLocations = bossData.spawnLocations.map(spawnLocation => spawnLocation.name).join(', ');
+
+        // Format the embed description body
+        var description = '';
+        description += `• **Spawn Locations**: ${spawnLocations}\n`;
 
         // Construct the embed
+        const embed = new MessageEmbed();
         embed.setTitle(bossName);
-        embed.addField('Spawn Chance 🎲', bossData.spawnChance, true);
+        embed.setDescription(description)
+        embed.addField('Spawn Chance 🎲', `${bossData.spawnChance * 100}%`, true);
 
+        // Send the message
         await interaction.editReply({
             embeds: [embed],
         });
