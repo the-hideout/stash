@@ -32,20 +32,28 @@ const defaultFunction = {
         // Join the escort names into a comma separated string
         const escortNames = bossData.escorts.map(escortName => `${escortName.name} x${escortName.amount[0].count}`).join(', ').replaceAll(' x1', '');
 
+        var spawnTime;
+        if (bossData.spawnTime === -1) {
+            spawnTime = 'Raid Start';
+        } else {
+            spawnTime = `${bossData.spawnTime} seconds`;
+        }
+
         // Format the embed description body
-        var description = '';
-        description += `• **Spawn Locations**: ${spawnLocations}\n`;
+        // var description = '';
+        // description += `• **Spawn Locations**: ${spawnLocations}\n`;
 
         // Construct the embed
         const embed = new MessageEmbed();
         embed.setTitle(bossName);
         embed.setThumbnail('https://static.wikia.nocookie.net/escapefromtarkov_gamepedia/images/a/ac/Killa_Portrait.png/revision/latest/scale-to-width-down/127?cb=20220710102646');
-        embed.setDescription(description)
+        embed.setDescription('<description will go here>');
         embed.addField('Spawn Chance 🎲', `${bossData.spawnChance * 100}%`, true);
+        embed.addField('Spawn Locations 📍', spawnLocations, true);
+        embed.addField('Spawn Time 🕒', spawnTime, true);
         if (escortNames) {
             embed.addField('Escort 💂', escortNames, true);
         }
-        
 
         // Send the message
         await interaction.editReply({
