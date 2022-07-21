@@ -4,7 +4,6 @@ import graphqlRequest from "./graphql-request.mjs";
 
 const gameData = {
     maps: false,
-    bosses: false,
     traders: false,
     hideout: false,
     flea: false,
@@ -34,66 +33,34 @@ const updateIntervalMinutes = 10;
 
 const eventEmitter = new EventEmitter();
 
-export async function updateBosses() {
-    const query = `query {
-        maps {
-            name
-            bosses {
-                name
-                spawnChance
-                spawnLocations {
-                    name
-                    chance
-                }
-                escorts {
-                    name
-                    amount {
-                        count
-                        chance
-                    }
-                }
-                spawnTime
-                spawnTimeRandom
-                spawnTrigger
-            }
-        }
-    }`;
-    const response = await graphqlRequest({ graphql: query });
-
-    // Set the gameData.bosses to a fresh empty array
-    gameData.bosses = [];
-
-    
-    var addedBosses = []; // Array of bosses that were added for keeping track
-    // Loop through each map and collect the bosses
-    for (const map of response.data.maps) {
-        // Loop through each boss and push the boss name to the bossChoices array
-        for (const boss of map.bosses) {
-            // Check if the boss name is already in the bossChoices array
-            if (!addedBosses.includes(boss.name) && boss.name !== 'Rogue' && boss.name !== 'Raider') {
-                addedBosses.push(boss.name);
-                bossChoices.push([boss.name, boss.name]);
-            }
-
-            // Add the map name to the bosses dictionary
-            boss["map"] = map.name;
-
-            // Append the boss to the gameData bosses array
-            gameData.bosses.push(boss);
-        }
-    }
-
-    // Sort the bossChoices array
-    bossChoices = bossChoices.sort();
-
-    return gameData.bosses;
-};
-
 export async function getBosses() {
-    if (gameData.bosses) {
-        return gameData.bosses;
+    if (!gameData.maps) {
+        await updateMaps();
+        return getBosses();
     }
-    return updateBosses();
+
+    const bosses = [];
+
+    const addedBosses = []; // Array of bosses that were added for keeping track
+    // Loop through each map and collect the bosses
+    for (const map of gameData.maps) {
+        // Loop through each boss and add if needed
+        for (const boss of map.bosses) {
+            // Check if the boss is already added
+            if (addedBosses.includes(boss.name) || boss.name === 'Rogue' || boss.name === 'Raider') {
+                continue;
+            }
+
+            // Append the boss
+            bosses.push({
+                ...boss,
+                map: map.name
+            });
+            addedBosses.push(boss.name);
+        }
+    }
+
+    return bosses;
 };
 
 export async function updateMaps() {
@@ -127,7 +94,6 @@ export async function updateMaps() {
             }
         }
     }`;
-    // add players to query
     const responses = await Promise.all([
         graphqlRequest({ graphql: query }),
         got('https://raw.githubusercontent.com/the-hideout/tarkov-dev/master/src/data/maps.json', {
@@ -152,10 +118,23 @@ export async function updateMaps() {
             mapData.key = testKey;
             mapData.source = mapImage.source;
             mapData.sourceLink = mapImage.sourceLink;
-            //mapData.players = mapImage.players;
             break;
         }
     }
+
+    // use Set so there aren't duplicates
+    const bossSet = new Set();
+    // Loop through each map and collect the bosses
+    for (const map of gameData.maps) {
+        // Loop through each boss and push the boss name to the bossChoices array
+        for (const boss of map.bosses) {
+            // Don't add Rogues and Raiders
+            if (boss.name !== 'Rogue' && boss.name !== 'Raider') {
+                bossSet.add(boss.name);
+            }
+        }
+    }
+    bossChoices = [...bossSet].map(bossName => [bossName, bossName]).sort();
     return gameData.maps;
 };
 
@@ -258,7 +237,6 @@ const updateAll = async () => {
     await Promise.allSettled([
         updateMaps(),
         updateTraders(),
-        updateBosses(),
         updateHideout()
     ]);
     eventEmitter.emit('updated');
@@ -278,7 +256,6 @@ export default {
     },
     bosses: {
         getAll: getBosses,
-        update: updateBosses,
         choices: () => {
             return bossChoices;
         }
