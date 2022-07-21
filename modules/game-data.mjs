@@ -63,11 +63,17 @@ export async function updateBosses() {
     // Set the gameData.bosses to a fresh empty array
     gameData.bosses = [];
 
+    
+    var addedBosses = []; // Array of bosses that were added for keeping track
     // Loop through each map and collect the bosses
     for (const map of response.data.maps) {
         // Loop through each boss and push the boss name to the bossChoices array
         for (const boss of map.bosses) {
-            bossChoices.push(boss.name);
+            // Check if the boss name is already in the bossChoices array
+            if (!addedBosses.includes(boss.name)) {
+                addedBosses.push(boss.name);
+                bossChoices.push([boss.name, boss.name]);
+            }
 
             // Add the map name to the bosses dictionary
             boss["map"] = map.name;
