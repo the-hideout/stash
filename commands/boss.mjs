@@ -3,6 +3,51 @@ import { MessageEmbed } from 'discord.js';
 
 import gameData from '../modules/game-data.mjs';
 
+const baseImageUrl = 'https://assets.tarkov.dev/';
+
+const bossDetails = [
+    {
+        "name": "cultist priest",
+        "details": "test",
+        "image": `${baseImageUrl}cultist-priest.jpg`
+    },
+    {
+        "name": "death knight",
+        "details": "test",
+        "image": `${baseImageUrl}death-knight.jpg`
+    },
+    {
+        "name": "glukhar",
+        "details": "test",
+        "image": `${baseImageUrl}glukhar.jpg`
+    },
+    {
+        "name": "killa",
+        "details": "test",
+        "image": `${baseImageUrl}killa.jpg`
+    },
+    {
+        "name": "reshala",
+        "details": "test",
+        "image": `${baseImageUrl}reshala.jpg`
+    },
+    {
+        "name": "sanitar",
+        "details": "test",
+        "image": `${baseImageUrl}sanitar.jpg`
+    },
+    {
+        "name": "shturman",
+        "details": "test",
+        "image": `${baseImageUrl}shturman.jpg`
+    },
+    {
+        "name": "tagilla",
+        "details": "test",
+        "image": `${baseImageUrl}tagilla.jpg`
+    }
+]
+
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('boss')
@@ -23,12 +68,22 @@ const defaultFunction = {
         // Fetch all current map/boss data
         const maps = await gameData.maps.getAll();
 
-
         // Construct the embed
         const embed = new MessageEmbed();
+
+        var details
+        var image
+        for (const boss of bossDetails) {
+            if (boss.name.toLowerCase() === bossName.toLowerCase()) {
+                details = boss.details;
+                image = boss.image;
+            }
+        }
+
+        // Add base fields to the embed
         embed.setTitle(bossName);
-        embed.setThumbnail('https://static.wikia.nocookie.net/escapefromtarkov_gamepedia/images/a/ac/Killa_Portrait.png/revision/latest/scale-to-width-down/127?cb=20220710102646');
-        embed.setDescription('<description will go here>');
+        embed.setThumbnail(image);
+        embed.setDescription(details);
 
         const mapEmbeds = [];
         for (const map of maps) {
