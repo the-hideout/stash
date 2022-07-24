@@ -3,48 +3,48 @@ import { MessageEmbed } from 'discord.js';
 
 import gameData from '../modules/game-data.mjs';
 
-const baseImageUrl = 'https://assets.tarkov.dev/';
+const baseImageUrl = 'https://assets.tarkov.dev';
 
 const bossDetails = [
     {
         "name": "cultist priest",
         "details": "test",
-        "image": `${baseImageUrl}cultist-priest.jpg`
+        "image": `${baseImageUrl}/cultist-priest.jpg`
     },
     {
         "name": "death knight",
         "details": "test",
-        "image": `${baseImageUrl}death-knight.jpg`
+        "image": `${baseImageUrl}/death-knight.jpg`
     },
     {
         "name": "glukhar",
         "details": "test",
-        "image": `${baseImageUrl}glukhar.jpg`
+        "image": `${baseImageUrl}/glukhar.jpg`
     },
     {
         "name": "killa",
         "details": "test",
-        "image": `${baseImageUrl}killa.jpg`
+        "image": `${baseImageUrl}/killa.jpg`
     },
     {
         "name": "reshala",
         "details": "test",
-        "image": `${baseImageUrl}reshala.jpg`
+        "image": `${baseImageUrl}/reshala.jpg`
     },
     {
         "name": "sanitar",
         "details": "test",
-        "image": `${baseImageUrl}sanitar.jpg`
+        "image": `${baseImageUrl}/sanitar.jpg`
     },
     {
         "name": "shturman",
         "details": "test",
-        "image": `${baseImageUrl}shturman.jpg`
+        "image": `${baseImageUrl}/shturman.jpg`
     },
     {
         "name": "tagilla",
         "details": "test",
-        "image": `${baseImageUrl}tagilla.jpg`
+        "image": `${baseImageUrl}/tagilla.jpg`
     }
 ]
 
