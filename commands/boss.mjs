@@ -8,8 +8,10 @@ const baseImageUrl = 'https://assets.tarkov.dev';
 const bossDetails = [
     {
         "name": "cultist priest",
-        "details": "test",
-        "image": `${baseImageUrl}/cultist-priest.jpg`
+        "details": "Sneaky bois. Cultists lurk in the shadows in groups of 3-5, waiting for a player to approach. They silently approach their enemies and stab them using either normal knives or, in case of the priests, the poisoned Cultist knife. If fired upon, the Cultists will return fire using firearms and grenades. After they attack a player with their knife, they may choose to run off into the woods again and return to the shadows.",
+        "image": `${baseImageUrl}/cultist-priest.jpg`,
+        "health": 850,
+        "loot": "Secure Flash drive, SAS drive, Cultist knife"
     },
     {
         "name": "death knight",
@@ -34,8 +36,10 @@ const bossDetails = [
     },
     {
         "name": "reshala",
-        "details": "test",
-        "image": `${baseImageUrl}/reshala.jpg`
+        "details": "He will normally try to stay at the back of the fight and hidden from the player's view. Additionally, he never wears armor. Be careful as a player scav, as if you are at lower scav karma levels Reshala or his guards may shoot you without provocation or will shoot you if you come to close to Reshala. His guards are sometimes known to give warnings to player scavs with low karma before becoming hostile.",
+        "image": `${baseImageUrl}/reshala.jpg`,
+        "health": 752,
+        "loot": "Golden TT Pistol, Bitcoin"
     },
     {
         "name": "sanitar",
