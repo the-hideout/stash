@@ -87,26 +87,23 @@ const defaultFunction = {
         // Construct the embed
         const embed = new MessageEmbed();
 
-        // Get unique boss details
-        var details
-        var image
-        var health
-        var loot
+        // Add base fields to the embed
+        embed.setTitle(bossName);
+
+        // Construct the description with boss details
+        let details = 'Unknown';
+        let health = 'Unknown';
+        let loot = 'Unknown';
         for (const boss of bossDetails) {
             if (boss.name.toLowerCase() === bossName.toLowerCase()) {
                 details = boss.details;
-                image = boss.image;
                 health = boss.health;
                 loot = boss.loot;
+                embed.setThumbnail(boss.image);
+                break;
             }
         }
-
-        // Add base fields to the embed
-        embed.setTitle(bossName);
-        embed.setThumbnail(image);
-
-        // Construct the description
-        var description = '💡 **About:**\n';
+        let description = '💡 **About:**\n';
         description += `${details}\n\n`;
         description += `• 💚 **Health:** ${health}\n`;
         description += `• 💎 **Unique Loot:** ${loot}\n`;
