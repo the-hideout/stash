@@ -38,8 +38,10 @@ const bossDetails = [
     },
     {
         "name": "shturman",
-        "details": "test",
-        "image": `${baseImageUrl}/shturman.jpg`
+        "details": "Shturman and his followers will engage the player at a long range protecting the sawmill area of the woods. They prefer to keep their distance, as they are not suited for close quarters combat.",
+        "image": `${baseImageUrl}/shturman.jpg`,
+        "health": 812,
+        "loot": "Shturman's stash key, Red Rebel"
     },
     {
         "name": "tagilla",
@@ -71,19 +73,31 @@ const defaultFunction = {
         // Construct the embed
         const embed = new MessageEmbed();
 
+        // Get unique boss details
         var details
         var image
+        var health
+        var loot
         for (const boss of bossDetails) {
             if (boss.name.toLowerCase() === bossName.toLowerCase()) {
                 details = boss.details;
                 image = boss.image;
+                health = boss.health;
+                loot = boss.loot;
             }
         }
 
         // Add base fields to the embed
         embed.setTitle(bossName);
         embed.setThumbnail(image);
-        embed.setDescription(details);
+
+        // Construct the description
+        var description = '💡 **About:**\n';
+        description += `${details}\n\n`;
+        description += `• 💚 **Health:** ${health}\n`;
+        description += `• 💎 **Unique Loot:** ${loot}\n`;
+
+        embed.setDescription(description);
 
         const mapEmbeds = [];
         for (const map of maps) {
