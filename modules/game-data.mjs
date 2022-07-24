@@ -25,6 +25,7 @@ const mapKeys = {
 };
 
 let mapChoices = [];
+let bossChoices = [];
 let traderChoices = [];
 let hideoutChoices = [];
 
@@ -63,9 +64,8 @@ export async function updateMaps() {
             }
         }
     }`;
-    // add players to query
     const responses = await Promise.all([
-        graphqlRequest({ graphql: query }), 
+        graphqlRequest({ graphql: query }),
         got('https://raw.githubusercontent.com/the-hideout/tarkov-dev/master/src/data/maps.json', {
             responseType: 'json',
             headers: { "user-agent": "stash-tarkov-dev" }
@@ -88,10 +88,23 @@ export async function updateMaps() {
             mapData.key = testKey;
             mapData.source = mapImage.source;
             mapData.sourceLink = mapImage.sourceLink;
-            //mapData.players = mapImage.players;
             break;
         }
     }
+
+    // use Set so there aren't duplicates
+    const bossSet = new Set();
+    // Loop through each map and collect the bosses
+    for (const map of gameData.maps) {
+        // Loop through each boss and push the boss name to the bossChoices array
+        for (const boss of map.bosses) {
+            // Don't add Rogues and Raiders
+            if (boss.name !== 'Rogue' && boss.name !== 'Raider') {
+                bossSet.add(boss.name);
+            }
+        }
+    }
+    bossChoices = [...bossSet].map(bossName => [bossName, bossName]).sort();
     return gameData.maps;
 };
 
@@ -209,6 +222,11 @@ export default {
         update: updateMaps,
         choices: () => {
             return mapChoices;
+        }
+    },
+    bosses: {
+        choices: () => {
+            return bossChoices;
         }
     },
     traders: {
