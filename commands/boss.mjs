@@ -45,8 +45,10 @@ const bossDetails = [
     },
     {
         "name": "tagilla",
-        "details": "test",
-        "image": `${baseImageUrl}/tagilla.jpg`
+        "details": "He is batshit insane and will attempt to hammer you down. However, if you are in a position that he cannot path-find to, such as the rafters, he will use his secondary weapon (usually a shotgun) to kill you from a distance. He's active immediately at the start of raid. The boss can set ambushes, open suppressive fire, and breach if needed.",
+        "image": `${baseImageUrl}/tagilla.jpg`,
+        "health": 1220,
+        "loot": "Crye Precision AVS MBAV (Tagilla Edition), L1 (Norepinephrine) injector, Bitcoin, Tagilla's welding mask, BOSS cap"
     }
 ]
 
