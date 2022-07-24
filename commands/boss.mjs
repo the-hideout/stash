@@ -13,18 +13,24 @@ const bossDetails = [
     },
     {
         "name": "death knight",
-        "details": "test",
-        "image": `${baseImageUrl}/death-knight.jpg`
+        "details": "The leader of 'The Goons'. Can spawn on many different maps.",
+        "image": `${baseImageUrl}/death-knight.jpg`,
+        "health": 1120,
+        "loot": "Death Knight mask, Crye Precision CPC plate carrier (Goons Edition)"
     },
     {
         "name": "glukhar",
-        "details": "test",
-        "image": `${baseImageUrl}/glukhar.jpg`
+        "details": "Glukhar and his many guards are extremely hostile. It's very unlikely to find success while fighting in any open areas. Small hallways and closed rooms are preferable. Glukhar and his guards are very accurate. Glukhar and his guards will stay near each other at all times and his guards will follow him to wherever he goes.",
+        "image": `${baseImageUrl}/glukhar.jpg`,
+        "health": 1010,
+        "loot": "GP coin, ASh-12 12.7x55 assault rifle"
     },
     {
         "name": "killa",
-        "details": "test",
-        "image": `${baseImageUrl}/killa.jpg`
+        "details": "The true Giga Chad of Tarkov. Killa uses a light machine gun or other automatic weapon to suppress the enemy, while lurking from cover to cover, getting closer to his target for the final push. During the assault he moves in a zig-zag pattern, uses smoke and fragmentation grenades, and relentlessly suppresses enemies with automatic fire. He will follow his target large distances out of his patrol route, so be sure to run very far to get away from him if he has locked onto you.",
+        "image": `${baseImageUrl}/killa.jpg`,
+        "health": 890,
+        "loot": "6B13 M modified assault armor (Tan), 'Maska-1SCh' bulletproof helmet (Killa)"
     },
     {
         "name": "reshala",
@@ -33,8 +39,10 @@ const bossDetails = [
     },
     {
         "name": "sanitar",
-        "details": "test",
-        "image": `${baseImageUrl}/sanitar.jpg`
+        "details": "When engaged in combat, he will fight alongside his fellow scavs and guards, but may often break away to heal or inject himself. He has plenty of meds, so a prolonged engagement is possible.",
+        "image": `${baseImageUrl}/sanitar.jpg`,
+        "health": 1270,
+        "loot": "Sanitar's bag, LEDX Skin Transilluminator, Keycard with a blue marking, Health Resort office key with a blue tape, multiple stims and meds"
     },
     {
         "name": "shturman",
