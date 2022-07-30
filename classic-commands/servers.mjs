@@ -11,23 +11,30 @@ const servers = (message, client) => {
 
     const sendTo = message.fallbackChannel || message.channel;
     const embed = new MessageEmbed();
-    let serverCount = 0;
-    let reach = 0;
 
-    client.guilds.cache.each(server => {
-        serverCount = serverCount + 1;
-        reach = reach + server.memberCount;
-    });
-    embed.setTitle(`Servers (${serverCount})`);
-    embed.setDescription(`Total reach: ${reach.toLocaleString()} users`);
+    // Collect data from all shards
+    const promises = [
+        client.shard.fetchClientValues('guilds.cache.size'),
+        client.shard.broadcastEval(c => c.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0)),
+    ];
 
-    if (embed.length == 0) {
-        message.react('❌');
+    return Promise.all(promises)
+        .then(results => {
+            const totalGuilds = results[0].reduce((acc, guildCount) => acc + guildCount, 0);
+            const totalMembers = results[1].reduce((acc, memberCount) => acc + memberCount, 0);
 
-        return true;
-    }
+            embed.setTitle(`Servers: ${totalGuilds}`);
+            embed.setDescription(`Total reach: ${totalMembers} users`);
 
-    sendTo.send({ embeds: [embed] })
+            if (embed.length == 0) {
+                message.react('❌');
+
+                return true;
+            }
+
+            sendTo.send({ embeds: [embed] })
+                .catch(console.error);
+        })
         .catch(console.error);
 };
 
