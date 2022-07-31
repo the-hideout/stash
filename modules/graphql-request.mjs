@@ -21,7 +21,7 @@ const graphqlRequest = async (options) => {
             body: requestBody,
             headers: { "user-agent": "stash-tarkov-dev" }
         });
-
+console.log('completed graphql request')
         return response.body;
     } catch (requestError) {
         console.error(requestError);

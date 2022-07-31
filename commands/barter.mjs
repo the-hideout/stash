@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageEmbed } from 'discord.js';
 
 import getItemsByName from '../modules/get-items.mjs';
-import progress from '../modules/progress.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const MAX_BARTERS = 3;
 
@@ -57,7 +57,7 @@ const defaultFunction = {
 
         let embeds = [];
 
-        const prog = progress.getSafeProgress(interaction.user.id);
+        const prog = await progress.getSafeProgress(interaction.user.id);
 
         for (let i = 0; i < matchedBarters.length; i = i + 1) {
             const barter = matchedBarters[i];

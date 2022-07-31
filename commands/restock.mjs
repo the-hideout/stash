@@ -3,7 +3,7 @@ import {MessageEmbed} from 'discord.js';
 import moment from 'moment';
 
 import gameData from '../modules/game-data.mjs';
-import progress from '../modules/progress.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const subCommands = {
     show: async interaction => {

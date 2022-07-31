@@ -3,7 +3,7 @@ import { MessageEmbed } from 'discord.js';
 
 import getItemsByName from '../modules/get-items.mjs';
 import lootTier from '../modules/loot-tier.js';
-import progress from '../modules/progress.mjs';
+import progress from '../modules/progress-shard.mjs';
 import moment from 'moment';
 
 const MAX_ITEMS = 2;
@@ -58,7 +58,7 @@ const defaultFunction = {
             embed.setURL(item.link);
             embed.setFooter({text: `🕑 Last Updated: ${moment(item.updated).fromNow()}`});
 
-            const prog = progress.getSafeProgress(interaction.user.id);
+            const prog = await progress.getSafeProgress(interaction.user.id);
 
             if (item.iconLink) {
                 embed.setThumbnail(item.iconLink);

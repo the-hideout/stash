@@ -19,7 +19,6 @@ if (process.env.CLOUDFLARE_TOKEN && process.env.CLOUDFLARE_ACCOUNT && process.en
 } else {
     console.log('Missing env var(s) for cloudflare KV; using local storage.');
 }
-let discordClient = false;
 const restockTimers = {};
 let shutdown = false;
 
@@ -206,9 +205,8 @@ const removeRestockAlert = async (id, traders) => {
     prog.alerts.restock = prog.alerts.restock.filter(traderId => !traders.includes(traderId));
 };
 
-const startRestockAlerts = async (client) => {
-    discordClient = client;
-    
+const startRestockAlerts = async (shardingManager) => {
+    //discordClient = client;
     const setRestockTimers = async () => {
         const traders = await gameData.traders.getAll();
         for (const trader of traders) {
@@ -219,10 +217,11 @@ const startRestockAlerts = async (client) => {
                     for (const userId in userProgress) {
                         if (!userProgress[userId].alerts) continue;
                         if (userProgress[userId].alerts.restock.includes(trader.id)) {
-                            discordClient.users.fetch(userId, false)
+                            /*discordClient.users.fetch(userId, false)
                                 .then(user => {
                                     user.send(`🛒 ${trader.name} restock in 1 minute 🛒`);
-                                }); 
+                                }); */
+                            shardingManager.shards[0].send({type: 'traderRestock', userId: userId, trader: trader.name});
                         }
                     }
                 }, new Date(trader.resetTime) - new Date() - 1000 * 60).unref();
@@ -312,7 +311,7 @@ if (process.env.NODE_ENV !== 'ci') {
             }
         }*/
     }
-    setTimeout(updateTarkovTracker, 1000 * 60 * tarkovTrackerUpdateIntervalMinutes).unref();
+    //setTimeout(updateTarkovTracker, 1000 * 60 * tarkovTrackerUpdateIntervalMinutes).unref();
     if (cf) {
         setInterval(saveToCloudflare, 1000 * 60 * saveToCloudflareIntervalMinutes).unref();
     }

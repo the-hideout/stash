@@ -24,7 +24,7 @@ const servers = (message, client) => {
             const totalMembers = results[1].reduce((acc, memberCount) => acc + memberCount, 0);
 
             embed.setTitle(`Servers: ${totalGuilds}`);
-            embed.setDescription(`Total reach: ${totalMembers} users`);
+            embed.setDescription(`Total reach: ${totalMembers} users\nShards: ${client.shard.count}`);
 
             if (embed.length == 0) {
                 message.react('❌');
