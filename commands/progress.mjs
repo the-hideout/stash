@@ -17,28 +17,28 @@ const subCommands = {
             embed.setTitle(`${interaction.user.username} - Level ${prog.level}`);
             embed.setDescription(`These values are used to determine craft/barter/price unlocks and flea market fees.`);
         }
-console.log('1');
+
         const hideoutStatus = [];
         for (const stationId in prog.hideout) {
             const station = await gameData.hideout.get(stationId);
             hideoutStatus.push(`${station.name} level ${prog.hideout[stationId]}`);
         }
         if (hideoutStatus.length > 0) embed.addField('Hideout 🏠', hideoutStatus.join('\n'), true);
-        console.log('2');
+        
         const traderStatus = [];
         for (const traderId in prog.traders) {
             const trader = await gameData.traders.get(traderId);
             traderStatus.push(`${trader.name} LL${prog.traders[traderId]}`);
         }
         if (traderStatus.length > 0) embed.addField('Traders 🛒', traderStatus.join('\n'), true);
-        console.log('3');
+        
         const skillStatus = [];
         for (const skillId in prog.skills) {
             const skill = await gameData.skills.get(skillId);
             skillStatus.push(`${skill.name} level ${prog.skills[skillId]}`);
         }
         if (skillStatus.length > 0) embed.addField('Skills 💪', skillStatus.join('\n'), true);
-        console.log('4');
+        
         if (prog.tarkovTracker && prog.tarkovTracker.token) {
             let lastUpdate = moment(prog.tarkovTracker.lastUpdate).fromNow();
             if (prog.tarkovTracker.lastUpdate == 0) lastUpdate = 'never';
@@ -48,7 +48,7 @@ console.log('1');
         } else if (prog.tarkovTracker && prog.tarkovTracker.lastUpdateStatus === 'invalid') {
             embed.addField('TarkovTracker 🧭', '[❌ Invalid token](https://tarkovtracker.io/settings/)', false);
         }
-console.log('sending reply');
+
         await interaction.reply({
             embeds: [embed],
             ephemeral: true

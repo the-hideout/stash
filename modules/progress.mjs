@@ -311,6 +311,7 @@ if (process.env.NODE_ENV !== 'ci') {
             }
         }*/
     }
+    // re-enable this when ready to test: 
     //setTimeout(updateTarkovTracker, 1000 * 60 * tarkovTrackerUpdateIntervalMinutes).unref();
     if (cf) {
         setInterval(saveToCloudflare, 1000 * 60 * saveToCloudflareIntervalMinutes).unref();
