@@ -1,7 +1,6 @@
 import newrelic from 'newrelic';
 
 import fs from 'fs';
-import cron from 'cron';
 import * as Sentry from "@sentry/node";
 import "@sentry/tracing";
 
@@ -13,10 +12,9 @@ import {
 } from 'discord.js';
 // import Rollbar from 'rollbar';
 
-import got from 'got';
-
 import commands from './classic-commands/index.mjs';
 import autocomplete, { fillCache } from './modules/autocomplete.mjs';
+import gameData from "./modules/game-data.mjs";
 
 if (process.env.NODE_ENV === 'production') {
     Sentry.init({
@@ -26,9 +24,6 @@ if (process.env.NODE_ENV === 'production') {
 } else {
     console.log(`Bypassing Sentry in ${process.env.NODE_ENV || 'dev'} environment`);
 }
-
-let shutdownSignalReceived = false;
-let healthcheckJob = false;
 
 const discordClient = new Client({
     intents: [
@@ -57,7 +52,7 @@ console.timeEnd('Fill-autocomplete-cache');
 discordClient.on('ready', () => {
     console.log(`Logged in as ${discordClient.user.tag}!`);
 
-    const message = "🟢 Systems now online";
+    const message = '🟢 Systems now online';
 
     console.log(message);
 
@@ -73,17 +68,6 @@ discordClient.on('ready', () => {
         type: 'PLAYING',
     });
 
-    const shutdown = () => {
-        if (shutdownSignalReceived) return;
-        shutdownSignalReceived = true;
-        console.log('Shutting down discord client');
-        if (healthcheckJob) healthcheckJob.stop();
-        discordClient.destroy();
-    };
-    process.on('SIGINT', shutdown);
-    process.on('SIGTERM', shutdown);
-    process.on('SIGBREAK', shutdown);
-    process.on('SIGHUP', shutdown);
     process.on('message', message => {
         console.log('message received on shard', message);
         if (!message.type === 'traderRestock') return;
@@ -207,22 +191,3 @@ discordClient.on('interactionCreate', async interaction => {
         }
     }
 });
-
-if (process.env.NODE_ENV === 'production') {
-    // A healthcheck cron to send a GET request to our status server
-    // The cron schedule is expressed in seconds for the first value
-    healthcheckJob = new cron.CronJob('*/45 * * * * *', () => {
-        got(
-            `https://status.tarkov.dev/api/push/${process.env.HEALTH_ENDPOINT}?msg=OK`,
-            {
-                headers: { "user-agent": "stash-tarkov-dev" },
-                timeout: { request: 5000 }
-            }).catch(error => {
-                console.log('Healthcheck error:', error);
-            });
-    });
-    healthcheckJob.start();
-
-} else {
-    console.log("Healthcheck disabled");
-}
