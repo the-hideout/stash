@@ -1,4 +1,4 @@
-let discordClient
+import gameData from "./game-data.mjs";
 
 const getFleaFactors = prog => {
     if (!prog) {
