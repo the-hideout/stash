@@ -104,7 +104,7 @@ const updateTarkovTracker = async () => {
                 console.log(`User ${user.id} had an invalid TarkovTracker token`);
             } else {
                 user.tarkovTracker.lastUpdateStatus = error.message;
-                console.log(`Error updating TarkovTracker progress for user ${user.id}`, error);
+                console.log(`Error updating TarkovTracker progress for user ${user.id}`, error.message);
             }
         }
     }
