@@ -75,13 +75,10 @@ const getParentData = async(message) => {
     message.uuid = uuidv4();
     message.type = 'getData';
     return new Promise((resolve, reject) => {
-        const handleFunc = response => {
-            if (response.uuid !== message.uuid) return;
-            process.off('message', handleFunc);
-            if (response.error) return resolve(new Error(response.error));
+        process.once(message.uuid, response => {
+            if (response.error) return reject(response.error);
             resolve(response.data);
-        };
-        process.on('message', handleFunc);
+        });
         discordClient.shard.send(message);
     });
 };

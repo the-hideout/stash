@@ -28,7 +28,7 @@ manager.on('shardCreate', shard => {
                     response.data = progress.getUpdateTime(message.userId);
                 } catch (error) {
                     response.data = null;
-                    response.error = error.message;
+                    response.error = error;
                 }
             }
             return shard.send(response);
@@ -53,6 +53,9 @@ manager.on('shardCreate', shard => {
         }
         if (message.type === 'setUserTarkovTrackerToken') {
             return progress.setToken(message.userId, message.token);
+        }
+        if (message.uuid) {
+            shard.emit(message.uuid, message);
         }
     });
     shard.on('ready', () => {
@@ -94,9 +97,10 @@ if (process.env.NODE_ENV === 'production') {
             {
                 headers: { "user-agent": "stash-tarkov-dev" },
                 timeout: { request: 5000 }
-            }).catch(error => {
-                console.log('Healthcheck error:', error);
-            });
+            }
+        ).catch(error => {
+            console.log('Healthcheck error:', error);
+        });
     });
     healthcheckJob.start();
 

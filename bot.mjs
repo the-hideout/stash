@@ -59,6 +59,23 @@ discordClient.on('ready', () => {
     discordClient.user.setActivity('Tarkov.dev', {
         type: 'PLAYING',
     });
+
+    process.on('message', message => {
+        if (!message.uuid) return;
+        if (message.type === 'getData') {
+            if (message.data === 'hasUser') {
+                const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], userId: message.userId, success: false}};
+                discordClient.users.fetch(message.userId).then(user => {
+                    if (user) response.data.success = true;
+                    discordClient.shard.send(response);
+                }).catch(error => {
+                    discordClient.shard.send(response);
+                });
+            }
+            return;
+        }
+        process.emit(message.uuid, message);
+    });
 });
 
 discordClient.login(process.env.DISCORD_API_TOKEN);
