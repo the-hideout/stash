@@ -8,25 +8,29 @@ let healthcheckJob = false;
 let shutdownSignalReceived = false;
 
 manager.on('shardCreate', shard => {
-    console.log(`Launched shard ${shard.id}`)
+    console.log(`Launched shard ${shard.id}`);
     shard.on('message', message => {
-        //console.log(`Shard[${shard.id}] : ${message._eval} : ${message._result}`);
-        console.log('message received on manager', message);
-        if (message.type === 'getUserProgress') {
-            return shard.send({type: 'userProgress', progress: progress.getProgress(message.userId)});
-        }
-        if (message.type === 'getDefaultUserProgress') {
-            return shard.send({type: 'defaultUserProgress', progress: progress.getDefaultProgress()});
-        }
-        if (message.type === 'getSafeUserProgress') {
-            return shard.send({type: 'userProgress', progress: progress.getSafeProgress(message.userId)});
-        }
-        if (message.type === 'getUserTarkovTrackerUpdateTime') {
-            try {
-                return shard.send({type: 'userTarkovTrackerUpdateTime', userId: message.userId, date: progress.getUpdateTime(message.userId)});
-            } catch (error) {
-                return shard.send({type: 'userTarkovTrackerUpdateTime', userId: message.userId, date: null, error: error});
+        //console.log(`ShardingManager received message from shard ${shard.id}`, message);
+        if (message.type === 'getData') {
+            const response = {uuid: message.uuid};
+            if (message.data === 'userProgress') {
+                response.data = progress.getProgress(message.userId);
             }
+            if (message.data === 'defaultUserProgress') {
+                response.data = progress.getDefaultProgress();
+            }
+            if (message.data === 'safeUserProgress') {
+                response.data = progress.getSafeProgress(message.userId);
+            }
+            if (message.data === 'userTarkovTrackerUpdateTime') {
+                try {
+                    response.data = progress.getUpdateTime(message.userId);
+                } catch (error) {
+                    response.data = null;
+                    response.error = error.message;
+                }
+            }
+            return shard.send(response);
         }
         if (message.type === 'setUserLevel') {
             return progress.setLevel(message.userId, message.level);
@@ -43,18 +47,26 @@ manager.on('shardCreate', shard => {
         if (message.type === 'addUserTraderRestockAlert') {
             return progress.addRestockAlert(message.userId, message.traders);
         }
-        
         if (message.type === 'removeUserTraderRestockAlert') {
             return progress.removeRestockAlert(message.userId, message.traders);
         }
+        if (message.type === 'setUserTarkovTrackerToken') {
+            return progress.setToken(message.userId, message.token);
+        }
+    });
+    shard.on('ready', () => {
+        /*shard.eval(client => {
+            client.users.fetch('144059683253125120', false).then(user => {
+                if (!user) return;
+                user.send(`🛒 Pappy restock in 1 minute 🛒`);
+            });
+            return true;
+        });*/
     });
 });
 
-process.on('message', message => {
-    console.log('received message', message);
-});
-
 manager.spawn().then(shards => {
+    console.log(`Spawned ${shards.size} shards`);
     progress.startRestockAlerts(manager);
     const shutdown = () => {
         if (shutdownSignalReceived) return;
@@ -70,14 +82,6 @@ manager.spawn().then(shards => {
     process.on('SIGTERM', shutdown);
     process.on('SIGBREAK', shutdown);
     process.on('SIGHUP', shutdown);
-
-    process.on('message', message => {
-        console.log('message received on shard', message);
-        if (!message.type === 'traderRestock') return;
-        discordClient.users.fetch(message.userId, false).then(user => {
-            user.send(`🛒 ${message.trader} restock in 1 minute 🛒`);
-        });
-    });
 }).catch(console.error);
 
 if (process.env.NODE_ENV === 'production') {

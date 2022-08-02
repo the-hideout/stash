@@ -32,10 +32,12 @@ const defaultFunction = {
             iconURL: 'https://assets.tarkov.dev/tarkov-dev-icon.png',
             url: 'https://tarkov.dev.com',
         });
-        embed.addField('Bugs? Missing features? Questions? Chat with us on Discord!', 'https://discord.gg/XPAsKGHSzH', true);
-        embed.addField('Want to contribute to the bot or checkout the source code? View the project on GitHub!', 'https://github.com/the-hideout/stash', true);
-        embed.addField('Want to check the status of our services (api, website, bot, etc)?', 'https://status.tarkov.dev', true);
-        // embed.addField('Like it? Support on Patreon', 'https://www.patreon.com/kokarn', true);
+        embed.addFields(
+            { name: 'Bugs? Missing features? Questions? Chat with us on Discord!', value: 'https://discord.gg/XPAsKGHSzH', inline: true} ,
+            { name: 'Want to contribute to the bot or checkout the source code? View the project on GitHub!', value: 'https://github.com/the-hideout/stash', inline: true} ,
+            { name: 'Want to check the status of our services (api, website, bot, etc)?', value: 'https://status.tarkov.dev', inline: true} ,
+            //{ name: 'Like it? Support on Patreon', value: 'https://www.patreon.com/kokarn', inline: true} ,
+        );
         embed.setFooter({
             text: 'Enjoy ❤️',
         });
@@ -49,7 +51,7 @@ const defaultFunction = {
         contributorsString = contributorsString.substring(1).trim();
 
         if (contributorsString) {
-            embed.addField('Contributors', contributorsString);
+            embed.addFields({name: 'Contributors', value: contributorsString});
         }
 
         interaction.editReply({ embeds: [embed] });

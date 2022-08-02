@@ -120,10 +120,10 @@ const defaultFunction = {
                 }
 
                 totalCost += itemCost * req.count;
-                embed.addField(reqName, itemCost.toLocaleString() + "₽ x " + req.count, true);
+                embed.addFields({name: reqName, value: itemCost.toLocaleString() + "₽ x " + req.count, inline: true});
             }
 
-            embed.addField("Total", totalCost.toLocaleString() + "₽", false);
+            embed.addFields({name: 'Total', value: totalCost.toLocaleString() + "₽", inline: false});
 
             embeds.push(embed);
 

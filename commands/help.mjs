@@ -72,8 +72,10 @@ const defaultFunction = {
             embed.setDescription(`Need Help or Have Questions?
         [Come visit us in our server.](https://discord.gg/XPAsKGHSzH)
         You can learn more about the bot's commands by entering:`);
-            embed.addField('/help [command]', 'Where [command] is one of the following commands: \n'
-            +Object.keys(commands).join('\n'));
+            embed.addFields({ 
+                name: '/help [command]', 
+                value: 'Where [command] is one of the following commands: \n'+Object.keys(commands).join('\n')
+            });
 
             await interaction.reply({ embeds: [embed] });
 
@@ -98,7 +100,7 @@ const defaultFunction = {
             if (examples.length > 0) {
                 exampleString = `\n\nExamples: \n ${examples.join('\n')}`;
             }
-            embed.addField(cmd.syntax, cmd.description+exampleString);
+            embed.addFields({name: cmd.syntax, value: cmd.description+exampleString});
         } else {
             embed.setDescription(cmd.description);
             for (const subCommand of cmd.options) {
@@ -115,7 +117,7 @@ const defaultFunction = {
                     exampleString = `\n\nExamples: \n ${examples.join('\n')}`;
                 }
                 const syntax = cmd.syntax[subCommand.name];
-                embed.addField(syntax, subCommand.description+exampleString);
+                embed.addFields({name: syntax, value: subCommand.description+exampleString});
             }
         }
 

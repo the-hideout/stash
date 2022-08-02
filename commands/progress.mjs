@@ -23,29 +23,29 @@ const subCommands = {
             const station = await gameData.hideout.get(stationId);
             hideoutStatus.push(`${station.name} level ${prog.hideout[stationId]}`);
         }
-        if (hideoutStatus.length > 0) embed.addField('Hideout 🏠', hideoutStatus.join('\n'), true);
+        if (hideoutStatus.length > 0) embed.addFields({name: 'Hideout 🏠', value: hideoutStatus.join('\n'), inline: true});
 
         const traderStatus = [];
         for (const traderId in prog.traders) {
             const trader = await gameData.traders.get(traderId);
             traderStatus.push(`${trader.name} LL${prog.traders[traderId]}`);
         }
-        if (traderStatus.length > 0) embed.addField('Traders 🛒', traderStatus.join('\n'), true);
+        if (traderStatus.length > 0) embed.addFields({name: 'Traders 🛒', value: traderStatus.join('\n'), inline: true});
 
         const skillStatus = [];
         for (const skillId in prog.skills) {
             const skill = await gameData.skills.get(skillId);
             skillStatus.push(`${skill.name} level ${prog.skills[skillId]}`);
         }
-        if (skillStatus.length > 0) embed.addField('Skills 💪', skillStatus.join('\n'), true);
+        if (skillStatus.length > 0) embed.addFields({name: 'Skills 💪', value: skillStatus.join('\n'), inline: true});
 
         if (prog.tarkovTracker && prog.tarkovTracker.token) {
             let lastUpdate = moment(prog.tarkovTracker.lastUpdate).fromNow();
             if (prog.tarkovTracker.lastUpdate == 0) lastUpdate = 'never';
             const nextUpdate = moment(await progress.getUpdateTime(interaction.user.id)).fromNow();
-            embed.addField('TarkovTracker 🧭', `Last update: ${lastUpdate}\nNext update: ${nextUpdate}`, false);
+            embed.addFields({name: 'TarkovTracker 🧭', value: `Last update: ${lastUpdate}\nNext update: ${nextUpdate}`, inline: false});
         } else if (prog.tarkovTracker && prog.tarkovTracker.lastUpdateStatus === 'invalid') {
-            embed.addField('TarkovTracker 🧭', '[❌ Invalid token](https://tarkovtracker.io/settings/)', false);
+            embed.addFields({name: 'TarkovTracker 🧭', value: '[❌ Invalid token](https://tarkovtracker.io/settings/)', inline: false});
         }
 
         await interaction.reply({

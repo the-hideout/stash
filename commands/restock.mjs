@@ -14,7 +14,7 @@ const subCommands = {
         embed.setTitle(`Trader restocks 🛒`);
         //embed.setDescription(``);
         for (const trader of traders) {
-            embed.addField(trader.name, moment(trader.resetTime).fromNow(), true);
+            embed.addFields({name: trader.name, value: moment(trader.resetTime).fromNow(), inline: true});
         }
 
         await interaction.editReply({

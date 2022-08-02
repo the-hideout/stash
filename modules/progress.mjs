@@ -205,6 +205,49 @@ const removeRestockAlert = async (id, traders) => {
     prog.alerts.restock = prog.alerts.restock.filter(traderId => !traders.includes(traderId));
 };
 
+const getShardsForDMs = async (shardingManager, traderId) => {
+    const userPromises = [];
+    for (const userId in userProgress) {
+        if (!userProgress[userId].alerts || !userProgress[userId].alerts.restock || userProgress[userId].alerts.restock.length < 1) continue;
+        if (traderId && !userProgress[userId].alerts.restock.includes(traderId)) continue;
+        let responseCount = 0;
+        for (const [shardId, shard] of shardingManager.shards) {
+            userPromises.push(new Promise(resolve => {
+                const shards = [];
+                const shardGetUser = (client, {uid}) => {
+                    client.users.fetch(uid).then(user => {
+                        if (!user) return Promise.reject('User not found');
+                        client.shard.send({type: 'shardGetUser', shardId: client.shard.ids[0], userId: uid, success: true});
+                    }).catch(error => {
+                        client.shard.send({type: 'shardGetUser', shardId: client.shard.ids[0], userId: uid, success: false});
+                    });
+                };
+                const listenForUsers = message => {
+                    if (message.type !== 'shardGetUser') return;
+                    if (message.shardId !== shardId) return;
+                    if (message.userId !== userId) return;
+                    if (message.success) {
+                        shards.push(message.shardId);
+                    }
+                    responseCount++;
+                    if (responseCount == shardingManager.shards.count) {
+                        shard.off('message', listenForUsers);
+                        resolve({userId, shards});
+                    }
+                };
+                shard.on('message', listenForUsers);
+                shardingManager.broadcastEval(shardGetUser, {context: {uid: userId}});
+            }));
+        }
+    }
+    const results = await Promise.all(userPromises);
+    const userShards = {};
+    for (const result of results) {
+        userShards[result.userId] = result.shards;
+    }
+    return userShards;
+};
+
 const startRestockAlerts = async (shardingManager) => {
     //discordClient = client;
     const setRestockTimers = async () => {
@@ -213,15 +256,40 @@ const startRestockAlerts = async (shardingManager) => {
             const currentTimer = restockTimers[trader.id];
             if (currentTimer != trader.resetTime) {
                 console.log('Setting new restock timer for '+trader.name);
-                setTimeout(() => {
+                setTimeout(async () => {
+                    /*const shardUsers = {};
+
+                    for (const [shardId, shard] of shardingManager.shards) {
+                        shardUsers[shardId] = [];
+                        const guilds = await shardingManager.fetchClientValues('guilds.cache', shardId);
+                        console.log(`${guilds.length} guilds in shard ${shardId}`)
+                        for (const guild of guilds) {
+                            const members = guild.members;
+                            console.log(`${members.length} members in shard ${shardId}, guild ${guild.id}`);
+                            for (const user of members) {
+                                console.log(user);
+                                shardUsers[shardId].push(user.id);
+                            }
+                        }
+                    }*/
+                    const shardUsers = await getShardsForDMs(shardingManager, trader.id);
                     for (const userId in userProgress) {
                         if (!userProgress[userId].alerts) continue;
                         if (userProgress[userId].alerts.restock.includes(trader.id)) {
-                            /*discordClient.users.fetch(userId, false)
-                                .then(user => {
-                                    user.send(`🛒 ${trader.name} restock in 1 minute 🛒`);
-                                }); */
-                            shardingManager.shards[0].send({type: 'traderRestock', userId: userId, trader: trader.name});
+                            if (!shardUsers[userId] || shardUsers[userId].length < 1) {
+                                console.log(`No shards found for user ${userId}`);
+                                continue;
+                            }
+                            /*discordClient.users.fetch(userId, false).then(user => {
+                                user.send(`🛒 ${trader.name} restock in 1 minute 🛒`);
+                            }); */
+                            shardingManager.shards[shardUsers[userId][0]].eval((c, {userId, traderName}) => {
+                                c.users.fetch(userId, false).then(user => {
+                                    user.send(`🛒 ${traderName} restock in 1 minute 🛒`);
+                                }).catch(error => {
+                                    console.log(`Error sending restock notification to user ${userId}`);
+                                });
+                            }, {context: {userId, traderName}});
                         }
                     }
                 }, new Date(trader.resetTime) - new Date() - 1000 * 60).unref();

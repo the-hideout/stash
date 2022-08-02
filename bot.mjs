@@ -14,6 +14,7 @@ import {
 
 import commands from './classic-commands/index.mjs';
 import autocomplete, { fillCache } from './modules/autocomplete.mjs';
+import progress from "./modules/progress-shard.mjs";
 //import gameData from "./modules/game-data.mjs";
 
 if (process.env.NODE_ENV === 'production') {
@@ -52,28 +53,12 @@ console.timeEnd('Fill-autocomplete-cache');
 discordClient.on('ready', () => {
     console.log(`Logged in as ${discordClient.user.tag}!`);
     //gameData.load();
-    const message = '🟢 Systems now online';
+    progress.init(discordClient);
 
-    console.log(message);
-
-    // Send a DM to the admin that the bot is online for testing
-    // if (process.env.ADMIN_ID && process.env.NODE_ENV !== 'production') {
-    //     discordClient.users.fetch(process.env.ADMIN_ID.split(',')[0], false)
-    //         .then(user => {
-    //             user.send(message);
-    //         });
-    // }
+    console.log('🟢 Systems now online');
 
     discordClient.user.setActivity('Tarkov.dev', {
         type: 'PLAYING',
-    });
-
-    process.on('message', message => {
-        console.log('message received on shard', message);
-        if (!message.type === 'traderRestock') return;
-        discordClient.users.fetch(message.userId, false).then(user => {
-            user.send(`🛒 ${message.trader} restock in 1 minute 🛒`);
-        });
     });
 });
 

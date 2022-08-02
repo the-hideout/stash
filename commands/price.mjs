@@ -94,7 +94,7 @@ const defaultFunction = {
                     fleaPrice += `\r\n ${Math.round(parseInt(item.avg24hPrice-tierFee) / size).toLocaleString()}₽/slot`;
                 }
 
-                embed.addField("Flea Price (avg)", fleaPrice, true);
+                embed.addFields({name: 'Flea Price (avg)', value: fleaPrice, inline: true});
             }
 
             if (item.lastLowPrice > 0) {
@@ -110,7 +110,7 @@ const defaultFunction = {
                     fleaPrice += `\r\n ${Math.round(parseInt(item.lastLowPrice-lowFee) / size).toLocaleString()}₽/slot`;
                 }
 
-                embed.addField("Flea Price (low)", fleaPrice, true);
+                embed.addFields({name: 'Flea Price (low)', value: fleaPrice, inline: true});
                 
                 if (item.lastLowPrice < tierPrice || tierPrice == 0) {
                     tierPrice = item.lastLowPrice;
@@ -135,7 +135,7 @@ const defaultFunction = {
                     fleaPrice += `\r\n ${Math.round(parseInt(optimalPrice-optimalFee) / size).toLocaleString()}₽/slot`;
                 }
 
-                embed.addField("Flea Price (optimal)", fleaPrice, true);
+                embed.addFields({name: 'Flea Price (optimal)', value: fleaPrice, inline: true});
             }
 
             if (bestTraderName) {
@@ -149,7 +149,7 @@ const defaultFunction = {
                 if (size > 1) {
                     traderVal += "\r\n" + Math.round(bestTraderPrice / size).toLocaleString() + "₽/slot";
                 }
-                embed.addField(bestTraderName + " Value", traderVal, true);
+                embed.addFields({name: bestTraderName + ' Value', value: traderVal, inline: true});
             }
 
             body += `• Sell to: \`${sellTo}\` for \`${tierPrice.toLocaleString() + "₽"}\`\n`;
@@ -177,7 +177,7 @@ const defaultFunction = {
 
                 const locked = prog.traders[offer.vendor.trader.id] < level ? '🔒' : '';
                 const title = `${offer.vendor.name} LL${level}${quest} Price${locked}`;
-                embed.addField(title, traderPrice, true);
+                embed.addFields({name: title, value: traderPrice, inline: true});
             }
 
             for (const b of item.bartersFor) {
@@ -229,7 +229,7 @@ const defaultFunction = {
                     barterCost = Math.round(barterCost / b.rewardItems[0].count).toLocaleString() + "₽";
                     const locked = prog.traders[b.trader.id] < b.level ? '🔒' : '';
                     const title = `${b.trader.name} LL${b.level} Barter${locked}`;
-                    embed.addField(title, barterCost, true);
+                    embed.addFields({name: title, value: barterCost, inline: true});
                 }
             }
 
@@ -264,7 +264,7 @@ const defaultFunction = {
 
                     const locked = prog.hideout[c.station.id] < c.level ? '🔒' : '';
                     const title = `${c.station.name} level ${c.level} Craft${locked}`;
-                    embed.addField(title, craftCost, true);
+                    embed.addFields({name: title, value: craftCost, inline: true});
                 }
             }
 

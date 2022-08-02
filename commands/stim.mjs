@@ -63,7 +63,7 @@ const defaultFunction = {
             }
 
             if (item.properties.cures.length > 0) {
-                embed.addField('Cures', item.properties.cures.join('\n'), true);
+                embed.addFields({name: 'Cures', values: item.properties.cures.join('\n'), inline: true});
             }
             for (const effect of item.properties.stimEffects) {
                 let title = effect.type;
@@ -87,7 +87,7 @@ const defaultFunction = {
                     lines.push(`Delay: ${effect.delay} seconds`);
                 }
                 lines.push(`Duration: ${effect.duration}`);
-                embed.addField(title, lines.join('\n'), true);
+                embed.addFielsd({name: title, value: lines.join('\n'), inline: true});
             }
 
             embeds.push(embed);
