@@ -3,7 +3,7 @@ import {MessageEmbed} from 'discord.js';
 import moment from 'moment';
 
 import gameData from '../modules/game-data.mjs';
-import progress from '../modules/progress.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const subCommands = {
     show: async interaction => {
@@ -14,7 +14,7 @@ const subCommands = {
         embed.setTitle(`Trader restocks 🛒`);
         //embed.setDescription(``);
         for (const trader of traders) {
-            embed.addField(trader.name, moment(trader.resetTime).fromNow(), true);
+            embed.addFields({name: trader.name, value: moment(trader.resetTime).fromNow(), inline: true});
         }
 
         await interaction.editReply({

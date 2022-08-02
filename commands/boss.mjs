@@ -118,7 +118,7 @@ const defaultFunction = {
 
             const mapEmbed = new MessageEmbed();
             mapEmbed.setTitle(map.name);
-            //mapEmbed.addField('Map', `${map.name} (${bossData.spawnChance * 100}%)`, false);
+            //mapEmbed.addFields({name: 'Map', value: `${map.name} (${bossData.spawnChance * 100}%)`, inline: false});
 
             // Join the spawn locations into a comma separated string
             const spawnLocations = bossData.spawnLocations.map(spawnLocation => spawnLocation.name).join(', ');
@@ -137,18 +137,20 @@ const defaultFunction = {
             // var description = '';
             // description += `• **Spawn Locations**: ${spawnLocations}\n`;
 
-            mapEmbed.addField('Spawn Chance 🎲', `${bossData.spawnChance * 100}%`, true);
-            mapEmbed.addField('Spawn Locations 📍', spawnLocations, true);
-            //embed.addField('Spawn Time 🕒', spawnTime, true);
+            mapEmbed.addFields(
+                { name: 'Spawn Chance 🎲', value: `${bossData.spawnChance * 100}%`, inline: true },
+                { name: 'Spawn Locations 📍', value: spawnLocations, inline: true },
+                //{ name: 'Spawn Time 🕒', value: spawnTime, inline: true },
+            );
             if (escortNames) {
                 mapEmbed.addField('Escort 💂', escortNames, true);
             }
             mapEmbeds.push(mapEmbed);
         }
         if (mapEmbeds.length === 1) {
-            embed.addField('Map', mapEmbeds[0].title, false);
+            embed.addFields({name: 'Map', value: mapEmbeds[0].title, inline: false});
             for (const field of mapEmbeds[0].fields) {
-                embed.addField(field.name, field.value, true);
+                embed.addFields({name: field.name, value: field.value, inline: true});
             }
             mapEmbeds.length = 0;
         }

@@ -68,7 +68,7 @@ const defaultFunction = {
         embed.setColor(colorCodes[globalStatus.status]);
 
         for (const message of currentStatus.currentStatuses) {
-            embed.addField(message.name, statusCodes[message.status], true);
+            embed.addFields({name: message.name, value: statusCodes[message.status], inline: true});
         }
 
         await interaction.editReply({ embeds: [embed] });

@@ -3,14 +3,14 @@ import {MessageEmbed} from 'discord.js';
 import moment from 'moment';
 
 import gameData from '../modules/game-data.mjs';
-import progress from '../modules/progress.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const subCommands = {
     show: async interaction => {
-        let prog = progress.getProgress(interaction.user.id);
+        let prog = await progress.getProgress(interaction.user.id);
         const embed = new MessageEmbed();
         if (!prog) {
-            prog = progress.getDefaultProgress();
+            prog = await progress.getDefaultProgress();
             embed.setTitle(`Default progress - Level ${prog.level}`);
             embed.setDescription(`You do not have any saved progress. Below are the defaults used to determine craft/barter/price unlocks and flea market fees.`);
         } else {
@@ -23,29 +23,29 @@ const subCommands = {
             const station = await gameData.hideout.get(stationId);
             hideoutStatus.push(`${station.name} level ${prog.hideout[stationId]}`);
         }
-        if (hideoutStatus.length > 0) embed.addField('Hideout 🏠', hideoutStatus.join('\n'), true);
+        if (hideoutStatus.length > 0) embed.addFields({name: 'Hideout 🏠', value: hideoutStatus.join('\n'), inline: true});
 
         const traderStatus = [];
         for (const traderId in prog.traders) {
             const trader = await gameData.traders.get(traderId);
             traderStatus.push(`${trader.name} LL${prog.traders[traderId]}`);
         }
-        if (traderStatus.length > 0) embed.addField('Traders 🛒', traderStatus.join('\n'), true);
+        if (traderStatus.length > 0) embed.addFields({name: 'Traders 🛒', value: traderStatus.join('\n'), inline: true});
 
         const skillStatus = [];
         for (const skillId in prog.skills) {
             const skill = await gameData.skills.get(skillId);
             skillStatus.push(`${skill.name} level ${prog.skills[skillId]}`);
         }
-        if (skillStatus.length > 0) embed.addField('Skills 💪', skillStatus.join('\n'), true);
+        if (skillStatus.length > 0) embed.addFields({name: 'Skills 💪', value: skillStatus.join('\n'), inline: true});
 
         if (prog.tarkovTracker && prog.tarkovTracker.token) {
             let lastUpdate = moment(prog.tarkovTracker.lastUpdate).fromNow();
             if (prog.tarkovTracker.lastUpdate == 0) lastUpdate = 'never';
-            const nextUpdate = moment(progress.getUpdateTime(interaction.user.id)).fromNow();
-            embed.addField('TarkovTracker 🧭', `Last update: ${lastUpdate}\nNext update: ${nextUpdate}`, false);
+            const nextUpdate = moment(await progress.getUpdateTime(interaction.user.id)).fromNow();
+            embed.addFields({name: 'TarkovTracker 🧭', value: `Last update: ${lastUpdate}\nNext update: ${nextUpdate}`, inline: false});
         } else if (prog.tarkovTracker && prog.tarkovTracker.lastUpdateStatus === 'invalid') {
-            embed.addField('TarkovTracker 🧭', '[❌ Invalid token](https://tarkovtracker.io/settings/)', false);
+            embed.addFields({name: 'TarkovTracker 🧭', value: '[❌ Invalid token](https://tarkovtracker.io/settings/)', inline: false});
         }
 
         await interaction.reply({
@@ -99,7 +99,7 @@ const subCommands = {
         await interaction.deferReply({ephemeral: true});
         const stationId = interaction.options.getString('station');
         const level = interaction.options.getInteger('level');
-        const prog = progress.getProgress(interaction.user.id);
+        const prog = await progress.getProgress(interaction.user.id);
         let ttWarn = '';
         if (prog && prog.tarkovTracker.token) {
             ttWarn = '\nNote: Progress synced via [TarkovTracker](https://tarkovtracker.io/settings/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.';
@@ -155,9 +155,16 @@ const subCommands = {
             });
             return;
         }
+        if (!token.match(/^[a-zA-Z0-9]{22}$/)) {
+            await interaction.reply({
+                content: `❌ The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.`,
+                ephemeral: true
+            });
+            return;
+        }
 
         progress.setToken(interaction.user.id, token);
-        const updateTime = moment(progress.getUpdateTime(interaction.user.id)).fromNow();
+        const updateTime = moment(await progress.getUpdateTime(interaction.user.id)).fromNow();
         await interaction.reply({
             content: `✅ Your hideout progress will update from TarkovTracker ${updateTime}.`,
             ephemeral: true

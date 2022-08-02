@@ -77,10 +77,12 @@ const defaultFunction = {
         if (mapUrl) {
             embed.setURL(mapUrl);
         }
-        embed.addField('Duration ⌛', displayDuration, true);
-        embed.addField('Players 👥', displayPlayers, true);
-        embed.addField('Time 🕑', displayTime, true);
-        embed.addField('Bosses 💀', bossArray.join('\n'), true);
+        embed.addFields(
+            { name: 'Duration ⌛', value: displayDuration, inline: true},
+            { name: 'Players 👥', value: displayPlayers, inline: true},
+            { name: 'Time 🕑', value: displayTime, inline: true},
+            { name: 'Bosses 💀', value: bossArray.join('\n'), inline: true}
+        );
         if (selectedMapData.key) {
             embed.setImage(`https://tarkov.dev/maps/${selectedMapData.key}.jpg`);
         }

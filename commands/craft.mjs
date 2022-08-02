@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageEmbed } from 'discord.js';
 
 import getItemsByName from '../modules/get-items.mjs';
-import progress from '../modules/progress.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const MAX_CRAFTS = 2;
 
@@ -55,7 +55,7 @@ const defaultFunction = {
 
         let embeds = [];
 
-        const prog = progress.getSafeProgress(interaction.user.id);
+        const prog = await progress.getSafeProgress(interaction.user.id);
 
         for (let i = 0; i < matchedCrafts.length; i = i + 1) {
             const craft = matchedCrafts[i];
@@ -111,7 +111,7 @@ const defaultFunction = {
                 }
                 if (isTool) {
                     toolCost += itemCost * req.count;
-                    toolsEmbed.addField(req.item.name, itemCost.toLocaleString() + "₽ x " + req.count, true);
+                    toolsEmbed.addFields({name: req.item.name, value: itemCost.toLocaleString() + "₽ x " + req.count, inline: true});
                     if(!toolsEmbed.thumbnail) {
                         toolsEmbed.setThumbnail(req.item.iconLink);
                     }
@@ -126,13 +126,13 @@ const defaultFunction = {
                 }
                 totalCost += itemCost * quantity;
                 //totalCost += req.item.avg24hPrice * req.count;
-                embed.addField(req.item.name, itemCost.toLocaleString() + "₽ x " + quantity, true);
+                embed.addFields({name: req.item.name, value: itemCost.toLocaleString() + '₽ x ' + quantity, inline: true});
             }
-            embed.addField("Total", totalCost.toLocaleString() + "₽", false);
+            embed.addFields({name: 'Total', value: totalCost.toLocaleString() + '₽', inline: false});
 
             embeds.push(embed);
             if (toolsEmbed.fields.length > 0) {
-                toolsEmbed.addField("Total", toolCost.toLocaleString() + "₽", false);
+                toolsEmbed.addFields({name: 'Total', value: toolCost.toLocaleString() + '₽', inline: false});
                 embeds.push(toolsEmbed);
             }
 

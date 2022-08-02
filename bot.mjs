@@ -1,7 +1,6 @@
 import newrelic from 'newrelic';
 
 import fs from 'fs';
-import cron from 'cron';
 import * as Sentry from "@sentry/node";
 import "@sentry/tracing";
 
@@ -13,11 +12,9 @@ import {
 } from 'discord.js';
 // import Rollbar from 'rollbar';
 
-import got from 'got';
-
 import commands from './classic-commands/index.mjs';
 import autocomplete, { fillCache } from './modules/autocomplete.mjs';
-import progress from './modules/progress.mjs';
+import progress from "./modules/progress-shard.mjs";
 
 if (process.env.NODE_ENV === 'production') {
     Sentry.init({
@@ -27,9 +24,6 @@ if (process.env.NODE_ENV === 'production') {
 } else {
     console.log(`Bypassing Sentry in ${process.env.NODE_ENV || 'dev'} environment`);
 }
-
-let shutdownSignalReceived = false;
-let healthcheckJob = false;
 
 const discordClient = new Client({
     intents: [
@@ -58,34 +52,30 @@ console.timeEnd('Fill-autocomplete-cache');
 discordClient.on('ready', () => {
     console.log(`Logged in as ${discordClient.user.tag}!`);
 
-    const message = "🟢 Systems now online";
+    progress.init(discordClient);
 
-    console.log(message);
-
-    // Send a DM to the admin that the bot is online for testing
-    // if (process.env.ADMIN_ID && process.env.NODE_ENV !== 'production') {
-    //     discordClient.users.fetch(process.env.ADMIN_ID.split(',')[0], false)
-    //         .then(user => {
-    //             user.send(message);
-    //         });
-    // }
+    console.log('🟢 Systems now online');
 
     discordClient.user.setActivity('Tarkov.dev', {
         type: 'PLAYING',
     });
 
-    const shutdown = () => {
-        if (shutdownSignalReceived) return;
-        shutdownSignalReceived = true;
-        console.log('Shutting down discord client');
-        if (healthcheckJob) healthcheckJob.stop();
-        discordClient.destroy();
-    };
-    process.on('SIGINT', shutdown);
-    process.on('SIGTERM', shutdown);
-    process.on('SIGBREAK', shutdown);
-    process.on('SIGHUP', shutdown);
-    progress.startRestockAlerts(discordClient);
+    process.on('message', message => {
+        if (!message.uuid) return;
+        if (message.type === 'getData') {
+            if (message.data === 'hasUser') {
+                const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], userId: message.userId, success: false}};
+                discordClient.users.fetch(message.userId).then(user => {
+                    if (user) response.data.success = true;
+                    discordClient.shard.send(response);
+                }).catch(error => {
+                    discordClient.shard.send(response);
+                });
+            }
+            return;
+        }
+        process.emit(message.uuid, message);
+    });
 });
 
 discordClient.login(process.env.DISCORD_API_TOKEN);
@@ -202,22 +192,3 @@ discordClient.on('interactionCreate', async interaction => {
         }
     }
 });
-
-if (process.env.NODE_ENV === 'production') {
-    // A healthcheck cron to send a GET request to our status server
-    // The cron schedule is expressed in seconds for the first value
-    healthcheckJob = new cron.CronJob('*/45 * * * * *', () => {
-        got(
-            `https://status.tarkov.dev/api/push/${process.env.HEALTH_ENDPOINT}?msg=OK`,
-            {
-                headers: { "user-agent": "stash-tarkov-dev" },
-                timeout: { request: 5000 }
-            }).catch(error => {
-                console.log('Healthcheck error:', error);
-            });
-    });
-    healthcheckJob.start();
-
-} else {
-    console.log("Healthcheck disabled");
-}

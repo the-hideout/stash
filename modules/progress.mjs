@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
-
 import moment from 'moment';
 import cloudflare from 'cloudflare';
+import { v4 as uuidv4 } from "uuid";
 
 import {getProgress} from "./tarkovtracker.js";
 import gameData from "./game-data.mjs";
@@ -19,7 +19,6 @@ if (process.env.CLOUDFLARE_TOKEN && process.env.CLOUDFLARE_ACCOUNT && process.en
 } else {
     console.log('Missing env var(s) for cloudflare KV; using local storage.');
 }
-let discordClient = false;
 const restockTimers = {};
 let shutdown = false;
 
@@ -35,6 +34,8 @@ const defaultProgress = {
 };
 
 const tarkovTrackerUpdateIntervalMinutes = 1;
+
+let shardingManager;
 
 const buildDefaultProgress = id => {
     const progress = {
@@ -66,6 +67,10 @@ const buildDefaultProgress = id => {
 
 const getUsersForUpdate = () => {
     return Object.values(userProgress).filter(prog => {
+        if (prog.tarkovTracker.token && !prog.tarkovTracker.token.match(/^[a-zA-Z0-9]{22}$/)) {
+            prog.tarkovTracker.token = false;
+            prog.tarkovTracker.lastUpdateStatus = 'invalid';
+        }
         return prog.tarkovTracker.token !== false;
     }).sort((a, b) => {
         return a.tarkovTracker.lastUpdate - b.tarkovTracker.lastUpdate;
@@ -103,7 +108,7 @@ const updateTarkovTracker = async () => {
                 console.log(`User ${user.id} had an invalid TarkovTracker token`);
             } else {
                 user.tarkovTracker.lastUpdateStatus = error.message;
-                console.log(`Error updating TarkovTracker progress for user ${user.id}`, error);
+                console.log(`Error updating TarkovTracker progress for user ${user.id} with token ${user.tarkovTracker.token}`, error.message);
             }
         }
     }
@@ -206,27 +211,77 @@ const removeRestockAlert = async (id, traders) => {
     prog.alerts.restock = prog.alerts.restock.filter(traderId => !traders.includes(traderId));
 };
 
-const startRestockAlerts = async (client) => {
-    discordClient = client;
-    
+const getShardData = async(shardId, message) => {
+    message.uuid = uuidv4();
+    message.type = 'getData';
+    return new Promise((resolve, reject) => {
+        shardingManager.shards.get(shardId).once(message.uuid, response => {
+            if (response.error) return reject(response.error);
+            resolve(response.data);
+        });
+        shardingManager.shards.get(shardId).send(message);
+    });
+};
+
+const getShardsForDMs = async (traderId) => {
+    const userPromises = [];
+    for (const userId in userProgress) {
+        if (!userProgress[userId].alerts || !userProgress[userId].alerts.restock || userProgress[userId].alerts.restock.length < 1) continue;
+        if (traderId && !userProgress[userId].alerts.restock.includes(traderId)) continue;
+        userPromises.push(new Promise(resolve => {
+            Promise.all(shardingManager.shards.map(shard => {
+                return getShardData(shard.id, {data: 'hasUser', userId: userId});
+            })).then(shardResults => {
+                const shards = [];
+                for (const result of shardResults) {
+                    if (result.success) shards.push(result.shardId);
+                }
+                resolve({userId, shards});
+            });
+        }));
+    }
+    const results = await Promise.all(userPromises);
+    const userShards = {};
+    for (const result of results) {
+        userShards[result.userId] = result.shards;
+    }
+    return userShards;
+};
+
+const startRestockAlerts = async (sharding_manager) => {
+    shardingManager = sharding_manager;
+    //discordClient = client;
     const setRestockTimers = async () => {
         const traders = await gameData.traders.getAll();
         for (const trader of traders) {
             const currentTimer = restockTimers[trader.id];
             if (currentTimer != trader.resetTime) {
                 console.log('Setting new restock timer for '+trader.name);
-                setTimeout(() => {
+                restockTimers[trader.id] = trader.resetTime;
+                const alertTime = new Date(trader.resetTime) - new Date() - 1000 * 60;
+                if (alertTime < 0) continue;
+                setTimeout(async () => {
+                    const shardUsers = await getShardsForDMs(trader.id);
                     for (const userId in userProgress) {
                         if (!userProgress[userId].alerts) continue;
                         if (userProgress[userId].alerts.restock.includes(trader.id)) {
-                            discordClient.users.fetch(userId, false)
-                                .then(user => {
-                                    user.send(`🛒 ${trader.name} restock in 1 minute 🛒`);
-                                }); 
+                            if (!shardUsers[userId] || shardUsers[userId].length < 1) {
+                                console.log(`No shards found for user ${userId}`);
+                                continue;
+                            }
+                            /*discordClient.users.fetch(userId, false).then(user => {
+                                user.send(`🛒 ${trader.name} restock in 1 minute 🛒`);
+                            }); */
+                            shardingManager.shards.get(shardUsers[userId][0]).eval((c, {userId, traderName}) => {
+                                c.users.fetch(userId, false).then(user => {
+                                    user.send(`🛒 ${traderName} restock in 1 minute 🛒`);
+                                }).catch(error => {
+                                    console.log(`Error sending ${traderName} restock notification to user ${userId}`);
+                                });
+                            }, {userId, traderName: trader.name});
                         }
                     }
-                }, new Date(trader.resetTime) - new Date() - 1000 * 60).unref();
-                restockTimers[trader.id] = trader.resetTime;
+                }, alertTime).unref();
             }
         }
     };
