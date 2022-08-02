@@ -67,6 +67,10 @@ const buildDefaultProgress = id => {
 
 const getUsersForUpdate = () => {
     return Object.values(userProgress).filter(prog => {
+        if (prog.tarkovTracker.token && prog.tarkovTracker.token.startsWith('http')) {
+            prog.tarkovTracker.token = false;
+            prog.tarkovTracker.lastUpdateStatus = 'invalid';
+        }
         return prog.tarkovTracker.token !== false;
     }).sort((a, b) => {
         return a.tarkovTracker.lastUpdate - b.tarkovTracker.lastUpdate;
@@ -104,7 +108,7 @@ const updateTarkovTracker = async () => {
                 console.log(`User ${user.id} had an invalid TarkovTracker token`);
             } else {
                 user.tarkovTracker.lastUpdateStatus = error.message;
-                console.log(`Error updating TarkovTracker progress for user ${user.id}`, error.message);
+                console.log(`Error updating TarkovTracker progress for user ${user.id} with token ${user.tarkovTracker.token}`, error.message);
             }
         }
     }
