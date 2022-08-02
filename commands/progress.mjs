@@ -155,6 +155,13 @@ const subCommands = {
             });
             return;
         }
+        if (!token.match(/^[a-zA-Z0-9]{22}$/)) {
+            await interaction.reply({
+                content: `❌ The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.`,
+                ephemeral: true
+            });
+            return;
+        }
 
         progress.setToken(interaction.user.id, token);
         const updateTime = moment(await progress.getUpdateTime(interaction.user.id)).fromNow();

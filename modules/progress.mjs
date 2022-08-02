@@ -67,7 +67,7 @@ const buildDefaultProgress = id => {
 
 const getUsersForUpdate = () => {
     return Object.values(userProgress).filter(prog => {
-        if (prog.tarkovTracker.token && prog.tarkovTracker.token.startsWith('http')) {
+        if (!prog.tarkovTracker.token.match(/^[a-zA-Z0-9]{22}$/)) {
             prog.tarkovTracker.token = false;
             prog.tarkovTracker.lastUpdateStatus = 'invalid';
         }
