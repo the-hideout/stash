@@ -224,19 +224,17 @@ const getShardsForDMs = async (traderId) => {
     for (const userId in userProgress) {
         if (!userProgress[userId].alerts || !userProgress[userId].alerts.restock || userProgress[userId].alerts.restock.length < 1) continue;
         if (traderId && !userProgress[userId].alerts.restock.includes(traderId)) continue;
-        for (const [shardId, shard] of shardingManager.shards) {
-            userPromises.push(new Promise(resolve => {
-                Promise.all(shardingManager.shards.map(shard => {
-                    return getShardData(shard.id, {data: 'hasUser', userId: userId});
-                })).then(shardResults => {
-                    const shards = [];
-                    for (const result of shardResults) {
-                        if (result.success) shards.push(result.shardId);
-                    }
-                    resolve({userId, shards});
-                });
-            }));
-        }
+        userPromises.push(new Promise(resolve => {
+            Promise.all(shardingManager.shards.map(shard => {
+                return getShardData(shard.id, {data: 'hasUser', userId: userId});
+            })).then(shardResults => {
+                const shards = [];
+                for (const result of shardResults) {
+                    if (result.success) shards.push(result.shardId);
+                }
+                resolve({userId, shards});
+            });
+        }));
     }
     const results = await Promise.all(userPromises);
     const userShards = {};
