@@ -1,3 +1,4 @@
+import got from 'got';
 import cron from 'cron';
 import { ShardingManager } from 'discord.js';
 
