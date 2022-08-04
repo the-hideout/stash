@@ -258,6 +258,10 @@ const startRestockAlerts = async (sharding_manager) => {
                             }); */
                             messageUser(userId, `🛒 ${trader.name} restock in 1 minute 🛒`).catch(error => {
                                 console.log(`Error sending ${trader.name} restock notification to user ${userId}: ${error.message}`);
+                                if (error.message === 'Cannot send messages to this user') {
+                                    console.log(`Disabling restock alerts for user ${userId}`);
+                                    userProgress[userId].alerts.restock = [];
+                                }
                             });
                         }
                     }
