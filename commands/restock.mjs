@@ -18,9 +18,9 @@ const subCommands = {
         }
         const alertsFor = await progress.getRestockAlerts(interaction.user.id);
         if (alertsFor.length > 0) {
-            embed.setFooter(`You have restock alerts set for: ${alertsFor.map(traderId => {
+            embed.setFooter({text: `You have restock alerts set for: ${alertsFor.map(traderId => {
                 return traders.find(trader => trader.id === traderId).name;
-            })}`);
+            })}`});
         }
 
         await interaction.editReply({
