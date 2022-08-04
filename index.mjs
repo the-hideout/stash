@@ -16,31 +16,31 @@ manager.on('shardCreate', shard => {
             const response = {uuid: message.uuid};
             try {
                 if (message.data === 'userProgress') {
-                    response.data = progress.getProgress(message.userId);
+                    response.data = await progress.getProgress(message.userId);
                 }
                 if (message.data === 'defaultUserProgress') {
-                    response.data = progress.getDefaultProgress();
+                    response.data = await progress.getDefaultProgress();
                 }
                 if (message.data === 'safeUserProgress') {
-                    response.data = progress.getSafeProgress(message.userId);
+                    response.data = await progress.getSafeProgress(message.userId);
                 }
                 if (message.data === 'userTarkovTrackerUpdateTime') {
-                    response.data = progress.getUpdateTime(message.userId);
+                    response.data = await progress.getUpdateTime(message.userId);
                 }
                 if (message.data === 'setUserLevel') {
-                    progress.setLevel(message.userId, message.level);
+                    await progress.setLevel(message.userId, message.level);
                     response.data = message.level;
                 }
                 if (message.data === 'setUserTraderLevel') {
-                    progress.setTrader(message.userId, message.traderId, message.level);
+                    await progress.setTrader(message.userId, message.traderId, message.level);
                     response.data = message.level;
                 }
                 if (message.data === 'setUserHideoutLevel') {
-                    progress.setHideout(message.userId, message.stationId, message.level);
+                    await progress.setHideout(message.userId, message.stationId, message.level);
                     response.data = message.level;
                 }
                 if (message.data === 'setUserSkillLevel') {
-                    progress.setSkill(message.userId, message.skillId, message.level);
+                    await progress.setSkill(message.userId, message.skillId, message.level);
                     response.data = message.level;
                 }
                 if (message.data === 'userTraderRestockAlerts') {
@@ -53,7 +53,7 @@ manager.on('shardCreate', shard => {
                     response.data = await progress.removeRestockAlert(message.userId, message.traders);
                 }
                 if (message.data === 'setUserTarkovTrackerToken') {
-                    progress.setToken(message.userId, message.token);
+                    await progress.setToken(message.userId, message.token);
                     response.data = message.token;
                 }
             } catch (error) {

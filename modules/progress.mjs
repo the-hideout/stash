@@ -21,6 +21,7 @@ if (process.env.CLOUDFLARE_TOKEN && process.env.CLOUDFLARE_ACCOUNT && process.en
 }
 const restockTimers = {};
 let shutdown = false;
+let progressLoaded = false;
 
 let userProgress = {};
 
@@ -63,6 +64,18 @@ const buildDefaultProgress = id => {
         progress.skills[skillId] = defaultProgress.skills[skillId];
     }
     return progress;
+};
+
+const loaded = async () => {
+    if (progressLoaded) return Promise.resolve(true);
+    return new Promise(resolve => {
+        const loadedInterval = setInterval(() => {
+            if (progressLoaded) {
+                resolve(true);
+                clearInterval(loadedInterval);
+            }
+        }, 1000);
+    });
 };
 
 const getUsersForUpdate = () => {
@@ -128,7 +141,8 @@ const getUserProgress = id => {
     return userProgress[id];
 };
 
-const getSafeProgress = id => {
+const getSafeProgress = async id => {
+    await loaded();
     if (userProgress[id]) return userProgress[id];
     return defaultProgress;
 };
@@ -202,6 +216,7 @@ const optimalFleaPrice = async (id, baseValue, lowerBound, upperBound) => {
 };
 
 const addRestockAlert = async (id, traders) => {
+    await loaded();
     if (typeof traders === 'string') traders = [traders];
     const prog = await getUserProgress(id);
     const restockAlerts = prog.alerts.restock;
@@ -212,6 +227,7 @@ const addRestockAlert = async (id, traders) => {
 };
 
 const removeRestockAlert = async (id, traders) => {
+    await loaded();
     if (typeof traders === 'string') traders = [traders];
     const prog = await getUserProgress(id);
     prog.alerts.restock = prog.alerts.restock.filter(traderId => !traders.includes(traderId));
@@ -292,18 +308,21 @@ const saveToCloudflare = () => {
 };
 
 export default {
-    hasToken: id => {
+    async hasToken(id) {
+        await loaded();
         if (!userProgress[id]) return false;
         return userProgress[id].tarkovTracker.token != false;
     },
-    setToken: (id, token) => {
+    async setToken(id, token) {
+        await loaded();
         if (!userProgress[id]) {
             userProgress[id] = buildDefaultProgress(id);
         }
         userProgress[id].tarkovTracker.token = token;
         if (!token) userProgress[id].tarkovTracker.lastUpdateStatus = 'n/a';
     },
-    getUpdateTime(id) {
+    async getUpdateTime(id) {
+        await loaded();
         if (!userProgress[id] || !userProgress[id].tarkovTracker.token) throw new Error('Your TarkovTracker account is not linked');
         const users = getUsersForUpdate();
         for (let i = 0; i < users.length; i++) {
@@ -312,30 +331,37 @@ export default {
             return moment(new Date()).add(Math.ceil((i+1) / 25), 'm').toDate();
         }
     },
-    getProgress(id) {
+    async getProgress(id) {
+        await loaded();
         return userProgress[id];
     },
-    getDefaultProgress() {
+    async getDefaultProgress() {
+        await loaded();
         return defaultProgress;
     },
     getSafeProgress: getSafeProgress,
-    setLevel(id, level) {
+    async setLevel(id, level) {
+        await loaded();
         const prog = getUserProgress(id);
         prog.level = level;
     },
-    setTrader(id, traderId, level) {
+    async setTrader(id, traderId, level) {
+        await loaded();
         const prog = getUserProgress(id);
         prog.traders[traderId] = level;
     },
-    setHideout(id, stationId, level) {
+    async setHideout(id, stationId, level) {
+        await loaded();
         const prog = getUserProgress(id);
         prog.hideout[stationId] = level;
     },
-    setSkill(id, skillId, level) {
+    async setSkill(id, skillId, level) {
+        await loaded();
         const prog = getUserProgress(id);
         prog.skills[skillId] = level;
     },
-    getFleaFeeFactors(id) {
+    async getFleaFeeFactors(id) {
+        await loaded();
         return getFleaFactors(id);
     },
     async getFleaMarketFee(id, price, baseValue, args) {
@@ -350,7 +376,6 @@ export default {
     },
     addRestockAlert: addRestockAlert,
     removeRestockAlert: removeRestockAlert,
-    startRestockAlerts: startRestockAlerts,
     async init(sharding_manager) {
         if (process.env.NODE_ENV === 'ci') return;
         shardingManager = sharding_manager;
@@ -436,5 +461,6 @@ export default {
         process.on( 'SIGTERM', saveOnExit);
         process.on( 'SIGBREAK', saveOnExit);
         process.on( 'SIGHUP', saveOnExit);
+        progressLoaded = true;
     }
 }
