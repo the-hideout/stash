@@ -79,7 +79,7 @@ manager.on('shardCreate', shard => {
 
 manager.spawn().then(shards => {
     console.log(`🟢 Systems now online with ${shards.size} shards`);
-    progress.startRestockAlerts(manager);
+    progress.init(manager);
     const shutdown = () => {
         if (shutdownSignalReceived) return;
         shutdownSignalReceived = true;

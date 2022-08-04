@@ -237,8 +237,7 @@ const messageUser = async (userId, message, shardId = 0) => {
     });
 };
 
-const startRestockAlerts = async (sharding_manager) => {
-    shardingManager = sharding_manager;
+const startRestockAlerts = async () => {
     //discordClient = client;
     const setRestockTimers = async () => {
         const traders = await gameData.traders.getAll();
@@ -291,90 +290,6 @@ const saveToCloudflare = () => {
         console.log('Error saving user progress to Cloudflare KV', error);
     });
 };
-
-if (process.env.NODE_ENV !== 'ci') {
-    try {
-        fs.mkdirSync('./cache');
-    } catch (createError){
-        if(createError.code !== 'EEXIST'){
-            console.error(createError);
-        }
-    }
-    try {
-        let savedUsers = {};
-        if (cf) {
-            savedUsers = await cf.enterpriseZoneWorkersKV.read(cfAccount, cfNamespace, 'progress').then(response => {
-                return zlib.gunzipSync(Buffer.from(response, 'base64')).toString();
-            }).catch(error => {
-                console.log('Error reading user progress from CloudflareKV', error);
-                console.log('Reading progress from local storage');
-                return fs.readFileSync(usersJsonPath);
-            });
-        } else {
-            savedUsers = fs.readFileSync(usersJsonPath);
-        }
-        userProgress = JSON.parse(savedUsers);
-    } catch (error) {
-        if (error.code === 'ENOENT') {
-            console.log('No saved user progress found.');
-        } else {
-            console.log(`Error reading ${usersJsonPath}`, error);
-        }
-    }
-    const flea = await gameData.flea.get();
-    defaultProgress.level = flea.minPlayerLevel;
-    const traders = await gameData.traders.getAll();
-    for (const trader of traders) {
-        const maxLevel = trader.levels[trader.levels.length-1].level;
-        defaultProgress.traders[trader.id] = maxLevel;
-        for (const id in userProgress) {
-            const user = userProgress[id];
-            if (!user.traders[trader.id]) user.traders[trader.id] = 1;
-        }
-    }
-    const skills = gameData.skills.getAll();
-    for (const skill of skills) {
-        defaultProgress.skills[skill.id] = 0;
-        for (const id in userProgress) {
-            const user = userProgress[id];
-            if (!user.skills[skill.id]) user.skills[skill.id] = 0;
-        }
-    }
-    const hideout = await gameData.hideout.getAll();
-    for (const station of hideout) {
-        const maxLevel = station.levels[station.levels.length-1].level;
-        defaultProgress.hideout[station.id] = maxLevel;
-        /*for (const id in userProgress) {
-            const user = userProgress[id];
-            if (typeof user.hideout[station.id] === 'undefined') {
-                user.hideout[station.id] = 0;
-            }
-        }*/
-    }
-    setTimeout(updateTarkovTracker, 1000 * 60 * tarkovTrackerUpdateIntervalMinutes).unref();
-    if (cf) {
-        setInterval(saveToCloudflare, 1000 * 60 * saveToCloudflareIntervalMinutes).unref();
-    }
-    //save user progress on shutdown
-    const saveOnExit = () => {
-        if (shutdown) return;
-        shutdown = true;
-        console.log('Saving user progress before exit');
-        const promises = [];
-        promises.push(new Promise(resolve => {
-            saveUserProgress();
-            resolve();
-        }));
-        if (cf) {
-            promises.push(saveToCloudflare());
-        }
-        return Promise.all(promises);
-    };
-    process.on( 'SIGINT', saveOnExit);
-    process.on( 'SIGTERM', saveOnExit);
-    process.on( 'SIGBREAK', saveOnExit);
-    process.on( 'SIGHUP', saveOnExit);
-}
 
 export default {
     hasToken: id => {
@@ -435,5 +350,91 @@ export default {
     },
     addRestockAlert: addRestockAlert,
     removeRestockAlert: removeRestockAlert,
-    startRestockAlerts: startRestockAlerts
+    startRestockAlerts: startRestockAlerts,
+    async init(sharding_manager) {
+        if (process.env.NODE_ENV === 'ci') return;
+        shardingManager = sharding_manager;
+        startRestockAlerts();
+        try {
+            fs.mkdirSync('./cache');
+        } catch (createError){
+            if(createError.code !== 'EEXIST'){
+                console.error(createError);
+            }
+        }
+        try {
+            let savedUsers = {};
+            if (cf) {
+                savedUsers = await cf.enterpriseZoneWorkersKV.read(cfAccount, cfNamespace, 'progress').then(response => {
+                    return zlib.gunzipSync(Buffer.from(response, 'base64')).toString();
+                }).catch(error => {
+                    console.log('Error reading user progress from CloudflareKV', error);
+                    console.log('Reading progress from local storage');
+                    return fs.readFileSync(usersJsonPath);
+                });
+            } else {
+                savedUsers = fs.readFileSync(usersJsonPath);
+            }
+            userProgress = JSON.parse(savedUsers);
+        } catch (error) {
+            if (error.code === 'ENOENT') {
+                console.log('No saved user progress found.');
+            } else {
+                console.log(`Error reading ${usersJsonPath}`, error);
+            }
+        }
+        const flea = await gameData.flea.get();
+        defaultProgress.level = flea.minPlayerLevel;
+        const traders = await gameData.traders.getAll();
+        for (const trader of traders) {
+            const maxLevel = trader.levels[trader.levels.length-1].level;
+            defaultProgress.traders[trader.id] = maxLevel;
+            for (const id in userProgress) {
+                const user = userProgress[id];
+                if (!user.traders[trader.id]) user.traders[trader.id] = 1;
+            }
+        }
+        const skills = gameData.skills.getAll();
+        for (const skill of skills) {
+            defaultProgress.skills[skill.id] = 0;
+            for (const id in userProgress) {
+                const user = userProgress[id];
+                if (!user.skills[skill.id]) user.skills[skill.id] = 0;
+            }
+        }
+        const hideout = await gameData.hideout.getAll();
+        for (const station of hideout) {
+            const maxLevel = station.levels[station.levels.length-1].level;
+            defaultProgress.hideout[station.id] = maxLevel;
+            /*for (const id in userProgress) {
+                const user = userProgress[id];
+                if (typeof user.hideout[station.id] === 'undefined') {
+                    user.hideout[station.id] = 0;
+                }
+            }*/
+        }
+        setTimeout(updateTarkovTracker, 1000 * 60 * tarkovTrackerUpdateIntervalMinutes).unref();
+        if (cf) {
+            setInterval(saveToCloudflare, 1000 * 60 * saveToCloudflareIntervalMinutes).unref();
+        }
+        //save user progress on shutdown
+        const saveOnExit = () => {
+            if (shutdown) return;
+            shutdown = true;
+            console.log('Saving user progress before exit');
+            const promises = [];
+            promises.push(new Promise(resolve => {
+                saveUserProgress();
+                resolve();
+            }));
+            if (cf) {
+                promises.push(saveToCloudflare());
+            }
+            return Promise.all(promises);
+        };
+        process.on( 'SIGINT', saveOnExit);
+        process.on( 'SIGTERM', saveOnExit);
+        process.on( 'SIGBREAK', saveOnExit);
+        process.on( 'SIGHUP', saveOnExit);
+    }
 }
