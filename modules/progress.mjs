@@ -254,7 +254,6 @@ const messageUser = async (userId, message, shardId = 0) => {
 };
 
 const startRestockAlerts = async () => {
-    //discordClient = client;
     const setRestockTimers = async () => {
         const traders = await gameData.traders.getAll();
         for (const trader of traders) {
@@ -268,9 +267,6 @@ const startRestockAlerts = async () => {
                     for (const userId in userProgress) {
                         if (!userProgress[userId].alerts) continue;
                         if (userProgress[userId].alerts.restock.includes(trader.id)) {
-                            /*discordClient.users.fetch(userId, false).then(user => {
-                                user.send(`🛒 ${trader.name} restock in 1 minute 🛒`);
-                            }); */
                             messageUser(userId, `🛒 ${trader.name} restock in 1 minute 🛒`).catch(error => {
                                 console.log(`Error sending ${trader.name} restock notification to user ${userId}: ${error.message}`);
                                 if (error.message === 'Cannot send messages to this user') {

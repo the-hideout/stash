@@ -66,15 +66,6 @@ manager.on('shardCreate', shard => {
             shard.emit(message.uuid, message);
         }
     });
-    shard.on('ready', () => {
-        /*shard.eval(client => {
-            client.users.fetch('144059683253125120', false).then(user => {
-                if (!user) return;
-                user.send(`🛒 Pappy restock in 1 minute 🛒`);
-            });
-            return true;
-        });*/
-    });
 });
 
 manager.spawn().then(shards => {

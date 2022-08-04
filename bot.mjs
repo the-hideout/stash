@@ -173,8 +173,6 @@ discordClient.on('interactionCreate', async interaction => {
         return false;
     }
 
-    //await interaction.deferReply();
-
     try {
         if (process.env.NODE_ENV === 'production') {
             newrelic.incrementMetric(`Command/${command.default.data.name}`);
