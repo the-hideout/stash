@@ -9,7 +9,7 @@ let healthcheckJob = false;
 let shutdownSignalReceived = false;
 
 manager.on('shardCreate', shard => {
-    console.log(`Launched shard ${shard.id}`);
+    console.log(`Created shard ${shard.id}`);
     shard.on('message', async message => {
         //console.log(`ShardingManager received message from shard ${shard.id}`, message);
         if (message.type === 'getReply') {
@@ -78,7 +78,7 @@ manager.on('shardCreate', shard => {
 });
 
 manager.spawn().then(shards => {
-    console.log(`Spawned ${shards.size} shards`);
+    console.log(`🟢 Systems now online with ${shards.size} shards`);
     progress.startRestockAlerts(manager);
     const shutdown = () => {
         if (shutdownSignalReceived) return;

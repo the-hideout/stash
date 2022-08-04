@@ -50,11 +50,9 @@ await fillCache();
 console.timeEnd('Fill-autocomplete-cache');
 
 discordClient.on('ready', () => {
-    console.log(`Logged in as ${discordClient.user.tag}!`);
+    console.log(`Logged in as ${discordClient.user.tag} on shard ${discordClient.shard.ids[0]}`);
 
     progress.init(discordClient);
-
-    console.log('🟢 Systems now online');
 
     discordClient.user.setActivity('Tarkov.dev', {
         type: 'PLAYING',
