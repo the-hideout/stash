@@ -143,7 +143,7 @@ const defaultFunction = {
                 //{ name: 'Spawn Time 🕒', value: spawnTime, inline: true },
             );
             if (escortNames) {
-                mapEmbed.addField('Escort 💂', escortNames, true);
+                mapEmbed.addFields({name: 'Escort 💂', value: escortNames, inline: true});
             }
             mapEmbeds.push(mapEmbed);
         }

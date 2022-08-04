@@ -50,25 +50,30 @@ await fillCache();
 console.timeEnd('Fill-autocomplete-cache');
 
 discordClient.on('ready', () => {
-    console.log(`Logged in as ${discordClient.user.tag}!`);
+    console.log(`Logged in as ${discordClient.user.tag} on shard ${discordClient.shard.ids[0]}`);
 
     progress.init(discordClient);
-
-    console.log('🟢 Systems now online');
 
     discordClient.user.setActivity('Tarkov.dev', {
         type: 'PLAYING',
     });
 
-    process.on('message', message => {
+    process.on('message', async message => {
         if (!message.uuid) return;
-        if (message.type === 'getData') {
-            if (message.data === 'hasUser') {
+        if (message.type === 'getReply') {
+            if (message.data === 'messageUser') {
                 const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], userId: message.userId, success: false}};
                 discordClient.users.fetch(message.userId).then(user => {
-                    if (user) response.data.success = true;
-                    discordClient.shard.send(response);
+                    if (!user) return Promise.reject(new Error('User not found'));
+                    user.send(message.message).then(() => {
+                        response.data.success = true;
+                        discordClient.shard.send(response);
+                    }).catch(error => {
+                        response.error = error;
+                        discordClient.shard.send(response);
+                    });
                 }).catch(error => {
+                    response.error = error;
                     discordClient.shard.send(response);
                 });
             }
@@ -167,8 +172,6 @@ discordClient.on('interactionCreate', async interaction => {
     if (!command) {
         return false;
     }
-
-    //await interaction.deferReply();
 
     try {
         if (process.env.NODE_ENV === 'production') {
