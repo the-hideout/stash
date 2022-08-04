@@ -60,15 +60,22 @@ discordClient.on('ready', () => {
         type: 'PLAYING',
     });
 
-    process.on('message', message => {
+    process.on('message', async message => {
         if (!message.uuid) return;
         if (message.type === 'getReply') {
-            if (message.data === 'hasUser') {
+            if (message.data === 'messageUser') {
                 const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], userId: message.userId, success: false}};
                 discordClient.users.fetch(message.userId).then(user => {
-                    if (user) response.data.success = true;
-                    discordClient.shard.send(response);
+                    if (!user) return Promise.reject(new Error('User not found'));
+                    user.send(message.message).then(() => {
+                        response.data.success = true;
+                        discordClient.shard.send(response);
+                    }).catch(error => {
+                        response.error = error;
+                        discordClient.shard.send(response);
+                    });
                 }).catch(error => {
+                    response.error = error;
                     discordClient.shard.send(response);
                 });
             }
