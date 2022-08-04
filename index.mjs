@@ -10,49 +10,57 @@ let shutdownSignalReceived = false;
 
 manager.on('shardCreate', shard => {
     console.log(`Launched shard ${shard.id}`);
-    shard.on('message', message => {
+    shard.on('message', async message => {
         //console.log(`ShardingManager received message from shard ${shard.id}`, message);
-        if (message.type === 'getData') {
+        if (message.type === 'getReply') {
             const response = {uuid: message.uuid};
-            if (message.data === 'userProgress') {
-                response.data = progress.getProgress(message.userId);
-            }
-            if (message.data === 'defaultUserProgress') {
-                response.data = progress.getDefaultProgress();
-            }
-            if (message.data === 'safeUserProgress') {
-                response.data = progress.getSafeProgress(message.userId);
-            }
-            if (message.data === 'userTarkovTrackerUpdateTime') {
-                try {
-                    response.data = progress.getUpdateTime(message.userId);
-                } catch (error) {
-                    response.data = null;
-                    response.error = error;
+            try {
+                if (message.data === 'userProgress') {
+                    response.data = progress.getProgress(message.userId);
                 }
+                if (message.data === 'defaultUserProgress') {
+                    response.data = progress.getDefaultProgress();
+                }
+                if (message.data === 'safeUserProgress') {
+                    response.data = progress.getSafeProgress(message.userId);
+                }
+                if (message.data === 'userTarkovTrackerUpdateTime') {
+                    response.data = progress.getUpdateTime(message.userId);
+                }
+                if (message.data === 'setUserLevel') {
+                    progress.setLevel(message.userId, message.level);
+                    response.data = message.level;
+                }
+                if (message.data === 'setUserTraderLevel') {
+                    progress.setTrader(message.userId, message.traderId, message.level);
+                    response.data = message.level;
+                }
+                if (message.data === 'setUserHideoutLevel') {
+                    progress.setHideout(message.userId, message.stationId, message.level);
+                    response.data = message.level;
+                }
+                if (message.data === 'setUserSkillLevel') {
+                    progress.setSkill(message.userId, message.skillId, message.level);
+                    response.data = message.level;
+                }
+                if (message.data === 'userTraderRestockAlerts') {
+                    response.data = await progress.getRestockAlerts(message.userId);
+                }
+                if (message.data === 'addUserTraderRestockAlert') {
+                    response.data = await progress.addRestockAlert(message.userId, message.traders);
+                }
+                if (message.data === 'removeUserTraderRestockAlert') {
+                    response.data = await progress.removeRestockAlert(message.userId, message.traders);
+                }
+                if (message.data === 'setUserTarkovTrackerToken') {
+                    progress.setToken(message.userId, message.token);
+                    response.data = message.token;
+                }
+            } catch (error) {
+                response.data = null;
+                response.error = error;
             }
             return shard.send(response);
-        }
-        if (message.type === 'setUserLevel') {
-            return progress.setLevel(message.userId, message.level);
-        }
-        if (message.type === 'setUserTraderLevel') {
-            return progress.setTrader(message.userId, message.traderId, message.level);
-        }
-        if (message.type === 'setUserHideoutLevel') {
-            return progress.setHideout(message.userId, message.stationId, message.level);
-        }
-        if (message.type === 'setUserSkillLevel') {
-            return progress.setHideout(message.userId, message.skillId, message.level);
-        }
-        if (message.type === 'addUserTraderRestockAlert') {
-            return progress.addRestockAlert(message.userId, message.traders);
-        }
-        if (message.type === 'removeUserTraderRestockAlert') {
-            return progress.removeRestockAlert(message.userId, message.traders);
-        }
-        if (message.type === 'setUserTarkovTrackerToken') {
-            return progress.setToken(message.userId, message.token);
         }
         if (message.uuid) {
             shard.emit(message.uuid, message);

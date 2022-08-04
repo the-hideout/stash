@@ -128,6 +128,11 @@ const getUserProgress = id => {
     return userProgress[id];
 };
 
+const getSafeProgress = id => {
+    if (userProgress[id]) return userProgress[id];
+    return defaultProgress;
+};
+
 const getFleaFactors = id => {
     let prog = userProgress[id];
     if (!prog) {
@@ -203,17 +208,19 @@ const addRestockAlert = async (id, traders) => {
     for (const traderId of traders) {
         if (!restockAlerts.includes(traderId)) restockAlerts.push(traderId);
     }
+    return prog.alerts.restock;
 };
 
 const removeRestockAlert = async (id, traders) => {
     if (typeof traders === 'string') traders = [traders];
     const prog = await getUserProgress(id);
     prog.alerts.restock = prog.alerts.restock.filter(traderId => !traders.includes(traderId));
+    return prog.alerts.restock;
 };
 
-const getShardData = async(shardId, message) => {
+const getShardReply = async(shardId, message) => {
     message.uuid = uuidv4();
-    message.type = 'getData';
+    message.type = 'getReply';
     return new Promise((resolve, reject) => {
         shardingManager.shards.get(shardId).once(message.uuid, response => {
             if (response.error) return reject(response.error);
@@ -230,7 +237,7 @@ const getShardsForDMs = async (traderId) => {
         if (traderId && !userProgress[userId].alerts.restock.includes(traderId)) continue;
         userPromises.push(new Promise(resolve => {
             Promise.all(shardingManager.shards.map(shard => {
-                return getShardData(shard.id, {data: 'hasUser', userId: userId});
+                return getShardReply(shard.id, {data: 'hasUser', userId: userId});
             })).then(shardResults => {
                 const shards = [];
                 for (const result of shardResults) {
@@ -419,10 +426,7 @@ export default {
     getDefaultProgress() {
         return defaultProgress;
     },
-    getSafeProgress(id) {
-        if (userProgress[id]) return userProgress[id];
-        return defaultProgress;
-    },
+    getSafeProgress: getSafeProgress,
     setLevel(id, level) {
         const prog = getUserProgress(id);
         prog.level = level;
@@ -447,6 +451,10 @@ export default {
     },
     getOptimalFleaPrice(id, baseValue) {
         return optimalFleaPrice(id, baseValue);
+    },
+    async getRestockAlerts(id) {
+        const prog = getSafeProgress(id);
+        return prog.alerts.restock;
     },
     addRestockAlert: addRestockAlert,
     removeRestockAlert: removeRestockAlert,

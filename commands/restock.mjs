@@ -7,7 +7,7 @@ import progress from '../modules/progress-shard.mjs';
 
 const subCommands = {
     show: async interaction => {
-        await interaction.deferReply();
+        await interaction.deferReply({ephemeral: true});
         //let prog = progress.getProgress(interaction.user.id);
         const traders = await gameData.traders.getAll();
         const embed = new MessageEmbed();
@@ -16,10 +16,15 @@ const subCommands = {
         for (const trader of traders) {
             embed.addFields({name: trader.name, value: moment(trader.resetTime).fromNow(), inline: true});
         }
+        const alertsFor = await progress.getRestockAlerts(interaction.user.id);
+        if (alertsFor.length > 0) {
+            embed.setFooter(`You have restock alerts set for: ${alertsFor.map(traderId => {
+                return traders.find(trader => trader.id === traderId).name;
+            })}`);
+        }
 
         await interaction.editReply({
-            embeds: [embed],
-            ephemeral: true
+            embeds: [embed]
         });
     },
     alert: async interaction => {
@@ -27,33 +32,30 @@ const subCommands = {
         const traders = await gameData.traders.getAll();
         let traderId = interaction.options.getString('trader');
         const sendAlert = interaction.options.getBoolean('send_alert');
-        let action = 'set';
         let forWho = 'all traders';
         if (traderId === 'all') {
             traderId = traders.map(trader => trader.id);
-            /*for (const trader of traders) {
-                let lvl = level;
-                let maxValue = trader.levels[trader.levels.length-1].level;
-                if (lvl > maxValue) lvl = maxValue;
-                progress.setTrader(interaction.user.id, trader.id, lvl);
-            }
-            await interaction.editReply({
-                content: `✅ All traders set to ${level}.`
-            });
-            return;*/
         } else {
             forWho = traders.find(trader => trader.id === traderId).name;
         }
 
+        let alertsFor = [];
+        let action = 'set';
         if (sendAlert) {
-            progress.addRestockAlert(interaction.user.id, traderId);
+            alertsFor = await progress.addRestockAlert(interaction.user.id, traderId);
         } else {
             action = 'disabled';
-            progress.removeRestockAlert(interaction.user.id, traderId);
+            alertsFor = await progress.removeRestockAlert(interaction.user.id, traderId);
+        }
+        let allAlerts = '';
+        if ((sendAlert && alertsFor.length > 1 && alertsFor.length !== traders.length) || (!sendAlert && alertsFor.length > 0)) {
+            allAlerts = '\nYou have alerts set for: ' + alertsFor.map(traderId => {
+                return traders.find(trader => trader.id === traderId).name;
+            }).join(', ');
         }
 
         await interaction.editReply({
-            content: `✅ Restock alert ${action} for ${forWho}.`
+            content: `✅ Restock alert ${action} for ${forWho}.${allAlerts}`
         });
     },
 };

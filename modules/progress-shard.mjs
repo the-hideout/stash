@@ -71,9 +71,9 @@ const optimalFleaPrice = async (progress, baseValue, lowerBound, upperBound) => 
     return highPrice;
 };
 
-const getParentData = async(message) => {
+const getParentReply = async(message) => {
     message.uuid = uuidv4();
-    message.type = 'getData';
+    message.type = 'getReply';
     return new Promise((resolve, reject) => {
         process.once(message.uuid, response => {
             if (response.error) return reject(response.error);
@@ -84,38 +84,38 @@ const getParentData = async(message) => {
 };
 
 const getProgress = async (id) => {
-    return getParentData({data: 'userProgress', userId: id});
+    return getParentReply({data: 'userProgress', userId: id});
 };
 
 const getDefaultProgress = async () => {
-    return getParentData({data: 'defaultUserProgress'});
+    return getParentReply({data: 'defaultUserProgress'});
 };
 
 const getSafeProgress = async(id) => {
-    return getParentData({data: 'safeUserProgress', userId: id});
+    return getParentReply({data: 'safeUserProgress', userId: id});
 };
 
 export default {
     async getUpdateTime(id) {
-        return getParentData({data: 'userTarkovTrackerUpdateTime', userId: id});
+        return getParentReply({data: 'userTarkovTrackerUpdateTime', userId: id});
     },
     getProgress: getProgress,
     getDefaultProgress: getDefaultProgress,
     getSafeProgress: getSafeProgress,
-    setToken: (id, token) => {
-        discordClient.shard.send({type: 'setUserTarkovTrackerToken', userId: id, token: token});
+    async setToken(id, token) {
+        return getParentReply({data: 'setUserTarkovTrackerToken', userId: id, token: token});
     },
-    setLevel(id, level) {
-        discordClient.shard.send({type: 'setUserLevel', userId: id, level: level});
+    async setLevel(id, level) {
+        return getParentReply({data: 'setUserLevel', userId: id, level: level});
     },
-    setTrader(id, traderId, level) {
-        discordClient.shard.send({type: 'setUserTraderLevel', userId: id, traderId: traderId, level: level});
+    async setTrader(id, traderId, level) {
+        return getParentReply({data: 'setUserTraderLevel', userId: id, traderId: traderId, level: level});
     },
-    setHideout(id, stationId, level) {
-        discordClient.shard.send({type: 'setUserHideoutLevel', userId: id, stationId: stationId, level: level});
+    async setHideout(id, stationId, level) {
+        return getParentReply({data: 'setUserHideoutLevel', userId: id, stationId: stationId, level: level});
     },
-    setSkill(id, skillId, level) {
-        discordClient.shard.send({type: 'setUserSkillLevel', userId: id, skillId: skillId, level: level});
+    async setSkill(id, skillId, level) {
+        return getParentReply({data: 'setUserSkillLevel', userId: id, skillId: skillId, level: level});
     },
     async getFleaMarketFee(id, price, baseValue, args) {
         const progress = await getSafeProgress(id);
@@ -125,11 +125,14 @@ export default {
         const progress = await getSafeProgress(id);
         return optimalFleaPrice(progress, baseValue);
     },
-    addRestockAlert(id, traders) {
-        discordClient.shard.send({type: 'addUserTraderRestockAlert', userId: id, traders: traders});
+    async getRestockAlerts(id) {
+        return getParentReply({data: 'userTraderRestockAlerts', userId: id});
     },
-    removeRestockAlert(id, traders) {
-        discordClient.shard.send({type: 'removeUserTraderRestockAlert', userId: id, traders: traders});
+    async addRestockAlert(id, traders) {
+        return getParentReply({data: 'addUserTraderRestockAlert', userId: id, traders: traders});
+    },
+    async removeRestockAlert(id, traders) {
+        return getParentReply({data: 'removeUserTraderRestockAlert', userId: id, traders: traders});
     },
     init(client) {
         discordClient = client;

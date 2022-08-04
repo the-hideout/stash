@@ -62,7 +62,7 @@ discordClient.on('ready', () => {
 
     process.on('message', message => {
         if (!message.uuid) return;
-        if (message.type === 'getData') {
+        if (message.type === 'getReply') {
             if (message.data === 'hasUser') {
                 const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], userId: message.userId, success: false}};
                 discordClient.users.fetch(message.userId).then(user => {
