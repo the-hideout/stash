@@ -87,7 +87,7 @@ const defaultFunction = {
                     lines.push(`Delay: ${effect.delay} seconds`);
                 }
                 lines.push(`Duration: ${effect.duration}`);
-                embed.addFielsd({name: title, value: lines.join('\n'), inline: true});
+                embed.addFields({name: title, value: lines.join('\n'), inline: true});
             }
 
             embeds.push(embed);
