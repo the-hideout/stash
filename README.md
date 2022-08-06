@@ -34,6 +34,7 @@ This bot is open source and supported by the team behind [Tarkov.dev](https://ta
 | `/changes` | - | Get the latest game changes from [tarkov-changes.com](https://tarkov-changes.com) |
 | `/patchnotes` | - | Get the latest *official* patchnotes for EFT |
 | `/stim` | - | Get information about a in-game stim |
+| `/roulette` | - | Play a game of roulette to determine how you play your next raid |
 | `/uptime` | - | Get the bot's uptime |
 
 ---
@@ -155,6 +156,14 @@ bot    | Filling autocomplete cache
 bot    | fill-autocomplete-cache: 944.249ms
 bot    | Logged in as stash-dev#1234!
 ```
+
+## Roulette 🎲
+
+Want to add a new item to the roulette?
+
+Simply edit the following JSON file to add your entry!
+
+[`roulette.json`](data/roulette.json)
 
 ## Deployment 🚀
 
