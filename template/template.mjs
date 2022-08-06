@@ -11,7 +11,7 @@ const defaultFunction = {
         const embed = new MessageEmbed();
         embed.setTitle("TEMPLATE TITLE");
         embed.setDescription("TEMPLATE DESCRIPTION");
-        await interaction.editReply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });
     },
 };
 
