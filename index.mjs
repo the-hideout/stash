@@ -58,7 +58,7 @@ manager.on('shardCreate', shard => {
                 }
             } catch (error) {
                 response.data = null;
-                response.error = error;
+                response.error = {message: error.message, stack: error.stack};
             }
             return shard.send(response);
         }

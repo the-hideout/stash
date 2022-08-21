@@ -69,11 +69,11 @@ discordClient.on('ready', () => {
                         response.data.success = true;
                         discordClient.shard.send(response);
                     }).catch(error => {
-                        response.error = error;
+                        response.error = {message: error.message, stack: error.stack};
                         discordClient.shard.send(response);
                     });
                 }).catch(error => {
-                    response.error = error;
+                    response.error = {message: error.message, stack: error.stack};
                     discordClient.shard.send(response);
                 });
             }
