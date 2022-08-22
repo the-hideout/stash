@@ -368,6 +368,7 @@ export default {
     },
     async getRestockAlerts(id) {
         const prog = getSafeProgress(id);
+        if (!prog.alerts) prog.alerts = {restock: []};
         return prog.alerts.restock;
     },
     addRestockAlert: addRestockAlert,

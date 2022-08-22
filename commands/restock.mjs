@@ -8,24 +8,28 @@ import progress from '../modules/progress-shard.mjs';
 const subCommands = {
     show: async interaction => {
         await interaction.deferReply({ephemeral: true});
-        //let prog = progress.getProgress(interaction.user.id);
-        const traders = await gameData.traders.getAll();
-        const embed = new MessageEmbed();
-        embed.setTitle(`Trader restocks 🛒`);
-        //embed.setDescription(``);
-        for (const trader of traders) {
-            embed.addFields({name: trader.name, value: moment(trader.resetTime).fromNow(), inline: true});
-        }
-        const alertsFor = await progress.getRestockAlerts(interaction.user.id);
-        if (alertsFor.length > 0) {
-            embed.setFooter({text: `You have restock alerts set for: ${alertsFor.map(traderId => {
-                return traders.find(trader => trader.id === traderId).name;
-            })}`});
-        }
+        try {
+            //let prog = progress.getProgress(interaction.user.id);
+            const traders = await gameData.traders.getAll();
+            const embed = new MessageEmbed();
+            embed.setTitle(`Trader restocks 🛒`);
+            //embed.setDescription(``);
+            for (const trader of traders) {
+                embed.addFields({name: trader.name, value: moment(trader.resetTime).fromNow(), inline: true});
+            }
+            const alertsFor = await progress.getRestockAlerts(interaction.user.id);
+            if (alertsFor.length > 0) {
+                embed.setFooter({text: `You have restock alerts set for: ${alertsFor.map(traderId => {
+                    return traders.find(trader => trader.id === traderId).name;
+                })}`});
+            }
 
-        await interaction.editReply({
-            embeds: [embed]
-        });
+            await interaction.editReply({
+                embeds: [embed]
+            });
+        } catch (error) {
+            interaction.editReply('There was an error processing your request.');
+        }
     },
     alert: async interaction => {
         await interaction.deferReply({ephemeral: true});
