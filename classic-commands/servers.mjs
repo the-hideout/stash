@@ -20,8 +20,8 @@ const servers = (message, client) => {
 
     return Promise.all(promises)
         .then(results => {
-            const totalGuilds = results[0].reduce((acc, guildCount) => acc + guildCount, 0);
-            const totalMembers = results[1].reduce((acc, memberCount) => acc + memberCount, 0);
+            const totalGuilds = results[0].reduce((acc, guildCount) => acc + guildCount, 0).toLocaleString("en-US");
+            const totalMembers = results[1].reduce((acc, memberCount) => acc + memberCount, 0).toLocaleString("en-US");
 
             embed.setTitle(`Servers: ${totalGuilds}`);
             embed.setDescription(`Total reach: ${totalMembers} users\nShards: ${client.shard.count}`);
