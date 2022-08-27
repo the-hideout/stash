@@ -2,6 +2,8 @@ FROM node:lts-alpine
 
 WORKDIR /usr/src/app
 
+RUN mkdir cache && chown -R node:node cache
+
 COPY package*.json .
 
 RUN npm install
