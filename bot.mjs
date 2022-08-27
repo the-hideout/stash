@@ -1,5 +1,3 @@
-import newrelic from 'newrelic';
-
 import fs from 'fs';
 import * as Sentry from "@sentry/node";
 import "@sentry/tracing";
@@ -10,7 +8,6 @@ import {
     Permissions,
     Collection,
 } from 'discord.js';
-// import Rollbar from 'rollbar';
 
 import commands from './classic-commands/index.mjs';
 import autocomplete, { fillCache } from './modules/autocomplete.mjs';
@@ -174,14 +171,8 @@ discordClient.on('interactionCreate', async interaction => {
     }
 
     try {
-        if (process.env.NODE_ENV === 'production') {
-            newrelic.incrementMetric(`Command/${command.default.data.name}`);
-        }
         await command.default.execute(interaction);
     } catch (error) {
-        if (process.env.NODE_ENV === 'production') {
-            newrelic.incrementMetric(`Error/${command.default.data.name}`);
-        }
         console.error(error);
 
         const message = {
