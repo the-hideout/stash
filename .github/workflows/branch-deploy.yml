@@ -62,3 +62,9 @@ jobs:
           heroku_app_name: stash-eft
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
+
+      - name: Deploy to Railway
+        if: steps.branch-deploy.outputs.continue == 'true'
+        run: railway up
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
