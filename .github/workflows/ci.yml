@@ -83,7 +83,7 @@ jobs:
         run: node deploy-commands.mjs
 
       - name: Deploy to Railway
-        run: railway up
+        run: npm run deploy
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
