@@ -92,7 +92,7 @@ export async function updateMaps() {
             if (mapImage.key !== testKey) 
                 continue;
             
-            let map = mapImage[0];
+            let map = mapImage.maps[0];
 
             mapData.key = map.key;
             mapData.source = map.source;
