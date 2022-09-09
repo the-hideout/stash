@@ -39,6 +39,7 @@ export async function updateMaps() {
             id
             tarkovDataId
             name
+            normalizedName
             wiki
             description
             enemies
@@ -71,7 +72,7 @@ export async function updateMaps() {
             headers: { "user-agent": "stash-tarkov-dev" }
         })
     ]);
-    gameData.maps = responses[0].data.maps;
+    gameData.maps = responses[0].data.maps;     // graphql
 
     mapChoices.length = 0;
     for (const mapData of gameData.maps) {
@@ -79,15 +80,24 @@ export async function updateMaps() {
     }
     mapChoices = mapChoices.sort();
 
-    const mapImages = responses[1].body;
+    const mapImages = responses[1].body;        // static
+
     for (const mapData of gameData.maps) {
-        let testKey = mapData.name.toLowerCase();
-        if (mapKeys[mapData.id]) testKey = mapKeys[mapData.id];
+        let testKey = mapData.normalizedName;
+
+        if (mapKeys[mapData.id]) 
+            testKey = mapKeys[mapData.id];      // remap night-factory=>facory and the-lab=>labs map keys 
+        
         for (const mapImage of mapImages) {
-            if (mapImage.key !== testKey) continue;
-            mapData.key = testKey;
-            mapData.source = mapImage.source;
-            mapData.sourceLink = mapImage.sourceLink;
+            if (mapImage.key !== testKey) 
+                continue;
+            
+            let map = mapImage[0];
+
+            mapData.key = map.key;
+            mapData.source = map.source;
+            mapData.sourceLink = map.sourceLink;
+
             break;
         }
     }
