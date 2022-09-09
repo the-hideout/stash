@@ -89,7 +89,7 @@ export async function updateMaps() {
             testKey = mapKeys[mapData.id];      // remap night-factory=>facory and the-lab=>labs map keys 
         
         for (const mapImage of mapImages) {
-            if (mapImage.key !== testKey) 
+            if (mapImage.normalizedName !== testKey) 
                 continue;
             
             let map = mapImage.maps[0];
