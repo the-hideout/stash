@@ -16,6 +16,7 @@ This bot takes all the data from [Tarkov.dev](https://tarkov.dev) and exposes it
 
 This bot is open source and supported by the team behind [Tarkov.dev](https://tarkov.dev)
 
+
 ### Commands 💬
 
 |  Command  |  Example   |  Description   |
