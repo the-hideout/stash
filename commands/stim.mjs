@@ -56,11 +56,7 @@ const defaultFunction = {
             embed.setURL(item.link);
             //embed.setFooter({text: `🕑 Last Updated: ${moment(item.updated).fromNow()}`});
 
-            if (item.iconLink) {
-                embed.setThumbnail(item.iconLink);
-            } else {
-                embed.setThumbnail(item.imageLink);
-            }
+            embed.setThumbnail(item.iconLink);
 
             if (item.properties.cures.length > 0) {
                 embed.addFields({name: 'Cures', values: item.properties.cures.join('\n'), inline: true});
