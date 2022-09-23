@@ -60,11 +60,7 @@ const defaultFunction = {
 
             const prog = await progress.getSafeProgress(interaction.user.id);
 
-            if (item.iconLink) {
-                embed.setThumbnail(item.iconLink);
-            } else {
-                embed.setThumbnail(item.imageLink);
-            }
+            embed.setThumbnail(item.iconLink);
 
             const size = parseInt(item.width) * parseInt(item.height);
             let bestTraderName = false;

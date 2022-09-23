@@ -14,7 +14,6 @@ const getItemsByName = async (searchString) => {
             height
             weight
             iconLink
-            imageLink
             link
             category {
                 name
@@ -39,6 +38,11 @@ const getItemsByName = async (searchString) => {
                         value
                         percent
                         skillName
+                    }
+                }
+                ...on ItemPropertiesWeapon {
+                    defaultPreset {
+                        iconLink
                     }
                 }
             }
@@ -320,9 +324,15 @@ const getItemsByName = async (searchString) => {
             }
         }
     }`;
-    return graphqlRequest({
+    const response = await graphqlRequest({
         graphql: itemsQuery,
     });
+    response.data?.items.forEach(item => {
+        if (item.properties?.defaultPreset) {
+            item.iconLink = item.properties.defaultPreset.iconLink;
+        }
+    });
+    return response;
 };
 
 export default getItemsByName;
