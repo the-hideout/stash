@@ -43,6 +43,17 @@ const getItemsByName = async (searchString) => {
                 ...on ItemPropertiesWeapon {
                     defaultPreset {
                         iconLink
+                        width
+                        height
+                        traderPrices {
+                            price
+                            priceRUB
+                            currency
+                            trader {
+                                id
+                                name
+                            }
+                        }
                     }
                 }
             }
@@ -330,6 +341,29 @@ const getItemsByName = async (searchString) => {
     response.data?.items.forEach(item => {
         if (item.properties?.defaultPreset) {
             item.iconLink = item.properties.defaultPreset.iconLink;
+            item.bartersFor.forEach(barter => {
+                barter.rewardItems[0].item.iconLink = item.properties.defaultPreset.iconLink;
+            });
+            item.bartersUsing.forEach(barter => {
+                barter.requiredItems.forEach(req => {
+                    if (req.item.id === item.id) {
+                        req.item.iconLink = item.properties.defaultPreset.iconLink;
+                    }
+                });
+            });
+            item.craftsFor.forEach(craft => {
+                craft.rewardItems[0].item.iconLink = item.properties.defaultPreset.iconLink;
+            });
+            item.craftsUsing.forEach(craft => {
+                craft.requiredItems.forEach(req => {
+                    if (req.item.id === item.id) {
+                        req.item.iconLink = item.properties.defaultPreset.iconLink;
+                    }
+                });
+            });
+            item.width = item.properties.defaultPreset.width;
+            item.height = item.properties.defaultPreset.height;
+            item.traderPrices = item.properties.defaultPreset.traderPrices;
         }
     });
     return response;

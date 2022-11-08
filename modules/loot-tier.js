@@ -19,13 +19,28 @@ const updateTiers = async () => {
             avg24hPrice
             lastLowPrice
             sellFor {
-                source
-                price
-                currency
+                vendor {
+                    normalizedName
+                }
+                priceRUB
             }
             types
             width
             height
+            properties {
+                ...on ItemPropertiesWeapon {
+                    defaultPreset {
+                        width
+                        height
+                        sellFor {
+                            vendor {
+                                normalizedName
+                            }
+                            priceRUB
+                        }
+                    }
+                }
+            }
         }
     }`;
 
@@ -51,17 +66,27 @@ const updateTiers = async () => {
         }
     }
 
-    const items = response.data.items;
+    const items = response.data.items.map(item => {
+        if (item.properties?.defaultPreset) {
+            item.width = item.properties.defaultPreset.width;
+            item.height = item.properties.defaultPreset.height;
+            item.sellFor = item.sellFor.filter(sellFor => sellFor.vendor.normalizedName === 'flea-market');
+            item.properties.defaultPreset.sellFor.forEach(sellFor => {
+                if (sellFor.vendor.normalizedName !== 'flea-market') {
+                    item.sellFor.push(sellFor);
+                }
+            });
+        }
+        return item;
+    });
     // get prices per slot
     const prices = [];
-    for (let i = 0; i < items.length; i++) {
-        const item = items[i];
+    for (const item of items) {
         let price = item.avg24hPrice;
         if (item.lastLowPrice < price && item.lastLowPrice > 0) price = item.lastLowPrice
-        for (let ii = 0; ii < item.sellFor.length; ii++) {
-            const traderPrice = item.sellFor[ii];
-            if (traderPrice.source === 'fleaMarket') continue;
-            if (traderPrice.price > price) price = traderPrice.price;
+        for (const traderPrice of item.sellFor) {
+            if (traderPrice.vendor.normalizedName === 'flea-market') continue;
+            if (traderPrice.priceRUB > price) price = traderPrice.priceRUB;
         }
         const size = item.width * item.height;
         const slotValue = Math.round(price / size);
