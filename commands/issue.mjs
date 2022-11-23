@@ -1,15 +1,32 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
+import { SlashCommandBuilder } from "discord.js";
 
 import sendError from '../modules/send-error.mjs';
+import { changeLanguage, t } from '../modules/translations.mjs';
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName("issue")
         .setDescription("Send issues to the developers")
+        .setNameLocalizations({
+            'es-ES': 'problema',
+            ru: 'проблема',
+        })
+        .setDescriptionLocalizations({
+            'es-ES': 'Enviar problemas a los desarrolladores',
+            ru: 'Отправить проблемы разработчикам',
+        })
         .addStringOption(option => option
             .setRequired(true)
-            .setDescription("Enter your message")
             .setName("message")
+            .setDescription("Enter your message")
+            .setNameLocalizations({
+                'es-ES': 'mensaje',
+                ru: 'сообщение',
+            })
+            .setDescriptionLocalizations({
+                'es-ES': 'Ingrese su mensaje',
+                ru: 'Введите сообщение',
+            })
             .setRequired(true)
         ),
 
@@ -19,8 +36,9 @@ const defaultFunction = {
 
         sendError(client, member, details);
 
+        changeLanguage(interaction.locale);
         interaction.reply({
-            content: "Thanks for reporting, we're on it!",
+            content: t("Thanks for reporting, we're on it!"),
             ephemeral: true,
         });
     },

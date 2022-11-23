@@ -1,5 +1,5 @@
 import {
-    MessageEmbed,
+    EmbedBuilder,
 } from 'discord.js';
 
 // Admin only command that returns the servers and the reach the bot has
@@ -10,7 +10,7 @@ const servers = (message, client) => {
     }
 
     const sendTo = message.fallbackChannel || message.channel;
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
 
     // Collect data from all shards
     const promises = [

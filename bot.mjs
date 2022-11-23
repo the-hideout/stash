@@ -4,14 +4,15 @@ import "@sentry/tracing";
 
 import {
     Client,
-    Intents,
-    Permissions,
+    GatewayIntentBits,
+    PermissionsBitField,
     Collection,
 } from 'discord.js';
 
 import commands from './classic-commands/index.mjs';
-import autocomplete, { fillCache } from './modules/autocomplete.mjs';
+import autocomplete from './modules/autocomplete.mjs';
 import progress from "./modules/progress-shard.mjs";
+import { updateAll } from './modules/game-data.mjs';
 
 if (process.env.NODE_ENV === 'production') {
     Sentry.init({
@@ -24,9 +25,9 @@ if (process.env.NODE_ENV === 'production') {
 
 const discordClient = new Client({
     intents: [
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.DIRECT_MESSAGES,
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.DirectMessages,
     ],
     partials: ["CHANNEL"],
 });
@@ -42,9 +43,9 @@ for (const file of commandFiles) {
     discordClient.commands.set(command.default.data.name, command);
 }
 
-console.time('Fill-autocomplete-cache');
-await fillCache();
-console.timeEnd('Fill-autocomplete-cache');
+console.time('Prefetch-game-data');
+await updateAll();
+console.timeEnd('Prefetch-game-data');
 
 discordClient.on('ready', () => {
     console.log(`Logged in as ${discordClient.user.tag} on shard ${discordClient.shard.ids[0]}`);
@@ -116,14 +117,14 @@ discordClient.on('messageCreate', async message => {
             continue;
         }
 
-        if (message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.SEND_MESSAGES)) {
+        if (message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(PermissionsBitField.Flags.SendMessages)) {
             const user = await discordClient.users.fetch(message.author.id, false);
             user.send(`Missing posting permissions in ${message.guild.name}#${message.channel.name} (${message.guild.id}). Replying here instead.\n\rIf you want to fix this, talk to your discord admin`);
 
             message.fallbackChannel = user;
         }
 
-        if (message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.EMBED_LINKS)) {
+        if (message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(PermissionsBitField.Flags.EmbedLinks)) {
             const user = await discordClient.users.fetch(message.author.id, false);
             user.send(`Missing embed permissions in ${message.guild.name}#${message.channel.name} (${message.guild.id}). Replying here instead.\n\rIf you want to fix this, talk to your discord admin`);
 
@@ -144,7 +145,7 @@ discordClient.on('messageCreate', async message => {
 
 discordClient.on('interactionCreate', async interaction => {
     if (interaction.isAutocomplete()) {
-        let options = autocomplete(interaction);
+        let options = await autocomplete(interaction);
 
         options = options.splice(0, 25);
 

@@ -1,7 +1,8 @@
 import fs from 'fs';
 
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+
+import { changeLanguage, t } from '../modules/translations.mjs';
 
 function getCommandOptions(command) {
     let optionString = '';
@@ -48,33 +49,52 @@ for (const file of commandFiles) {
         syntax: buildSyntax(command.default.data),
         examples: command.default.examples
     }
-    commandChoices.push([command.default.data.name, command.default.data.name]);
+    commandChoices.push({name: command.default.data.name, value: command.default.data.name});
 }
-commandChoices.push(['help', 'help']);
-commandChoices = commandChoices.sort();
+commandChoices.push({name: 'help', value: 'help'});
+commandChoices = commandChoices.sort((a,b) => {
+    return a.name.localeCompare(b.name);
+});
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('help')
         .setDescription('Tells you a bit about the bot commands')
+        .setNameLocalizations({
+            'es-ES': 'ayuda',
+            ru: 'помощь',
+        })
+        .setDescriptionLocalizations({
+            'es-ES': 'Te cuenta un poco sobre los comandos del bot.',
+            ru: 'расскажет вам немного о командах бота',
+        })
         .addStringOption(option => option
             .setName('command')
             .setDescription('Get help about command')
-            .setChoices(commandChoices)
+            .setNameLocalizations({
+                'es-ES': 'comando',
+                ru: 'приказ',
+            })
+            .setDescriptionLocalizations({
+                'es-ES': 'Obtener ayuda sobre el comando',
+                ru: 'Получить помощь по приказ',
+            })
+            .setChoices(...commandChoices)
         ),
 
     async execute(interaction) {
-        const embed = new MessageEmbed();
+        const embed = new EmbedBuilder();
         const helpCommand = interaction.options.getString('command');
+        changeLanguage(interaction.locale);
 
         if (!commands[helpCommand]) {
-            embed.setTitle("Available Commands");
-            embed.setDescription(`Need Help or Have Questions?
+            embed.setTitle(t('Available Commands'));
+            embed.setDescription(`${t('Need Help or Have Questions?')}
         [Come visit us in our server.](https://discord.gg/XPAsKGHSzH)
-        You can learn more about the bot's commands by entering:`);
+        ${t('You can learn more about the bot\'s commands by entering:')}`);
             embed.addFields({ 
-                name: '/help [command]', 
-                value: 'Where [command] is one of the following commands: \n'+Object.keys(commands).join('\n')
+                name: t('/help [command]'), 
+                value: `${t('Where [command] is one of the following commands:')} \n`+Object.keys(commands).join('\n')
             });
 
             await interaction.reply({ embeds: [embed] });
@@ -84,7 +104,7 @@ const defaultFunction = {
 
         const cmd = commands[helpCommand];
 
-        embed.setTitle("Help for /" + helpCommand);
+        embed.setTitle(t("Help for /") + helpCommand);
 
         if (typeof cmd.syntax === 'string') {
             // no subcommands
@@ -98,7 +118,7 @@ const defaultFunction = {
                 }
             }
             if (examples.length > 0) {
-                exampleString = `\n\nExamples: \n ${examples.join('\n')}`;
+                exampleString = `\n\n${t('Examples')}: \n ${examples.join('\n')}`;
             }
             embed.addFields({name: cmd.syntax, value: cmd.description+exampleString});
         } else {
@@ -114,7 +134,7 @@ const defaultFunction = {
                     }
                 }
                 if (examples.length > 0) {
-                    exampleString = `\n\nExamples: \n ${examples.join('\n')}`;
+                    exampleString = `\n\n${t('Examples')}: \n ${examples.join('\n')}`;
                 }
                 const syntax = cmd.syntax[subCommand.name];
                 embed.addFields({name: syntax, value: subCommand.description+exampleString});

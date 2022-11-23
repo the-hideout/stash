@@ -1,8 +1,9 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import got from 'got';
 import * as cheerio from 'cheerio';
 import TurndownService from 'turndown';
+
+import { changeLanguage, t } from '../modules/translations.mjs';
 
 const MAX_EMBED_LENGTH = 4096;
 const URL = 'https://www.escapefromtarkov.com/news?page=1&filter=2';
@@ -36,21 +37,30 @@ const getPatchNotes = async () => {
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('patchnotes')
-        .setDescription('get latest patch notes'),
+        .setDescription('Get latest patch notes')
+        .setNameLocalizations({
+            'es-ES': 'notasparche',
+            ru: 'примечаниякпатчу',
+        })
+        .setDescriptionLocalizations({
+            'es-ES': 'Obtén las últimas notas del parche',
+            ru: 'Получить последние примечания к патчу',
+        }),
     async execute(interaction) {
         await interaction.deferReply();
         
         const notes = await getPatchNotes();
 
+        changeLanguage(interaction.locale);
         var message;
         if (notes.notes.length >= MAX_EMBED_LENGTH) {
-            const truncateMessage = `...\n\nToo many notes to display.\n\nClick [here](${notes.link}) for full notes.`;
+            const truncateMessage = `...\n\n${t('Too many notes to display.')}\n\n${t('[Click here]({{url}}) for full notes.', {url: notes.link})}`;
             message = notes.notes.substring(0, MAX_EMBED_LENGTH-truncateMessage.length)+truncateMessage;
         } else {
             message = notes.notes
         }
 
-        const embed = new MessageEmbed();
+        const embed = new EmbedBuilder();
         embed.setURL(notes.link);
         embed.setTitle(`${notes.title}`);
         embed.setFooter({text: notes.date});

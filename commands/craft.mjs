@@ -1,8 +1,8 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
-import getItemsByName from '../modules/get-items.mjs';
+import { getItems, getCrafts, getHideout } from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
+import { changeLanguage, t } from '../modules/translations.mjs';
 
 const MAX_CRAFTS = 2;
 
@@ -10,9 +10,25 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('craft')
         .setDescription('Find crafts with a specific item')
+        .setNameLocalizations({
+            'es-ES': 'artesanía',
+            ru: 'ремесло',
+        })
+        .setDescriptionLocalizations({
+            'es-ES': 'Encuentra artesanías con un artículo específico',
+            ru: 'Найти поделки с определенным предметом',
+        })
         .addStringOption(option => {
             return option.setName('name')
                 .setDescription('Item name to search for')
+                .setNameLocalizations({
+                    'es-ES': 'nombre',
+                    ru: 'имя',
+                })
+                .setDescriptionLocalizations({
+                    'es-ES': 'Nombre del elemento a buscar',
+                    ru: 'Название элемента для поиска',
+                })
                 .setAutocomplete(true)
                 .setRequired(true);
         }),
@@ -22,8 +38,9 @@ const defaultFunction = {
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
+            changeLanguage(interaction.locale);
             await interaction.editReply({
-                content: 'You need to specify a search term',
+                content: t('You need to specify a search term'),
                 ephemeral: true,
             });
 
@@ -32,21 +49,30 @@ const defaultFunction = {
 
         const matchedCrafts = [];
 
-        const response = await getItemsByName(searchString.toLowerCase());
+        const [items, crafts, stations] = await Promise.all([
+            getItems(interaction.locale),
+            getCrafts(),
+            getHideout(interaction.locale),
+        ]);
 
-        for (const item of response.data.items) {
+        const searchedItems = items.filter(item => item.name.toLowerCase().includes(searchString.toLowerCase()));
+
+        for (const item of searchedItems) {
             for (const craft of item.craftsFor) {
-                matchedCrafts.push(craft);
+                if (matchedCrafts.includes(craft.id)) continue;
+                matchedCrafts.push(craft.id);
             }
             for (const craft of item.craftsUsing) {
-                matchedCrafts.push(craft);
+                if (matchedCrafts.includes(craft.id)) continue;
+                matchedCrafts.push(craft.id);
             }
         }
 
         if (matchedCrafts.length === 0) {
+            changeLanguage(interaction.locale);
             await interaction.deleteReply();
             await interaction.followUp({
-                content: `Found no matching crafts for "${searchString}"`,
+                content: t('Found no results for "{{searchString}}"', {searchString: searchString}),
                 ephemeral: true,
             });
 
@@ -57,15 +83,18 @@ const defaultFunction = {
 
         const prog = await progress.getSafeProgress(interaction.user.id);
 
+        changeLanguage(interaction.locale);
+
         for (let i = 0; i < matchedCrafts.length; i = i + 1) {
-            const craft = matchedCrafts[i];
+            const craft = crafts.find(c => c.id === matchedCrafts[i]);
             let totalCost = 0;
-            const embed = new MessageEmbed();
-            const toolsEmbed = new MessageEmbed();
-            toolsEmbed.setTitle('Required Tools 🛠️');
+            const embed = new EmbedBuilder();
+            const toolsEmbed = new EmbedBuilder();
+            toolsEmbed.setTitle(`${t('Required Tools')} 🛠️`);
             let toolCost = 0;
 
-            let title = craft.rewardItems[0].item.name;
+            const rewardItem = items.find(it => it.id === craft.rewardItems[0].item.id)
+            let title = rewardItem.name;
 
             if (craft.rewardItems[0].count > 1) {
                 title += " (" + craft.rewardItems[0].count + ")";
@@ -75,22 +104,23 @@ const defaultFunction = {
             let timeDiscount = prog.skills['crafting']*0.0075*craft.duration;
             measuredTime.setSeconds(craft.duration - timeDiscount);
             const locked = prog.hideout[craft.station.id] < craft.level ? '🔒' : '';
-            title += `\n${craft.station.name} level ${craft.level} (${measuredTime.toISOString().substr(11, 8)})${locked}`;
+            title += `\n${stations.find(st => st.id === craft.station.id).name} ${t('level')} ${craft.level} (${measuredTime.toISOString().substr(11, 8)})${locked}`;
             embed.setTitle(title);
-            embed.setURL(`${craft.rewardItems[0].item.link}#${i}`);
+            embed.setURL(`${rewardItem.link}#${i}`);
 
-            if (craft.rewardItems[0].item.iconLink) {
-                embed.setThumbnail(craft.rewardItems[0].item.iconLink);
+            if (rewardItem.iconLink) {
+                embed.setThumbnail(rewardItem.iconLink);
             }
 
             for (const req of craft.requiredItems) {
-                let itemCost = req.item.avg24hPrice;
+                const reqItem = items.find(it => it.id === req.item.id);
+                let itemCost = reqItem.avg24hPrice;
 
-                if (req.item.lastLowPrice > itemCost && req.item.lastLowPrice > 0) {
-                    itemCost = req.item.lastLowPrice;
+                if (reqItem.lastLowPrice > itemCost && reqItem.lastLowPrice > 0) {
+                    itemCost = reqItem.lastLowPrice;
                 }
 
-                for (const offer of req.item.buyFor) {
+                for (const offer of reqItem.buyFor) {
                     if (!offer.vendor.trader) {
                         continue;
                     }
@@ -111,28 +141,29 @@ const defaultFunction = {
                 }
                 if (isTool) {
                     toolCost += itemCost * req.count;
-                    toolsEmbed.addFields({name: req.item.name, value: itemCost.toLocaleString() + "₽ x " + req.count, inline: true});
+                    toolsEmbed.addFields({name: reqItem.name, value: itemCost.toLocaleString() + "₽ x " + req.count, inline: true});
                     if(!toolsEmbed.thumbnail) {
-                        toolsEmbed.setThumbnail(req.item.iconLink);
+                        toolsEmbed.setThumbnail(reqItem.iconLink);
                     }
                     continue;
                 }
                 let quantity = req.count;
                 // water filter consumption rate reduction
-                if (craft.station.id === '5d484fc8654e760065037abf' && req.item.id === '5d1b385e86f774252167b98a') {
+                if (craft.station.id === '5d484fc8654e760065037abf' && reqItem.id === '5d1b385e86f774252167b98a') {
                     let time = prog.skills['crafting']*0.0075*quantity;
                     let consumption = prog.skills['hideoutManagement']*0.005*quantity;
                     quantity = Math.round((quantity - time - consumption) * 100) /100;
                 }
                 totalCost += itemCost * quantity;
                 //totalCost += req.item.avg24hPrice * req.count;
-                embed.addFields({name: req.item.name, value: itemCost.toLocaleString() + '₽ x ' + quantity, inline: true});
+                embed.addFields({name: reqItem.name, value: itemCost.toLocaleString() + '₽ x ' + quantity, inline: true});
             }
-            embed.addFields({name: 'Total', value: totalCost.toLocaleString() + '₽', inline: false});
+            embed.addFields({name: t('Total'), value: totalCost.toLocaleString() + '₽', inline: false});
 
             embeds.push(embed);
-            if (toolsEmbed.fields.length > 0) {
-                toolsEmbed.addFields({name: 'Total', value: toolCost.toLocaleString() + '₽', inline: false});
+            console.log(toolsEmbed)
+            if (toolsEmbed.data.fields?.length > 0) {
+                toolsEmbed.addFields({name: t('Total'), value: toolCost.toLocaleString() + '₽', inline: false});
                 embeds.push(toolsEmbed);
             }
 
@@ -142,18 +173,21 @@ const defaultFunction = {
         }
 
         if (matchedCrafts.length > MAX_CRAFTS) {
-            const ending = new MessageEmbed();
+            const ending = new EmbedBuilder();
 
-            ending.setTitle("+" + (matchedCrafts.length - MAX_CRAFTS) + " more");
+            ending.setTitle("+" + (matchedCrafts.length - MAX_CRAFTS) + ` ${('more')}`);
             ending.setURL("https://tarkov.dev/hideout-profit/?search=" + encodeURIComponent(searchString));
 
             let otheritems = '';
 
             for (let i = MAX_CRAFTS; i < matchedCrafts.length; i = i + 1) {
-                const bitemname = `[${matchedCrafts[i].rewardItems[0].item.name}](${matchedCrafts[i].rewardItems[0].item.link}) (${matchedCrafts[i].station.name} level ${matchedCrafts[i].level})`;
+                const craft = crafts.find(c => c.id === matchedCrafts[i]);
+                const rewardItem = items.find(it => it.id === craft.rewardItems[0].item.id);
+                const station = stations.find(s => s.id === craft.station.id);
+                const bitemname = `[${rewardItem.name}](${rewardItem.link}) (${station.name} level ${craft.level})`;
 
                 if (bitemname.length + 4 + otheritems.length > 2048) {
-                    ending.setFooter({text: `${matchedCrafts.length-i} additional results not shown.`,});
+                    ending.setFooter({text: `${matchedCrafts.length-i} ${t('additional results not shown.')}`,});
 
                     break;
                 }

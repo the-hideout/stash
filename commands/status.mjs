@@ -1,7 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import {
-    MessageEmbed,
-} from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import graphqlRequest from '../modules/graphql-request.mjs';
 import generalError from '../modules/general-error.mjs';
 
@@ -22,10 +19,18 @@ const colorCodes = [
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('status')
-        .setDescription('Gives you the current server status'),
+        .setDescription('Gives you the current server status')
+        .setNameLocalizations({
+            'es-ES': 'estado',
+            ru: 'статус',
+        })
+        .setDescriptionLocalizations({
+            'es-ES': 'Le da el estado actual del servidor',
+            ru: 'Дает вам текущий статус сервера',
+        }),
     async execute(interaction) {
         await interaction.deferReply();
-        const embed = new MessageEmbed();
+        const embed = new EmbedBuilder();
         let currentStatus;
 
         try {

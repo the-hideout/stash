@@ -1,20 +1,20 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import gameData from '../modules/game-data.mjs';
+import { changeLanguage, t } from '../modules/translations.mjs';
 
 const baseImageUrl = 'https://assets.tarkov.dev';
 
 const bossDetails = [
     {
-        "name": "cultist priest",
+        "name": "cultist-priest",
         "details": "Sneaky bois. Cultists lurk in the shadows in groups of 3-5, waiting for a player to approach. They silently approach their enemies and stab them using either normal knives or, in case of the priests, the poisoned Cultist knife. If fired upon, the Cultists will return fire using firearms and grenades. After they attack a player with their knife, they may choose to run off into the woods again and return to the shadows.",
         "image": `${baseImageUrl}/cultist-priest.jpg`,
         "health": 850,
         "loot": "Secure Flash drive, SAS drive, Cultist knife"
     },
     {
-        "name": "death knight",
+        "name": "death-knight",
         "details": "The leader of 'The Goons'. Can spawn on many different maps.",
         "image": `${baseImageUrl}/death-knight.jpg`,
         "health": 1120,
@@ -68,11 +68,27 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('boss')
         .setDescription('Get detailed information about a boss')
+        .setNameLocalizations({
+            'es-ES': 'jefe',
+            ru: 'босс',
+        })
+        .setDescriptionLocalizations({
+            'es-ES': 'Obtener información detallada sobre un jefe',
+            ru: 'Получить подробную информацию о боссе',
+        })
         .addStringOption(option => option
             .setName('boss')
             .setDescription('Select a boss')
+            .setNameLocalizations({
+                'es-ES': 'jefe',
+                ru: 'босс',
+            })
+            .setDescriptionLocalizations({
+                'es-ES': 'Selecciona un jefe',
+                ru: 'Выберите босса',
+            })
             .setRequired(true)
-            .setChoices(gameData.bosses.choices())
+            .setChoices(...gameData.bosses.choices())
         ),
 
     async execute(interaction) {
@@ -82,20 +98,20 @@ const defaultFunction = {
         const bossName = interaction.options.getString('boss');
 
         // Fetch all current map/boss data
-        const maps = await gameData.maps.getAll();
+        const maps = await gameData.maps.getAll(interaction.locale);
 
         // Construct the embed
-        const embed = new MessageEmbed();
+        const embed = new EmbedBuilder();
+
+        changeLanguage(interaction.locale);
 
         // Add base fields to the embed
-        embed.setTitle(bossName);
-
         // Construct the description with boss details
-        let details = 'Unknown';
-        let health = 'Unknown';
-        let loot = 'Unknown';
+        let details = t('Unknown');
+        let health = t('Unknown');
+        let loot = t('Unknown');
         for (const boss of bossDetails) {
-            if (boss.name.toLowerCase() === bossName.toLowerCase()) {
+            if (boss.name === bossName) {
                 details = boss.details;
                 health = boss.health;
                 loot = boss.loot;
@@ -103,20 +119,21 @@ const defaultFunction = {
                 break;
             }
         }
-        let description = '💡 **About:**\n';
+        let description = `💡 **${t('About')}:**\n`;
         description += `${details}\n\n`;
-        description += `• 💚 **Health:** ${health}\n`;
-        description += `• 💎 **Unique Loot:** ${loot}\n`;
+        description += `• 💚 **${t('Health')}:** ${health}\n`;
+        description += `• 💎 **${t('Special Loot')}:** ${loot}\n`;
 
         embed.setDescription(description);
 
         const mapEmbeds = [];
         for (const map of maps) {
             // Only use the data for the boss specified in the command
-            const bossData = map.bosses.find(boss => boss.name === bossName);
+            const bossData = map.bosses.find(boss => boss.normalizedName === bossName);
             if (!bossData) continue;
 
-            const mapEmbed = new MessageEmbed();
+            embed.setTitle(bossData.name);
+            const mapEmbed = new EmbedBuilder();
             mapEmbed.setTitle(map.name);
             //mapEmbed.addFields({name: 'Map', value: `${map.name} (${bossData.spawnChance * 100}%)`, inline: false});
 
@@ -128,9 +145,9 @@ const defaultFunction = {
 
             var spawnTime;
             if (bossData.spawnTime === -1) {
-                spawnTime = 'Raid Start';
+                spawnTime = t('Raid Start');
             } else {
-                spawnTime = `${bossData.spawnTime} seconds`;
+                spawnTime = `${bossData.spawnTime} ${t('seconds')}`;
             }
 
             // Format the embed description body
@@ -138,18 +155,18 @@ const defaultFunction = {
             // description += `• **Spawn Locations**: ${spawnLocations}\n`;
 
             mapEmbed.addFields(
-                { name: 'Spawn Chance 🎲', value: `${bossData.spawnChance * 100}%`, inline: true },
-                { name: 'Spawn Locations 📍', value: spawnLocations, inline: true },
+                { name: `${t('Spawn Chance')} 🎲`, value: `${bossData.spawnChance * 100}%`, inline: true },
+                { name: `${t('Spawn Locations')} 📍`, value: spawnLocations, inline: true },
                 //{ name: 'Spawn Time 🕒', value: spawnTime, inline: true },
             );
             if (escortNames) {
-                mapEmbed.addFields({name: 'Escort 💂', value: escortNames, inline: true});
+                mapEmbed.addFields({name: `${t('Escort')} 💂`, value: escortNames, inline: true});
             }
             mapEmbeds.push(mapEmbed);
         }
         if (mapEmbeds.length === 1) {
-            embed.addFields({name: 'Map', value: mapEmbeds[0].title, inline: false});
-            for (const field of mapEmbeds[0].fields) {
+            embed.addFields({name: t('Map'), value: mapEmbeds[0].data.title, inline: false});
+            for (const field of mapEmbeds[0].data.fields) {
                 embed.addFields({name: field.name, value: field.value, inline: true});
             }
             mapEmbeds.length = 0;

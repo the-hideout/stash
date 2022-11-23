@@ -1,6 +1,7 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import got from 'got';
+
+import { changeLanguage, t } from '../modules/translations.mjs';
 
 const URL = 'https://tarkov-changes.com';
 const MAX_EMBED_LENGTH = 4096;
@@ -18,23 +19,33 @@ const getChanges = async () => {
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('changes')
-        .setDescription('Get the latest changes for EFT'),
+        .setDescription('Get the latest changes for EFT')
+        .setNameLocalizations({
+            'es-ES': 'cambios',
+            ru: 'изменения',
+        })
+        .setDescriptionLocalizations({
+            'es-ES': 'Obtenga los últimos cambios para EFT',
+            ru: 'Получить последние изменения для побега из Таркова',
+        }),
     async execute(interaction) {
         await interaction.deferReply();
         
         const data = await getChanges();
+        
+        changeLanguage(interaction.locale);
 
-        var message = `**Changes provided by https://tarkov-changes.com**\n\n${data}`;
+        var message = `**${t('Changes provided by')} https://tarkov-changes.com**\n\n${data}`;
 
         if (message.length >= MAX_EMBED_LENGTH) {
-            message = `Sorry, the current change list is too long to be displayed in Discord\n\nPlease visit ${URL} for more information`;
+            message = `${t('Sorry, the current change list is too long to be displayed in Discord')}\n\n${t('Please visit {{url}} for more information', {url: URL})}`;
         }
 
-        const embed = new MessageEmbed();
+        const embed = new EmbedBuilder();
         embed.setURL(URL);
-        embed.setTitle('Latest EFT Changes 🗒️');
+        embed.setTitle(`${t('Latest EFT Changes')} 🗒️`);
         embed.setDescription(message);
-        embed.setFooter({text: `Get the full data from ${URL}`});
+        embed.setFooter({text: t('Get the full data from {{url}}', {url: URL})});
         await interaction.editReply({ embeds: [embed] });
     }
 };

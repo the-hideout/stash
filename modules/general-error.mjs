@@ -1,5 +1,5 @@
 import {
-    MessageEmbed,
+    EmbedBuilder,
 } from 'discord.js';
 
 // Send a generic error message as an embed
@@ -7,7 +7,7 @@ import {
 // :param message: The message text to send
 const generalError = async (interaction, message) => {
     const sendTo = interaction.fallbackChannel || interaction.channel;
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
 
     message = message || 'An error has occurred';
     message = `${interaction.user} ${message}`;
