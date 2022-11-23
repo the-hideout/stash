@@ -164,7 +164,7 @@ const defaultFunction = {
         if (matchedBarters.length > MAX_BARTERS) {
             const ending = new EmbedBuilder();
 
-            ending.setTitle("+" + (matchedBarters.length - MAX_BARTERS) + ` ${t(more)}`);
+            ending.setTitle("+" + (matchedBarters.length - MAX_BARTERS) + ` ${t('more')}`);
             ending.setURL("https://tarkov.dev/barters/?search=" + encodeURIComponent(searchString));
 
             let otheritems = '';
