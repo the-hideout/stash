@@ -58,7 +58,7 @@ const translationResources = {
             'Item Tier': 'Nivel de Artículo',
             'kg': 'kg',
             'Latest EFT Changes': 'Últimos cambios de EFT',
-            'Last Updated': 'Última actualización',
+            'Last Updated': 'Actualización anterior',
             '⭐ Legendary ⭐': '⭐ Legendario ⭐',
             'Level': 'Nivel',
             'level': 'nivel',
