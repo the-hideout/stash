@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: branch-deploy
         id: branch-deploy
-        uses: github/branch-deploy@13475966d6676e2eb5825486fd7b8993bb2d6f7c # pin@v3.0.1
+        uses: github/branch-deploy@668add1b55ab3b7aff46668d95c4501aebdf2541 # pin@v3.0.3
         with:
           admins: the-hideout/core-contributors
           admins_pat: ${{ secrets.BRANCH_DEPLOY_ADMINS_PAT }}
