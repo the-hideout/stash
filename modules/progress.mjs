@@ -31,7 +31,8 @@ const defaultProgress = {
     level: 15,
     hideout: {},
     traders: {},
-    skills: {}
+    skills: {},
+    locale: 'en-US',
 };
 
 const tarkovTrackerUpdateIntervalMinutes = 1;
@@ -52,7 +53,8 @@ const buildDefaultProgress = id => {
         skills: {},
         alerts: {
             restock: []
-        }
+        },
+        locale: 'en-US',
     };
     for (const stationId in defaultProgress.hideout) {
         progress.hideout[stationId] = defaultProgress.hideout[stationId];
@@ -218,10 +220,13 @@ const optimalFleaPrice = async (id, baseValue, lowerBound, upperBound) => {
     return highPrice;
 };
 
-const addRestockAlert = async (id, traders) => {
+const addRestockAlert = async (id, traders, locale) => {
     await loaded();
     if (typeof traders === 'string') traders = [traders];
     const prog = await getUserProgress(id);
+    if (locale) {
+        prog.locale = locale;
+    }
     const restockAlerts = prog.alerts.restock;
     for (const traderId of traders) {
         if (!restockAlerts.includes(traderId)) restockAlerts.push(traderId);
@@ -229,10 +234,13 @@ const addRestockAlert = async (id, traders) => {
     return prog.alerts.restock;
 };
 
-const removeRestockAlert = async (id, traders) => {
+const removeRestockAlert = async (id, traders, locale) => {
     await loaded();
     if (typeof traders === 'string') traders = [traders];
     const prog = await getUserProgress(id);
+    if (locale) {
+        prog.locale = locale;
+    }
     prog.alerts.restock = prog.alerts.restock.filter(traderId => !traders.includes(traderId));
     return prog.alerts.restock;
 };
@@ -249,16 +257,16 @@ const getShardReply = async(shardId, message) => {
     });
 };
 
-const messageUser = async (userId, message, shardId = 0) => {
-    return getShardReply(shardId, {data: 'messageUser', userId: userId, message: message}).catch(error => {
-        if (shardingManager.shards.has(shardId+1)) return messageUser(userId, message, shardId+1);
+const messageUser = async (userId, message, messageValues, shardId = 0) => {
+    return getShardReply(shardId, {data: 'messageUser', userId: userId, message: message, messageValues: messageValues}).catch(error => {
+        if (shardingManager.shards.has(shardId+1)) return messageUser(userId, message, messageValues, shardId+1);
         return Promise.reject(error);
     });
 };
 
-function messageChannel(guildId, channelId, message, shardId = 0) {
-    return getShardReply(shardId, {data: 'messageChannel', guildId: guildId, channelId: channelId, message: message}).catch(error => {
-        if (shardingManager.shards.has(shardId+1)) return messageChannel(guildId, channelId, message, shardId+1);
+function messageChannel(guildId, channelId, message, messageValues, shardId = 0) {
+    return getShardReply(shardId, {data: 'messageChannel', guildId: guildId, channelId: channelId, message: message, messageValues: messageValues}).catch(error => {
+        if (shardingManager.shards.has(shardId+1)) return messageChannel(guildId, channelId, message, messageValues, shardId+1);
         return Promise.reject(error);
     });
 }
@@ -274,11 +282,13 @@ const startRestockAlerts = async () => {
                 const alertTime = new Date(trader.resetTime) - new Date() - 1000 * 60;
                 if (alertTime < 0) continue;
                 setTimeout(() => {
-                    const restockMessage = `🛒 ${trader.name} restock in 1 minute 🛒`;
+                    const restockMessage = '🛒 {{trader.name}} restock in {{numMinutes}} minute(s) 🛒';
+                    const messageVars = {trader, numMinutes: tarkovTrackerUpdateIntervalMinutes};
                     for (const userId in userProgress) {
                         if (!userProgress[userId].alerts) continue;
                         if (userProgress[userId].alerts.restock.includes(trader.id)) {
-                            messageUser(userId, restockMessage).catch(error => {
+                            messageVars.lng = userProgress[userId].locale;
+                            messageUser(userId, restockMessage, messageVars).catch(error => {
                                 console.log(`Error sending ${trader.name} restock notification to user ${userId}: ${error.message}`);
                                 if (error.message === 'Cannot send messages to this user') {
                                     console.log(`Disabling restock alerts for user ${userId}`);
@@ -293,7 +303,7 @@ const startRestockAlerts = async () => {
                             if (!guildSettings.restockAlertChannel) {
                                 continue;
                             }
-                            messageChannel(guildId, guildSettings.restockAlertChannel, restockMessage).catch(error => {
+                            messageChannel(guildId, guildSettings.restockAlertChannel, restockMessage, messageVars).catch(error => {
                                 console.log(`Error sending ${trader.name} restock notification to channel ${guildId} ${guildSettings.restockAlertChannel}: ${error.message}`);
                                 userProgress.guilds[guildId].restockAlertChannel = false;
                             });

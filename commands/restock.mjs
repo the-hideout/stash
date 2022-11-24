@@ -4,12 +4,14 @@ import { ChannelType, PermissionFlagsBits } from 'discord-api-types/v10';
 
 import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
-import { changeLanguage, t } from '../modules/translations.mjs';
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
 
 const subCommands = {
     show: async interaction => {
         await interaction.deferReply({ephemeral: true});
-        changeLanguage(interaction.locale);
+        const t = getFixedT(interaction.locale);
         try {
             //let prog = progress.getProgress(interaction.user.id);
             const traders = await gameData.traders.getAll();
@@ -36,6 +38,7 @@ const subCommands = {
     },
     alert: async interaction => {
         await interaction.deferReply({ephemeral: true});
+        const t = getFixedT(interaction.locale);
         const traders = await gameData.traders.getAll();
         let traderId = interaction.options.getString('trader');
         const sendAlert = interaction.options.getBoolean('send_alert');
@@ -49,12 +52,11 @@ const subCommands = {
         let alertsFor = [];
         let action = 'enabled';
         if (sendAlert) {
-            alertsFor = await progress.addRestockAlert(interaction.user.id, traderId);
+            alertsFor = await progress.addRestockAlert(interaction.user.id, traderId, interaction.locale);
         } else {
             action = 'disabled';
-            alertsFor = await progress.removeRestockAlert(interaction.user.id, traderId);
+            alertsFor = await progress.removeRestockAlert(interaction.user.id, traderId, interaction.locale);
         }
-        changeLanguage(interaction.locale);
         let allAlerts = '';
         if ((sendAlert && alertsFor.length > 1 && alertsFor.length !== traders.length) || (!sendAlert && alertsFor.length > 0)) {
             allAlerts = `\n${t('You have alerts enabled for')}: ` + alertsFor.map(traderId => {
@@ -95,46 +97,46 @@ const defaultFunction = {
         .setName('restock')
         .setDescription('Show or set alerts for trader restock timers')
         .setNameLocalizations({
-            'es-ES': 'repoblar',
-            ru: 'пополнить_запасы',
+            'es-ES': comT('restock', {lng: 'es-ES'}),
+            ru: comT('restock', {lng: 'ru'}),
         })
         .setDescriptionLocalizations({
-            'es-ES': 'Mostrar o establecer alertas para los temporizadores de reabastecimiento del comerciante',
-            ru: 'Показать или настроить оповещения для таймеров пополнения запасов трейдера',
+            'es-ES': comT('restock_desc', {lng: 'es-ES'}),
+            ru: comT('restock_desc', {lng: 'ru'}),
         })
         .addSubcommand(subcommand => subcommand
             .setName('show')
             .setDescription('Show trader restock timers')
             .setNameLocalizations({
-                'es-ES': 'mostrar',
-                ru: 'показывать',
+                'es-ES': comT('show', {lng: 'es-ES'}),
+                ru: comT('show', {lng: 'ru'}),
             })
             .setDescriptionLocalizations({
-                'es-ES': 'Mostrar temporizadores de reposición de comerciantes',
-                ru: 'Показать таймеры пополнения запасов трейдеров',
+                'es-ES': comT('restock_show_desc', {lng: 'es-ES'}),
+                ru: comT('restock_show_desc', {lng: 'ru'}),
             })
         )
         .addSubcommand(subcommand => subcommand
             .setName('alert')
             .setDescription('Set alerts for trader restocks')
             .setNameLocalizations({
-                'es-ES': 'alerta',
-                ru: 'тревога',
+                'es-ES': comT('alert', {lng: 'es-ES'}),
+                ru: comT('alert', {lng: 'ru'}),
             })
             .setDescriptionLocalizations({
-                'es-ES': 'Establezca alertas para reabastecimientos de comerciantes',
-                ru: 'Установите оповещения о пополнении запасов трейдера',
+                'es-ES': comT('restock_alert_desc', {lng: 'es-ES'}),
+                ru: comT('restock_alert_desc', {lng: 'ru'}),
             })
             .addStringOption(option => option
                 .setName('trader')
                 .setDescription('Trader')
                 .setNameLocalizations({
-                    'es-ES': 'comerciante',
-                    ru: 'торговец',
+                    'es-ES': comT('trader', {lng: 'es-ES'}),
+                    ru: comT('trader', {lng: 'ru'}),
                 })
                 .setDescriptionLocalizations({
-                    'es-ES': 'Comerciante',
-                    ru: 'Tорговец',
+                    'es-ES': comT('Trader', {lng: 'es-ES'}),
+                    ru: comT('Trader', {lng: 'ru'}),
                 })
                 .setRequired(true)
                 .setChoices(...gameData.traders.choices(true))
@@ -143,12 +145,12 @@ const defaultFunction = {
                 .setName('send_alert')
                 .setDescription('Whether to send an alert')
                 .setNameLocalizations({
-                    'es-ES': 'enviar_alerta',
-                    ru: 'отправить_оповещение',
+                    'es-ES': comT('send_alert', {lng: 'es-ES'}),
+                    ru: comT('send_alert', {lng: 'ru'}),
                 })
                 .setDescriptionLocalizations({
-                    'es-ES': 'Ya sea para enviar una alerta',
-                    ru: 'Отправлять ли оповещение',
+                    'es-ES': comT('restock_alert_send_desc', {lng: 'es-ES'}),
+                    ru: comT('restock_alert_send_desc', {lng: 'ru'}),
                 })
                 .setRequired(true)
             )
@@ -157,23 +159,23 @@ const defaultFunction = {
             .setName('channel')
             .setDescription('Announce trader restocks in a Discord channel')
             .setNameLocalizations({
-                'es-ES': 'canal',
-                ru: 'канал',
+                'es-ES': comT('channel', {lng: 'es-ES'}),
+                ru: comT('channel', {lng: 'ru'}),
             })
             .setDescriptionLocalizations({
-                'es-ES': 'Anuncie las reposiciones de los comerciantes en un canal de Discord',
-                ru: 'Объявите трейдеру о пополнении запасов в канале Discord',
+                'es-ES': comT('restock_channel_desc', {lng: 'es-ES'}),
+                ru: comT('restock_channel_desc', {lng: 'ru'}),
             })
             .addChannelOption(option => 
                 option.setName('channel')
                 .setDescription('The channel on this server in which to make announcements')
                 .setNameLocalizations({
-                    'es-ES': 'canal',
-                    ru: 'канал',
+                    'es-ES': comT('channel', {lng: 'es-ES'}),
+                    ru: comT('channel', {lng: 'ru'}),
                 })
                 .setDescriptionLocalizations({
-                    'es-ES': 'El canal en este servidor en el que hacer anuncios.',
-                    ru: 'Канал на этом сервере, в котором делать объявления',
+                    'es-ES': comT('restock_channel_select', {lng: 'es-ES'}),
+                    ru: comT('restock_channel_select', {lng: 'ru'}),
                 })
                 .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement))
         ),

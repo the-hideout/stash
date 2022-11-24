@@ -6,22 +6,25 @@ import {
 } from 'discord.js';
 import got from 'got';
 
-import { changeLanguage, t } from '../modules/translations.mjs';
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('about')
         .setDescription('Tells you a bit about the bot')
         .setNameLocalizations({
-            'es-ES': 'sobre',
-            ru: 'о',
+            'es-ES': comT('about', {lng: 'es-ES'}),
+            ru: comT('about', {lng: 'ru'}),
         })
         .setDescriptionLocalizations({
-            'es-ES': 'Te cuenta un poco sobre el bot',
-            ru: 'Рассказывает немного о боте',
+            'es-ES': comT('about_desc', {lng: 'es-ES'}),
+            ru: comT('about_desc', {lng: 'ru'}),
         }),
     async execute(interaction) {
         await interaction.deferReply();
+        const t = getFixedT(interaction.locale);
         const embed = new EmbedBuilder();
         let data;
 
@@ -34,8 +37,6 @@ const defaultFunction = {
             console.error(loadError);
         }
 
-        changeLanguage(interaction.locale);
-        embed.setTitle(`Stash - ${t('EFT Discord Bot')}`);
         embed.setURL('https://github.com/the-hideout/stash');
         embed.setDescription(t('The official Tarkov.dev Discord bot! An open source project by The Hideout to help you play Escape from Tarkov.'));
         embed.setAuthor({

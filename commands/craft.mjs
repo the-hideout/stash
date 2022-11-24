@@ -2,32 +2,34 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import { getItems, getCrafts, getHideout } from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
-import { changeLanguage, t } from '../modules/translations.mjs';
+import { getFixedT } from '../modules/translations.mjs';
 
 const MAX_CRAFTS = 2;
+
+const comT = getFixedT(null, 'command');
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('craft')
         .setDescription('Find crafts with a specific item')
         .setNameLocalizations({
-            'es-ES': 'artesanía',
-            ru: 'ремесло',
+            'es-ES': comT('craft', {lng: 'es-ES'}),
+            ru: comT('craft', {lng: 'ru'}),
         })
         .setDescriptionLocalizations({
-            'es-ES': 'Encuentra artesanías con un artículo específico',
-            ru: 'Найти поделки с определенным предметом',
+            'es-ES': comT('craft_desc', {lng: 'es-ES'}),
+            ru: comT('craft_desc', {lng: 'ru'}),
         })
         .addStringOption(option => {
             return option.setName('name')
                 .setDescription('Item name to search for')
                 .setNameLocalizations({
-                    'es-ES': 'nombre',
-                    ru: 'имя',
+                    'es-ES': comT('name', {lng: 'es-ES'}),
+                    ru: comT('name', {lng: 'ru'}),
                 })
                 .setDescriptionLocalizations({
-                    'es-ES': 'Nombre del elemento a buscar',
-                    ru: 'Название элемента для поиска',
+                    'es-ES': comT('craft_name_desc', {lng: 'es-ES'}),
+                    ru: comT('craft_name_desc', {lng: 'ru'}),
                 })
                 .setAutocomplete(true)
                 .setRequired(true);
@@ -35,10 +37,10 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
+        const t = getFixedT(interaction.locale);
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
-            changeLanguage(interaction.locale);
             await interaction.editReply({
                 content: t('You need to specify a search term'),
                 ephemeral: true,
@@ -69,7 +71,6 @@ const defaultFunction = {
         }
 
         if (matchedCrafts.length === 0) {
-            changeLanguage(interaction.locale);
             await interaction.deleteReply();
             await interaction.followUp({
                 content: t('Found no results for "{{searchString}}"', {searchString: searchString}),
@@ -82,8 +83,6 @@ const defaultFunction = {
         let embeds = [];
 
         const prog = await progress.getSafeProgress(interaction.user.id);
-
-        changeLanguage(interaction.locale);
 
         for (let i = 0; i < matchedCrafts.length; i = i + 1) {
             const craft = crafts.find(c => c.id === matchedCrafts[i]);

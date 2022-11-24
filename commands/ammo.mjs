@@ -2,7 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import asciiTable from 'ascii-table';
 
 import { getAmmo } from '../modules/game-data.mjs';
-import { changeLanguage, t } from '../modules/translations.mjs';
+import { getFixedT } from '../modules/translations.mjs';
 
 const ammoLabels = {
     Caliber12g: '12/70',
@@ -28,37 +28,39 @@ const ammoLabels = {
     Caliber9x39: '9x39mm',
     Caliber127x55: '12.7x55mm',
     Caliber1143x23ACP: '.45 ACP',
-  };
+};
+
+const comT = getFixedT(null, 'command');
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('ammo')
         .setDescription('Get ammunition information')
         .setNameLocalizations({
-            'es-ES': 'munición',
-            ru: 'патроны',
+            'es-ES': comT('ammo', {lng: 'es-ES'}),
+            ru: comT('ammo', {lng: 'ru'}),
         })
         .setDescriptionLocalizations({
-            'es-ES': 'Obtener información de municiones',
-            ru: 'Получить информацию о боеприпасах',
+            'es-ES': comT('ammo_desc', {lng: 'es-ES'}),
+            ru: comT('ammo_desc', {lng: 'ru'}),
         })
         .addStringOption(option => option
             .setName('name')
             .setDescription('Enter the ammo type')
             .setNameLocalizations({
-                'es-ES': 'nombre',
-                ru: 'имя',
+                'es-ES': comT('name', {lng: 'es-ES'}),
+                ru: comT('name', {lng: 'ru'}),
             })
             .setDescriptionLocalizations({
-                'es-ES': 'Introduce el tipo de munición',
-                ru: 'Введите тип боеприпасов',
+                'es-ES': comT('ammo_name_desc', {lng: 'es-ES'}),
+                ru: comT('ammo_name_desc', {lng: 'ru'}),
             })
             .setAutocomplete(true)
             .setRequired(true)
         ),
     async execute(interaction) {
         await interaction.deferReply();
-        changeLanguage(interaction.locale);
+        const t = getFixedT(interaction.locale);
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {

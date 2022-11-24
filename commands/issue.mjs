@@ -1,42 +1,44 @@
 import { SlashCommandBuilder } from "discord.js";
 
 import sendError from '../modules/send-error.mjs';
-import { changeLanguage, t } from '../modules/translations.mjs';
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName("issue")
         .setDescription("Send issues to the developers")
         .setNameLocalizations({
-            'es-ES': 'problema',
-            ru: 'проблема',
+            'es-ES': comT('issue', {lng: 'es-ES'}),
+            ru: comT('issue', {lng: 'ru'}),
         })
         .setDescriptionLocalizations({
-            'es-ES': 'Enviar problemas a los desarrolladores',
-            ru: 'Отправить проблемы разработчикам',
+            'es-ES': comT('issue_desc', {lng: 'es-ES'}),
+            ru: comT('issue_desc', {lng: 'ru'}),
         })
         .addStringOption(option => option
             .setRequired(true)
             .setName("message")
             .setDescription("Enter your message")
             .setNameLocalizations({
-                'es-ES': 'mensaje',
-                ru: 'сообщение',
+                'es-ES': comT('message', {lng: 'es-ES'}),
+                ru: comT('message', {lng: 'ru'}),
             })
             .setDescriptionLocalizations({
-                'es-ES': 'Ingrese su mensaje',
-                ru: 'Введите сообщение',
+                'es-ES': comT('issue_message_desc', {lng: 'es-ES'}),
+                ru: comT('issue_message_desc', {lng: 'ru'}),
             })
             .setRequired(true)
         ),
 
     async execute(interaction) {
+        const t = getFixedT(interaction.locale);
         const { client, member } = interaction;
         const details = interaction.options.getString("message");
 
         sendError(client, member, details);
 
-        changeLanguage(interaction.locale);
         interaction.reply({
             content: t("Thanks for reporting, we're on it!"),
             ephemeral: true,

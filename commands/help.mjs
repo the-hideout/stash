@@ -2,7 +2,9 @@ import fs from 'fs';
 
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
-import { changeLanguage, t } from '../modules/translations.mjs';
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
 
 function getCommandOptions(command) {
     let optionString = '';
@@ -61,31 +63,31 @@ const defaultFunction = {
         .setName('help')
         .setDescription('Tells you a bit about the bot commands')
         .setNameLocalizations({
-            'es-ES': 'ayuda',
-            ru: 'помощь',
+            'es-ES': comT('help', {lng: 'es-ES'}),
+            ru: comT('help', {lng: 'ru'}),
         })
         .setDescriptionLocalizations({
-            'es-ES': 'Te cuenta un poco sobre los comandos del bot.',
-            ru: 'расскажет вам немного о командах бота',
+            'es-ES': comT('help_desc', {lng: 'es-ES'}),
+            ru: comT('help_desc', {lng: 'ru'}),
         })
         .addStringOption(option => option
             .setName('command')
             .setDescription('Get help about command')
             .setNameLocalizations({
-                'es-ES': 'comando',
-                ru: 'приказ',
+                'es-ES': comT('command', {lng: 'es-ES'}),
+                ru: comT('command', {lng: 'ru'}),
             })
             .setDescriptionLocalizations({
-                'es-ES': 'Obtener ayuda sobre el comando',
-                ru: 'Получить помощь по приказ',
+                'es-ES': comT('help_command_desc', {lng: 'es-ES'}),
+                ru: comT('help_command_desc', {lng: 'ru'}),
             })
             .setChoices(...commandChoices)
         ),
 
     async execute(interaction) {
+        const t = getFixedT(interaction.locale);
         const embed = new EmbedBuilder();
         const helpCommand = interaction.options.getString('command');
-        changeLanguage(interaction.locale);
 
         if (!commands[helpCommand]) {
             embed.setTitle(t('Available Commands'));

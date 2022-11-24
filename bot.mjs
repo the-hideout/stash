@@ -12,7 +12,8 @@ import {
 import commands from './classic-commands/index.mjs';
 import autocomplete from './modules/autocomplete.mjs';
 import progress from "./modules/progress-shard.mjs";
-import { updateAll } from './modules/game-data.mjs';
+import { updateAll, getTraders } from './modules/game-data.mjs';
+import { t } from './modules/translations.mjs';
 
 if (process.env.NODE_ENV === 'production') {
     Sentry.init({
@@ -61,9 +62,17 @@ discordClient.on('ready', () => {
         if (message.type === 'getReply') {
             if (message.data === 'messageUser') {
                 const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], userId: message.userId, success: false}};
-                discordClient.users.fetch(message.userId).then(user => {
+                discordClient.users.fetch(message.userId).then(async user => {
                     if (!user) return Promise.reject(new Error('User not found'));
-                    user.send(message.message).then(() => {
+                    if (typeof message.messageValues === 'object') {
+                        for (const field in message.messageValues) {
+                            if (field === 'trader') {
+                                const traders = await getTraders(message.messageValues?.lng);
+                                message.messageValues.trader = traders.find(tr => tr.id === message.messageValues.trader.id);
+                            }
+                        }
+                    }
+                    user.send(t(message.message, message.messageValues)).then(() => {
                         response.data.success = true;
                         discordClient.shard.send(response);
                     }).catch(error => {
@@ -79,10 +88,18 @@ discordClient.on('ready', () => {
                 const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], guildId: message.guildId, channelId: message.channelId, success: false}};
                 discordClient.guilds.fetch(message.guildId).then(guild => {
                     if (!guild) return Promise.reject(new Error('Guild not found'));
-                    guild.channels.fetch(message.channelId).then(channel => {
+                    guild.channels.fetch(message.channelId).then(async channel => {
                         if (!channel) return Promise.reject(new Error('Channel not found'));
                         if (!channel.isTextBased) return Promise.reject(new Error('Channel is not text-based'));
-                        channel.send(message.message).then(() => {
+                        if (typeof message.messageValues === 'object') {
+                            for (const field in message.messageValues) {
+                                if (field === 'trader') {
+                                    const traders = await getTraders(guild.preferredLocale);
+                                    message.messageValues.trader = traders.find(tr => tr.id === message.messageValues.trader.id);
+                                }
+                            }
+                        }
+                        channel.send(t(message.message, message.messageValues)).then(() => {
                             response.data.success = true;
                             discordClient.shard.send(response);
                         }).catch(error => {

@@ -1,23 +1,25 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import { formatHMS } from '../modules/utils.mjs';
-import { changeLanguage, t } from '../modules/translations.mjs';
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('uptime')
         .setDescription('Shows the uptime of the bot')
         .setNameLocalizations({
-            'es-ES': 'uptime',
-            ru: 'uptime',
+            'es-ES': comT('uptime', {lng: 'es-ES'}),
+            ru: comT('uptime', {lng: 'ru'}),
         })
         .setDescriptionLocalizations({
-            'es-ES': 'Muestra el tiempo de actividad del bot.',
-            ru: 'Показывает время работы бота',
+            'es-ES': comT('uptime_desc', {lng: 'es-ES'}),
+            ru: comT('uptime_desc', {lng: 'ru'}),
         }),
     async execute(interaction) {
+        const t = getFixedT(interaction.locale);
         const embed = new EmbedBuilder();
-        changeLanguage(interaction.locale);
         embed.setTitle(`${('Stash Uptime')} ⌛`);
 
         const uptime = process.uptime();

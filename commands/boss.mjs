@@ -1,7 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import gameData from '../modules/game-data.mjs';
-import { changeLanguage, t } from '../modules/translations.mjs';
+import { getFixedT } from '../modules/translations.mjs';
 
 const baseImageUrl = 'https://assets.tarkov.dev';
 
@@ -62,30 +62,32 @@ const bossDetails = [
         "health": 1220,
         "loot": "Crye Precision AVS MBAV (Tagilla Edition), L1 (Norepinephrine) injector, Bitcoin, Tagilla's welding mask, BOSS cap"
     }
-]
+];
+
+const comT = getFixedT(null, 'command');
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('boss')
         .setDescription('Get detailed information about a boss')
         .setNameLocalizations({
-            'es-ES': 'jefe',
-            ru: 'босс',
+            'es-ES': comT('boss', {lng: 'es-ES'}),
+            ru: comT('boss', {lng: 'ru'}),
         })
         .setDescriptionLocalizations({
-            'es-ES': 'Obtener información detallada sobre un jefe',
-            ru: 'Получить подробную информацию о боссе',
+            'es-ES': comT('boss_desc', {lng: 'es-ES'}),
+            ru: comT('boss_desc', {lng: 'ru'}),
         })
         .addStringOption(option => option
             .setName('boss')
             .setDescription('Select a boss')
             .setNameLocalizations({
-                'es-ES': 'jefe',
-                ru: 'босс',
+                'es-ES': comT('boss', {lng: 'es-ES'}),
+                ru: comT('boss', {lng: 'ru'}),
             })
             .setDescriptionLocalizations({
-                'es-ES': 'Selecciona un jefe',
-                ru: 'Выберите босса',
+                'es-ES': comT('boss_select', {lng: 'es-ES'}),
+                ru: comT('boss_select', {lng: 'ru'}),
             })
             .setRequired(true)
             .setChoices(...gameData.bosses.choices())
@@ -93,6 +95,7 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
+        const t = getFixedT(interaction.locale);
 
         // Get the boss name from the command interaction
         const bossName = interaction.options.getString('boss');
@@ -102,8 +105,6 @@ const defaultFunction = {
 
         // Construct the embed
         const embed = new EmbedBuilder();
-
-        changeLanguage(interaction.locale);
 
         // Add base fields to the embed
         // Construct the description with boss details

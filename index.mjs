@@ -47,10 +47,10 @@ manager.on('shardCreate', shard => {
                     response.data = await progress.getRestockAlerts(message.userId);
                 }
                 if (message.data === 'addUserTraderRestockAlert') {
-                    response.data = await progress.addRestockAlert(message.userId, message.traders);
+                    response.data = await progress.addRestockAlert(message.userId, message.traders, message.locale);
                 }
                 if (message.data === 'removeUserTraderRestockAlert') {
-                    response.data = await progress.removeRestockAlert(message.userId, message.traders);
+                    response.data = await progress.removeRestockAlert(message.userId, message.traders, message.locale);
                 }
                 if (message.data === 'setUserTarkovTrackerToken') {
                     await progress.setToken(message.userId, message.token);

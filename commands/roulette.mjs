@@ -1,7 +1,9 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import fs from 'fs';
 
-import { changeLanguage, t } from '../modules/translations.mjs';
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
 
 const rouletteData = JSON.parse(fs.readFileSync('data/roulette.json'));
 
@@ -10,17 +12,17 @@ const defaultFunction = {
         .setName('roulette')
         .setDescription('Spin the roulette wheel for a fun or challenging game of Tarkov!')
         .setNameLocalizations({
-            'es-ES': 'ruleta',
-            ru: 'рулетка',
+            'es-ES': comT('roulette', {lng: 'es-ES'}),
+            ru: comT('roulette', {lng: 'ru'}),
         })
         .setDescriptionLocalizations({
-            'es-ES': '¡Gira la rueda de la ruleta para un juego divertido o desafiante de Tarkov!',
-            ru: 'Вращайте рулетку для веселой или сложной игры в тарков!',
+            'es-ES': comT('roulette_desc', {lng: 'es-ES'}),
+            ru: comT('roulette_desc', {lng: 'ru'}),
         }),
     async execute(interaction) {
-        const draw = rouletteData[Math.floor(Math.random()*rouletteData.length)];
+        const t = getFixedT(interaction.locale);
 
-        changeLanguage(interaction.locale);
+        const draw = rouletteData[Math.floor(Math.random()*rouletteData.length)];
 
         const embed = new EmbedBuilder();
         embed.setTitle(draw.name);

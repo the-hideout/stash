@@ -2,30 +2,32 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import gameData from '../modules/game-data.mjs';
 import realTimeToTarkovTime from '../modules/time.mjs';
-import { changeLanguage, t } from '../modules/translations.mjs';
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('map')
         .setDescription('Get detailed information about a map')
         .setNameLocalizations({
-            'es-ES': 'mapa',
-            ru: 'карта',
+            'es-ES': comT('map', {lng: 'es-ES'}),
+            ru: comT('map', {lng: 'ru'}),
         })
         .setDescriptionLocalizations({
-            'es-ES': 'Obtener información detallada sobre un mapa',
-            ru: 'Получить подробную информацию о карте',
+            'es-ES': comT('map_desc', {lng: 'es-ES'}),
+            ru: comT('map_desc', {lng: 'ru'}),
         })
         .addStringOption(option => option
             .setName('map')
             .setDescription('Select a map')
             .setNameLocalizations({
-                'es-ES': 'mapa',
-                ru: 'карта',
+                'es-ES': comT('map', {lng: 'es-ES'}),
+                ru: comT('map', {lng: 'ru'}),
             })
             .setDescriptionLocalizations({
-                'es-ES': 'Seleccione un mapa',
-                ru: 'Выберите карту',
+                'es-ES': comT('map_select', {lng: 'es-ES'}),
+                ru: comT('map_select', {lng: 'ru'}),
             })
             .setRequired(true)
             .setChoices(...gameData.maps.choices())
@@ -33,12 +35,12 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
+        const t = getFixedT(interaction.locale);
         const mapId = interaction.options.getString('map');
 
         const mapData = await gameData.maps.getAll(interaction.locale);
         const embed = new EmbedBuilder();
 
-        changeLanguage(interaction.locale);
         const selectedMapData = mapData.find(mapObject => mapObject.id === mapId);
         let displayDuration = `${selectedMapData.raidDuration} ${t('minutes')}`;
 

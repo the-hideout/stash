@@ -1,7 +1,9 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import { getStims } from '../modules/game-data.mjs';
-import { changeLanguage, t } from '../modules/translations.mjs';
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
 
 const MAX_ITEMS = 2;
 
@@ -10,29 +12,30 @@ const defaultFunction = {
         .setName('stim')
         .setDescription('Get stim injector information')
         .setNameLocalizations({
-            'es-ES': 'estimular',
-            ru: 'стим',
+            'es-ES': comT('stim', {lng: 'es-ES'}),
+            ru: comT('stim', {lng: 'ru'}),
         })
         .setDescriptionLocalizations({
-            'es-ES': 'Obtener información del inyector de estimulación',
-            ru: 'Получить информацию о стим-инжекторе',
+            'es-ES': comT('stim_desc', {lng: 'es-ES'}),
+            ru: comT('stim_desc', {lng: 'ru'}),
         })
         .addStringOption(option => {
             return option.setName('name')
                 .setDescription('Stim to search for')
                 .setNameLocalizations({
-                    'es-ES': 'nombre',
-                    ru: 'имя',
+                    'es-ES': comT('name', {lng: 'es-ES'}),
+                    ru: comT('name', {lng: 'ru'}),
                 })
                 .setDescriptionLocalizations({
-                    'es-ES': 'Estimular a buscar',
-                    ru: 'Стим для поиска',
+                    'es-ES': comT('stim_name_desc', {lng: 'es-ES'}),
+                    ru: comT('stim_name_desc', {lng: 'ru'}),
                 })
                 .setAutocomplete(true)
                 .setRequired(true);
         }),
 
     async execute(interaction) {
+        const t = getFixedT(interaction.locale);
         await interaction.deferReply();
         // Get the search string from the user invoked command
         let searchString = interaction.options.getString('name');
@@ -50,8 +53,6 @@ const defaultFunction = {
                 break;
             }
         }
-
-        changeLanguage(interaction.locale);
 
         for (let i = 0; i < matchedStims.length; i = i + 1) {
             const item = matchedStims[i];

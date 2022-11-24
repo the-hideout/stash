@@ -1,24 +1,26 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import lootTier, { getTiers } from '../modules/loot-tier.mjs';
-import { changeLanguage, t } from '../modules/translations.mjs';
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('tier')
         .setDescription('Shows the criteria for loot tiers')
         .setNameLocalizations({
-            'es-ES': 'tier',
-            ru: 'ярус',
+            'es-ES': comT('tier', {lng: 'es-ES'}),
+            ru: comT('tier', {lng: 'ru'}),
         })
         .setDescriptionLocalizations({
-            'es-ES': 'Muestra los criterios para los niveles de botín.',
-            ru: 'Показывает критерии уровней добычи',
+            'es-ES': comT('tier_desc', {lng: 'es-ES'}),
+            ru: comT('tier_desc', {lng: 'ru'}),
         }),
 
     async execute(interaction) {
+        const t = getFixedT(interaction.locale);
         const tiers = getTiers();
-        changeLanguage(interaction.locale);
         const embed = new EmbedBuilder()
             .setTitle(t('Loot Tiers'))
             .setDescription(`

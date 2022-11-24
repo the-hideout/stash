@@ -4,7 +4,9 @@ import moment from 'moment/min/moment-with-locales.js';
 import lootTier from '../modules/loot-tier.mjs';
 import progress from '../modules/progress-shard.mjs';
 import { getBarters, getCrafts, getItems, getTraders, getHideout } from '../modules/game-data.mjs';
-import { changeLanguage, t } from '../modules/translations.mjs';
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
 
 const MAX_ITEMS = 2;
 
@@ -13,23 +15,23 @@ const defaultFunction = {
         .setName('price')
         .setDescription('Get an item\'s flea and trader value')
         .setNameLocalizations({
-            'es-ES': 'precio',
-            ru: 'цена',
+            'es-ES': comT('price', {lng: 'es-ES'}),
+            ru: comT('price', {lng: 'ru'}),
         })
         .setDescriptionLocalizations({
-            'es-ES': 'Obtenga el valor de pulgas y comerciante de un artículo',
-            ru: 'Получите блоху предмета и ценность торговца',
+            'es-ES': comT('price_desc', {lng: 'es-ES'}),
+            ru: comT('price_desc', {lng: 'ru'}),
         })
         .addStringOption(option => {
             return option.setName('name')
                 .setDescription('Item name to search for')
                 .setNameLocalizations({
-                    'es-ES': 'nombre',
-                    ru: 'имя',
+                    'es-ES': comT('name', {lng: 'es-ES'}),
+                    ru: comT('name', {lng: 'ru'}),
                 })
                 .setDescriptionLocalizations({
-                    'es-ES': 'Nombre del elemento a buscar',
-                    ru: 'Название элемента для поиска',
+                    'es-ES': comT('price_name_desc', {lng: 'es-ES'}),
+                    ru: comT('price_name_desc', {lng: 'ru'}),
                 })
                 .setAutocomplete(true)
                 .setRequired(true);
@@ -37,6 +39,7 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
+        const t = getFixedT(interaction.locale);
         // Get the search string from the user invoked command
         const searchString = interaction.options.getString('name');
 
@@ -48,7 +51,6 @@ const defaultFunction = {
             getCrafts(),
         ]);
         const matchedItems = items.filter(i => i.name.toLowerCase().includes(searchString.toLowerCase()));
-        changeLanguage(interaction.locale);
 
         if (matchedItems.length === 0) {
             await interaction.deleteReply();
