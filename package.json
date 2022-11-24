@@ -22,7 +22,7 @@
     "cloudflare": "^2.9.1",
     "cron": "^1.8.2",
     "cross-env": "^7.0.3",
-    "discord-api-types": "^0.26.0",
+    "discord-api-types": "^0.37.19",
     "discord.js": "^14.6.0",
     "dotenv": "^14.1.0",
     "got": "^12.1.0",

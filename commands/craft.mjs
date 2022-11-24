@@ -141,7 +141,7 @@ const defaultFunction = {
                 }
                 if (isTool) {
                     toolCost += itemCost * req.count;
-                    toolsEmbed.addFields({name: reqItem.name, value: itemCost.toLocaleString() + "₽ x " + req.count, inline: true});
+                    toolsEmbed.addFields({name: reqItem.name, value: itemCost.toLocaleString(interaction.locale) + "₽ x " + req.count, inline: true});
                     if(!toolsEmbed.thumbnail) {
                         toolsEmbed.setThumbnail(reqItem.iconLink);
                     }
@@ -156,14 +156,14 @@ const defaultFunction = {
                 }
                 totalCost += itemCost * quantity;
                 //totalCost += req.item.avg24hPrice * req.count;
-                embed.addFields({name: reqItem.name, value: itemCost.toLocaleString() + '₽ x ' + quantity, inline: true});
+                embed.addFields({name: reqItem.name, value: itemCost.toLocaleString(interaction.locale) + '₽ x ' + quantity, inline: true});
             }
-            embed.addFields({name: t('Total'), value: totalCost.toLocaleString() + '₽', inline: false});
+            embed.addFields({name: t('Total'), value: totalCost.toLocaleString(interaction.locale) + '₽', inline: false});
 
             embeds.push(embed);
             console.log(toolsEmbed)
             if (toolsEmbed.data.fields?.length > 0) {
-                toolsEmbed.addFields({name: t('Total'), value: toolCost.toLocaleString() + '₽', inline: false});
+                toolsEmbed.addFields({name: t('Total'), value: toolCost.toLocaleString(interaction.locale) + '₽', inline: false});
                 embeds.push(toolsEmbed);
             }
 

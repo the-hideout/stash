@@ -1,5 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import moment from 'moment/min/moment-with-locales.js';
+import { ChannelType, PermissionFlagsBits } from 'discord-api-types/v10';
 
 import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
@@ -63,6 +64,28 @@ const subCommands = {
 
         await interaction.editReply({
             content: `✅ ${t(`Restock alert ${action} for {{traderName}}.`, {traderName: forWho})}${allAlerts}`
+        });
+    },
+    channel: async interaction => {
+        await interaction.deferReply({ephemeral: true});
+        const isAdmin = interaction.memberPermissions.has(PermissionFlagsBits.Administrator);
+        if (!isAdmin) {
+            await interaction.editReply({
+                content: `❌ ${t('You must be an administrator to set channel restock alerts.')}`
+            });
+            return;
+        }
+        const channel = interaction.options.getChannel('channel');
+        if (!channel) {
+            await progress.setRestockAlertChannel(interaction.guildId, false);
+            await interaction.editReply({
+                content: `✅ ${t('Restock alert channel disabled for this server.')}`
+            });
+            return;
+        }
+        const result = await progress.setRestockAlertChannel(interaction.guildId, channel?.id);
+        await interaction.editReply({
+            content: `✅ ${t('Restock alert channel set to #{{channelName}}.', {channelName: channel.name})}`
         });
     },
 };
@@ -129,8 +152,31 @@ const defaultFunction = {
                 })
                 .setRequired(true)
             )
+        )
+        .addSubcommand(subcommand => subcommand
+            .setName('channel')
+            .setDescription('Announce trader restocks in a Discord channel')
+            .setNameLocalizations({
+                'es-ES': 'canal',
+                ru: 'канал',
+            })
+            .setDescriptionLocalizations({
+                'es-ES': 'Anuncie las reposiciones de los comerciantes en un canal de Discord',
+                ru: 'Объявите трейдеру о пополнении запасов в канале Discord',
+            })
+            .addChannelOption(option => 
+                option.setName('channel')
+                .setDescription('The channel on this server in which to make announcements')
+                .setNameLocalizations({
+                    'es-ES': 'canal',
+                    ru: 'канал',
+                })
+                .setDescriptionLocalizations({
+                    'es-ES': 'El canal en este servidor en el que hacer anuncios.',
+                    ru: 'Канал на этом сервере, в котором делать объявления',
+                })
+                .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement))
         ),
-
     async execute(interaction) {
         subCommands[interaction.options._subcommand](interaction);
     },

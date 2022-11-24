@@ -102,15 +102,15 @@ const defaultFunction = {
             if (item.avg24hPrice > 0) {
                 tierFee = await progress.getFleaMarketFee(interaction.user.id, item.avg24hPrice, item.basePrice);
                 //tierPrice -= avgFee;
-                let fleaPrice = parseInt(item.avg24hPrice).toLocaleString() + "₽";
+                let fleaPrice = parseInt(item.avg24hPrice).toLocaleString(interaction.locale) + "₽";
 
                 if (size > 1) {
-                    fleaPrice += "\r\n" + Math.round(parseInt(item.avg24hPrice) / size).toLocaleString() + `₽/${t('slot')}`;
+                    fleaPrice += "\r\n" + Math.round(parseInt(item.avg24hPrice) / size).toLocaleString(interaction.locale) + `₽/${t('slot')}`;
                 }
-                fleaPrice += `\r\n\r\n ${t('Fee')}: ~${tierFee.toLocaleString()}₽`;
-                fleaPrice += `\r\n ${t('Net')}: ${parseInt(item.avg24hPrice-tierFee).toLocaleString()}₽`;
+                fleaPrice += `\r\n\r\n ${t('Fee')}: ~${tierFee.toLocaleString(interaction.locale)}₽`;
+                fleaPrice += `\r\n ${t('Net')}: ${parseInt(item.avg24hPrice-tierFee).toLocaleString(interaction.locale)}₽`;
                 if (size > 1) {
-                    fleaPrice += `\r\n ${Math.round(parseInt(item.avg24hPrice-tierFee) / size).toLocaleString()}₽/${t('slot')}`;
+                    fleaPrice += `\r\n ${Math.round(parseInt(item.avg24hPrice-tierFee) / size).toLocaleString(interaction.locale)}₽/${t('slot')}`;
                 }
 
                 embed.addFields({name: t('Flea Price (avg)'), value: fleaPrice, inline: true});
@@ -118,15 +118,15 @@ const defaultFunction = {
 
             if (item.lastLowPrice > 0) {
                 const lowFee = await progress.getFleaMarketFee(interaction.user.id, item.lastLowPrice, item.basePrice);
-                let fleaPrice = parseInt(item.lastLowPrice).toLocaleString() + "₽";
+                let fleaPrice = parseInt(item.lastLowPrice).toLocaleString(interaction.locale) + "₽";
 
                 if (size > 1) {
-                    fleaPrice += "\r\n" + Math.round(parseInt(item.lastLowPrice) / size).toLocaleString() + `₽/${t('slot')}`;
+                    fleaPrice += "\r\n" + Math.round(parseInt(item.lastLowPrice) / size).toLocaleString(interaction.locale) + `₽/${t('slot')}`;
                 }
-                fleaPrice += `\r\n\r\n ${t('Fee')}: ~${lowFee.toLocaleString()}₽`;
-                fleaPrice += `\r\n ${t('Net')}: ${parseInt(item.lastLowPrice-lowFee).toLocaleString()}₽`;
+                fleaPrice += `\r\n\r\n ${t('Fee')}: ~${lowFee.toLocaleString(interaction.locale)}₽`;
+                fleaPrice += `\r\n ${t('Net')}: ${parseInt(item.lastLowPrice-lowFee).toLocaleString(interaction.locale)}₽`;
                 if (size > 1) {
-                    fleaPrice += `\r\n ${Math.round(parseInt(item.lastLowPrice-lowFee) / size).toLocaleString()}₽/${t('slot')}`;
+                    fleaPrice += `\r\n ${Math.round(parseInt(item.lastLowPrice-lowFee) / size).toLocaleString(interaction.locale)}₽/${t('slot')}`;
                 }
 
                 embed.addFields({name: t('Flea Price (low)'), value: fleaPrice, inline: true});
@@ -143,15 +143,15 @@ const defaultFunction = {
                 tierPrice = optimalPrice;
                 tierFee = optimalFee;
 
-                let fleaPrice = parseInt(optimalPrice).toLocaleString() + "₽";
+                let fleaPrice = parseInt(optimalPrice).toLocaleString(interaction.locale) + "₽";
 
                 if (size > 1) {
-                    fleaPrice += "\r\n" + Math.round(parseInt(optimalPrice) / size).toLocaleString() + `₽/${t('slot')}`;
+                    fleaPrice += "\r\n" + Math.round(parseInt(optimalPrice) / size).toLocaleString(interaction.locale) + `₽/${t('slot')}`;
                 }
-                fleaPrice += `\r\n\r\n ${t('Fee')}: ~${optimalFee.toLocaleString()}₽`;
-                fleaPrice += `\r\n ${t('Net')}: ${parseInt(optimalPrice-optimalFee).toLocaleString()}₽`;
+                fleaPrice += `\r\n\r\n ${t('Fee')}: ~${optimalFee.toLocaleString(interaction.locale)}₽`;
+                fleaPrice += `\r\n ${t('Net')}: ${parseInt(optimalPrice-optimalFee).toLocaleString(interaction.locale)}₽`;
                 if (size > 1) {
-                    fleaPrice += `\r\n ${Math.round(parseInt(optimalPrice-optimalFee) / size).toLocaleString()}₽/${t('slot')}`;
+                    fleaPrice += `\r\n ${Math.round(parseInt(optimalPrice-optimalFee) / size).toLocaleString(interaction.locale)}₽/${t('slot')}`;
                 }
 
                 embed.addFields({name: t('Flea Price (optimal)'), value: fleaPrice, inline: true});
@@ -163,15 +163,15 @@ const defaultFunction = {
                     tierFee = 0;
                     sellTo = bestTraderName;
                 }
-                let traderVal = bestTraderPrice.toLocaleString() + "₽";
+                let traderVal = bestTraderPrice.toLocaleString(interaction.locale) + "₽";
 
                 if (size > 1) {
-                    traderVal += "\r\n" + Math.round(bestTraderPrice / size).toLocaleString() + `₽/${t('slot')}`;
+                    traderVal += "\r\n" + Math.round(bestTraderPrice / size).toLocaleString(interaction.locale) + `₽/${t('slot')}`;
                 }
                 embed.addFields({name: bestTraderName + ` ${t('Value')}`, value: traderVal, inline: true});
             }
 
-            body += `• ${t('Sell to')}: \`${sellTo}\` ${t('for')} \`${tierPrice.toLocaleString() + "₽"}\`\n`;
+            body += `• ${t('Sell to')}: \`${sellTo}\` ${t('for')} \`${tierPrice.toLocaleString(interaction.locale) + "₽"}\`\n`;
 
             // Calculate item tier
             let tier = lootTier(tierPrice / (item.width * item.height), item.types.includes('noFlea'));
@@ -183,7 +183,7 @@ const defaultFunction = {
                     continue;
                 }
 
-                let traderPrice = offer.priceRUB.toLocaleString() + "₽";
+                let traderPrice = offer.priceRUB.toLocaleString(interaction.locale) + "₽";
                 let level = 1;
                 let quest = '';
 
@@ -246,7 +246,7 @@ const defaultFunction = {
                     barterCost += itemCost * req.count;
                 }
 
-                barterCost = Math.round(barterCost / barter.rewardItems[0].count).toLocaleString() + "₽";
+                barterCost = Math.round(barterCost / barter.rewardItems[0].count).toLocaleString(interaction.locale) + "₽";
                 const locked = prog.traders[barter.trader.id] < barter.level ? '🔒' : '';
                 const title = `${traders.find(t => t.id === barter.trader.id).name} ${t('LL')}${barter.level} ${t('Barter')}${locked}`;
                 embed.addFields({name: title, value: barterCost, inline: true});
@@ -277,7 +277,7 @@ const defaultFunction = {
                     }
                     craftCost += itemCost * req.count;
                 }
-                craftCost = Math.round(craftCost / craft.rewardItems[0].count).toLocaleString() + "₽";
+                craftCost = Math.round(craftCost / craft.rewardItems[0].count).toLocaleString(interaction.locale) + "₽";
                 if (craft.rewardItems[0].count > 1) {
                     craftCost += ' (' + craft.rewardItems[0].count + ')';
                 }

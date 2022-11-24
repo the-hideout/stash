@@ -75,6 +75,26 @@ discordClient.on('ready', () => {
                     discordClient.shard.send(response);
                 });
             }
+            if (message.data === 'messageChannel') {
+                const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], guildId: message.guildId, channelId: message.channelId, success: false}};
+                discordClient.guilds.fetch(message.guildId).then(guild => {
+                    if (!guild) return Promise.reject(new Error('Guild not found'));
+                    guild.channels.fetch(message.channelId).then(channel => {
+                        if (!channel) return Promise.reject(new Error('Channel not found'));
+                        if (!channel.isTextBased) return Promise.reject(new Error('Channel is not text-based'));
+                        channel.send(message.message).then(() => {
+                            response.data.success = true;
+                            discordClient.shard.send(response);
+                        }).catch(error => {
+                            response.error = {message: error.message, stack: error.stack};
+                            discordClient.shard.send(response);
+                        });
+                    });
+                }).catch(error => {
+                    response.error = {message: error.message, stack: error.stack};
+                    discordClient.shard.send(response);
+                });
+            }
             return;
         }
         process.emit(message.uuid, message);

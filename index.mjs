@@ -56,6 +56,9 @@ manager.on('shardCreate', shard => {
                     await progress.setToken(message.userId, message.token);
                     response.data = message.token;
                 }
+                if (message.data === 'guildTraderRestockAlertChannel') {
+                    response.data = await progress.setGuildTraderRestockAlertChannel(message.guildId, message.channelId);
+                }
             } catch (error) {
                 response.data = null;
                 response.error = {message: error.message, stack: error.stack};
