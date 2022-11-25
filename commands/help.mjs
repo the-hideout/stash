@@ -1,12 +1,15 @@
 import fs from 'fs';
 
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
-function getCommandOptions(command) {
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
+
+function getCommandOptions(command, locale = 'en') {
     let optionString = '';
     for (const option of command.options) {
-        let optionName = option.name;
+        let optionName = comT(option.name, {lng: locale});
         if (!option.required) {
             optionName = `[${optionName}]`;
         }
@@ -15,22 +18,22 @@ function getCommandOptions(command) {
     return optionString;
 };
 
-function buildSyntax(command, subcommand) {
-    let stem = `/${command.name}`;
+function buildSyntax(command, locale = 'en') {
+    let stem = `/${comT(command.name, {lng: locale})}`;
     let subCommands = false;
     if (command.options.length > 0 && command.options[0].options) {
         subCommands = true;
     }
     if (!subCommands) {
-        return `${stem}${getCommandOptions(command)}`;
+        return `${stem}${getCommandOptions(command, locale)}`;
     } 
     const syntaxes = {};
     for (const sub of command.options) {
-        const subCommandSyntax = `${stem} ${sub.name}${getCommandOptions(sub)}`;
-        if (subcommand && sub.name == sub.name) {
+        //const subCommandSyntax = `${stem} ${sub.name}${getCommandOptions(sub)}`;
+        /*if (subcommand && sub.name == sub.name) {
             return subCommandSyntax;
-        }
-        syntaxes[sub.name] = `${stem} ${sub.name}${getCommandOptions(sub)}`;
+        }*/
+        syntaxes[sub.name] = `${stem} ${comT(sub.name, {lng: locale})}${getCommandOptions(sub, locale)}`;
     }
     return syntaxes;
 };
@@ -42,39 +45,56 @@ const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('
 for (const file of commandFiles) {
     const command = await import(`./${file}`);
     commands[command.default.data.name] = {
-        name: command.default.data.name,
-        description: command.default.data.description,
-        options: command.default.data.options,
-        syntax: buildSyntax(command.default.data),
-        examples: command.default.examples
+        ...command.default.data,
+        hasSubcommands: command.default.data.options.length > 0 && command.default.data.options[0].options,
+        examples: command.default.examples,
     }
-    commandChoices.push([command.default.data.name, command.default.data.name]);
+    commandChoices.push({name: command.default.data.name, value: command.default.data.name});
 }
-commandChoices.push(['help', 'help']);
-commandChoices = commandChoices.sort();
+commandChoices.push({name: 'help', value: 'help'});
+commandChoices = commandChoices.sort((a,b) => {
+    return a.name.localeCompare(b.name);
+});
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('help')
         .setDescription('Tells you a bit about the bot commands')
+        .setNameLocalizations({
+            'es-ES': comT('help', {lng: 'es-ES'}),
+            ru: comT('help', {lng: 'ru'}),
+        })
+        .setDescriptionLocalizations({
+            'es-ES': comT('help_desc', {lng: 'es-ES'}),
+            ru: comT('help_desc', {lng: 'ru'}),
+        })
         .addStringOption(option => option
             .setName('command')
             .setDescription('Get help about command')
-            .setChoices(commandChoices)
+            .setNameLocalizations({
+                'es-ES': comT('command', {lng: 'es-ES'}),
+                ru: comT('command', {lng: 'ru'}),
+            })
+            .setDescriptionLocalizations({
+                'es-ES': comT('help_command_desc', {lng: 'es-ES'}),
+                ru: comT('help_command_desc', {lng: 'ru'}),
+            })
+            .setChoices(...commandChoices)
         ),
 
     async execute(interaction) {
-        const embed = new MessageEmbed();
+        const t = getFixedT(interaction.locale);
+        const embed = new EmbedBuilder();
         const helpCommand = interaction.options.getString('command');
 
         if (!commands[helpCommand]) {
-            embed.setTitle("Available Commands");
-            embed.setDescription(`Need Help or Have Questions?
-        [Come visit us in our server.](https://discord.gg/XPAsKGHSzH)
-        You can learn more about the bot's commands by entering:`);
+            embed.setTitle(t('Available Commands'));
+            embed.setDescription(`${t('Need Help or Have Questions?')}
+                [${t('Come visit us in our server.')}](https://discord.gg/XPAsKGHSzH)
+                ${t('You can learn more about the bot\'s commands by entering:')}`);
             embed.addFields({ 
-                name: '/help [command]', 
-                value: 'Where [command] is one of the following commands: \n'+Object.keys(commands).join('\n')
+                name: t('/help [command]'), 
+                value: `${t('Where [command] is one of the following commands:')} \n`+Object.keys(commands).map(comm => comT(comm, {lng: interaction.locale})).join('\n')
             });
 
             await interaction.reply({ embeds: [embed] });
@@ -84,9 +104,9 @@ const defaultFunction = {
 
         const cmd = commands[helpCommand];
 
-        embed.setTitle("Help for /" + helpCommand);
+        embed.setTitle(t('Help for /') + comT(helpCommand, {lng: interaction.locale}));
 
-        if (typeof cmd.syntax === 'string') {
+        if (!cmd.hasSubcommands) {
             // no subcommands
             let exampleString = '';
             let examples = [];
@@ -98,11 +118,11 @@ const defaultFunction = {
                 }
             }
             if (examples.length > 0) {
-                exampleString = `\n\nExamples: \n ${examples.join('\n')}`;
+                exampleString = `\n\n${t('Examples')}: \n ${examples.map(ex => comT(ex, {lng: interaction.locale})).join('\n')}`;
             }
-            embed.addFields({name: cmd.syntax, value: cmd.description+exampleString});
+            embed.addFields({name: buildSyntax(cmd, interaction.locale), value: comT(`${helpCommand}_desc`, {lng: interaction.locale})+exampleString});
         } else {
-            embed.setDescription(cmd.description);
+            embed.setDescription(comT(`${helpCommand}_desc`, {lng: interaction.locale}));
             for (const subCommand of cmd.options) {
                 let exampleString = '';
                 let examples = [];
@@ -114,27 +134,26 @@ const defaultFunction = {
                     }
                 }
                 if (examples.length > 0) {
-                    exampleString = `\n\nExamples: \n ${examples.join('\n')}`;
+                    exampleString = `\n\n${t('Examples')}: \n ${examples.map(ex => comT(ex, {lng: interaction.locale})).join('\n')}`;
                 }
-                const syntax = cmd.syntax[subCommand.name];
-                embed.addFields({name: syntax, value: subCommand.description+exampleString});
+                const syntaxes = buildSyntax(cmd, interaction.locale);
+                const syntax = syntaxes[subCommand.name];
+                embed.addFields({name: syntax, value: comT(`${helpCommand}_${subCommand.name}_desc`, {lng: interaction.locale})+exampleString});
             }
         }
 
         await interaction.reply({ embeds: [embed] });
     },
     examples: [
-        '/help barter',
-        '/help progress'
+        '/$t(help) $t(barter)',
+        '/$t(help) $t(progress)'
     ]
 };
 
 commands.help = {
-    name: defaultFunction.data.name,
-    description: defaultFunction.data.description,
-    options: defaultFunction.data.options,
-    syntax: buildSyntax(defaultFunction.data),
-    examples: defaultFunction.examples
+    ...defaultFunction.data,
+    hasSubcommands: false,
+    examples: defaultFunction.examples,
 };
 
 export default defaultFunction;

@@ -1,7 +1,8 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import asciiTable from 'ascii-table';
-import getAmmo from "../modules/get-ammo.mjs";
+
+import { getAmmo } from '../modules/game-data.mjs';
+import { getFixedT } from '../modules/translations.mjs';
 
 const ammoLabels = {
     Caliber12g: '12/70',
@@ -27,32 +28,51 @@ const ammoLabels = {
     Caliber9x39: '9x39mm',
     Caliber127x55: '12.7x55mm',
     Caliber1143x23ACP: '.45 ACP',
-  };
+};
+
+const comT = getFixedT(null, 'command');
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('ammo')
-        .setDescription('get ammunition information')
+        .setDescription('Get ammunition information')
+        .setNameLocalizations({
+            'es-ES': comT('ammo', {lng: 'es-ES'}),
+            ru: comT('ammo', {lng: 'ru'}),
+        })
+        .setDescriptionLocalizations({
+            'es-ES': comT('ammo_desc', {lng: 'es-ES'}),
+            ru: comT('ammo_desc', {lng: 'ru'}),
+        })
         .addStringOption(option => option
             .setName('name')
             .setDescription('Enter the ammo type')
+            .setNameLocalizations({
+                'es-ES': comT('name', {lng: 'es-ES'}),
+                ru: comT('name', {lng: 'ru'}),
+            })
+            .setDescriptionLocalizations({
+                'es-ES': comT('ammo_name_desc', {lng: 'es-ES'}),
+                ru: comT('ammo_name_desc', {lng: 'ru'}),
+            })
             .setAutocomplete(true)
             .setRequired(true)
         ),
     async execute(interaction) {
         await interaction.deferReply();
+        const t = getFixedT(interaction.locale);
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
             await interaction.editReply({
-                content: 'You need to specify an ammo type',
+                content: t('You need to specify an ammo type'),
                 ephemeral: true,
             });
 
             return true;
         }
 
-        const embed = new MessageEmbed();
+        const embed = new EmbedBuilder();
         embed.setURL(`https://tarkov.dev/ammo`);
 
         const table = new asciiTable();
@@ -60,27 +80,27 @@ const defaultFunction = {
 
         table.removeBorder();
         table.addRow([
-            'Name',
-            'Pen',
-            'Dmg',
-            'A Dmg',
-            'Frag',
-            'Velo',
+            t('Name'),
+            t('Pen'),
+            t('Dmg'),
+            t('A Dmg'),
+            t('Frag'),
+            t('Velo'),
         ]);
 
-        const ammoResponse = await getAmmo();
+        const ammos = await getAmmo(interaction.locale);
+        console.log(ammos);
         let caliber = false;
         let penIcon = -1;
-        for (const id in ammoResponse) {
-            const ammo = ammoResponse[id];
-            if (ammo.item.name.toLowerCase().includes(searchString.toLowerCase())) {
-                caliber = ammo.caliber;
+        for (const ammo of ammos) {
+            if (ammo.name.toLowerCase().replace(/\./g, '').includes(searchString.toLowerCase().replace(/\./g, ''))) {
+                caliber = ammo.properties.caliber;
                 break;
             }
         }
         if (!caliber) {
             await interaction.editReply({
-                content: 'No matching ammo found',
+                content: t('No matching ammo found'),
                 ephemeral: true,
             });
 
@@ -89,31 +109,30 @@ const defaultFunction = {
 
         let caliberLabel = ammoLabels[caliber];
         if (!caliberLabel) caliberLabel = caliber.replace('Caliber', '');
-        embed.setTitle(`${caliberLabel} Ammo Table`);
+        embed.setTitle(`${caliberLabel} ${t('Ammo Table')}`);
 
-        for (const id in ammoResponse) {
-            const ammo = ammoResponse[id];
-            if (ammo.caliber !== caliber) {
+        for (const ammo of ammos) {
+            if (ammo.properties.caliber !== caliber) {
                 continue;
             }
-            if (!embed.thumbnail || penIcon < ammo.penetrationPower) {
-                embed.setThumbnail(ammo.item.iconLink);
-                if (embed.thumbnail) penIcon = ammo.penetrationPower;
+            if (!embed.thumbnail || penIcon < ammo.properties.penetrationPower) {
+                embed.setThumbnail(ammo.iconLink);
+                if (embed.thumbnail) penIcon = ammo.properties.penetrationPower;
             }
-            let damage = ammo.damage;
-            let projectileCount = ammo.projectileCount;
+            let damage = ammo.properties.damage;
+            let projectileCount = ammo.properties.projectileCount;
 
             if (projectileCount > 1) {
                 damage = damage * projectileCount;
             }
 
             tableData.push([
-                ammo.item.shortName,
-                ammo.penetrationPower,
+                ammo.shortName,
+                ammo.properties.penetrationPower,
                 damage,
-                ammo.armorDamage,
-                Math.floor(ammo.fragmentationChance * 100),
-                ammo.initialSpeed,
+                ammo.properties.armorDamage,
+                Math.floor(ammo.properties.fragmentationChance * 100),
+                ammo.properties.initialSpeed,
             ]);
         }
 
@@ -141,7 +160,7 @@ const defaultFunction = {
         await interaction.editReply({ embeds: [embed] });
     },
     examples: [
-        '/ammo 7.62x51mm'
+        '/$t(ammo) 7.62x51mm'
     ]
 };
 

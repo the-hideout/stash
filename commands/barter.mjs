@@ -1,29 +1,48 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
-import getItemsByName from '../modules/get-items.mjs';
+import { getBarters, getItems, getTraders } from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
+import { getFixedT } from '../modules/translations.mjs';
 
 const MAX_BARTERS = 3;
+
+const comT = getFixedT(null, 'command');
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('barter')
         .setDescription('Find barters with a specific item')
+        .setNameLocalizations({
+            'es-ES': comT('barter', {lng: 'es-ES'}),
+            ru: comT('barter', {lng: 'ru'}),
+        })
+        .setDescriptionLocalizations({
+            'es-ES': comT('barter_desc', {lng: 'es-ES'}),
+            ru: comT('barter_desc', {lng: 'ru'}),
+        })
         .addStringOption(option => {
             return option.setName('name')
                 .setDescription('Item name to search for')
+                .setNameLocalizations({
+                    'es-ES': comT('name', {lng: 'es-ES'}),
+                    ru: comT('name', {lng: 'ru'}),
+                })
+                .setDescriptionLocalizations({
+                    'es-ES': comT('name_search_desc', {lng: 'es-ES'}),
+                    ru: comT('name_search_desc', {lng: 'ru'}),
+                })
                 .setAutocomplete(true)
                 .setRequired(true);
         }),
     async execute(interaction) {
         await interaction.deferReply();
+        const t = getFixedT(interaction.locale);
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
             await interaction.deleteReply();
             await interaction.followUp({
-                content: 'You need to specify a search term',
+                content: t('You need to specify a search term'),
                 ephemeral: true,
             });
 
@@ -32,23 +51,30 @@ const defaultFunction = {
 
         const matchedBarters = [];
 
-        const response = await getItemsByName(searchString.toLowerCase());
+        const [items, barters, traders] = await Promise.all([
+            getItems(interaction.locale),
+            getBarters(),
+            getTraders(interaction.locale)
+        ]);
+        const searchedItems = items.filter(item => item.name.toLowerCase().includes(searchString.toLowerCase()));
 
-        for (const item of response.data.items) {
+        for (const item of searchedItems) {
             for (const barter of item.bartersFor) {
-                if (matchedBarters.some(mBarter => mBarter.id === barter.id)) continue;
-                matchedBarters.push(barter);
+                if (matchedBarters.includes(barter.id)) continue;
+                matchedBarters.push(barter.id);
             }
             for (const barter of item.bartersUsing) {
-                if (matchedBarters.some(mBarter => mBarter.id === barter.id)) continue;
-                matchedBarters.push(barter);
+                if (matchedBarters.includes(barter.id)) continue;
+                matchedBarters.push(barter.id);
             }
         }
 
         if (matchedBarters.length === 0) {
             await interaction.deleteReply();
             await interaction.followUp({
-                content: `Found no matching barters for "${searchString}"`,
+                content: t(`Found no results for "{{searchString}}"`, {
+                    searchString: searchString
+                }),
                 ephemeral: true,
             });
 
@@ -60,33 +86,35 @@ const defaultFunction = {
         const prog = await progress.getSafeProgress(interaction.user.id);
 
         for (let i = 0; i < matchedBarters.length; i = i + 1) {
-            const barter = matchedBarters[i];
+            const barter = barters.find(b => b.id === matchedBarters[i]);
             let totalCost = 0;
-            const embed = new MessageEmbed();
+            const embed = new EmbedBuilder();
 
-            let title = barter.rewardItems[0].item.name;
+            const rewardItem = items.find(it => it.id === barter.rewardItems[0].item.id);
+            let title = rewardItem.name;
 
             if (barter.rewardItems[0].count > 1) {
                 title += " (" + barter.rewardItems[0].count + ")";
             }
 
             const locked = prog.traders[barter.trader.id] < barter.level ? '🔒' : '';
-            title += `\r\n ${barter.trader.name} LL${barter.level}${locked}`;
+            title += `\r\n ${traders.find(tr => tr.id === barter.trader.id).name} ${t('LL')}${barter.level}${locked}`;
             embed.setTitle(title);
-            embed.setURL(`${barter.rewardItems[0].item.link}#${i}`);
+            embed.setURL(`${rewardItem.link}#${i}`);
 
-            if (barter.rewardItems[0].item.iconLink) {
-                embed.setThumbnail(barter.rewardItems[0].item.iconLink);
+            if (rewardItem.iconLink) {
+                embed.setThumbnail(rewardItem.iconLink);
             }
 
             for (const req of barter.requiredItems) {
-                let itemCost = req.item.avg24hPrice;
+                const reqItem = items.find(i => i.id === req.item.id);
+                let itemCost = reqItem.avg24hPrice;
 
-                if (req.item.lastLowPrice > itemCost && req.item.lastLowPrice > 0) {
-                    itemCost = req.item.lastLowPrice;
+                if (reqItem.lastLowPrice > itemCost && reqItem.lastLowPrice > 0) {
+                    itemCost = reqItem.lastLowPrice;
                 }
 
-                for (const offer of req.item.buyFor) {
+                for (const offer of reqItem.buyFor) {
                     if (!offer.vendor.trader) {
                         continue;
                     }
@@ -98,7 +126,7 @@ const defaultFunction = {
                 }
 
                 let bestSellPrice = 0;
-                for (const offer of req.item.sellFor) {
+                for (const offer of reqItem.sellFor) {
                     if (!offer.vendor.trader) {
                         continue;
                     }
@@ -107,7 +135,7 @@ const defaultFunction = {
                     }
                 }
 
-                let reqName = req.item.name;
+                let reqName = reqItem.name;
                 if (itemCost === 0) {
                     itemCost = bestSellPrice;
 
@@ -120,10 +148,10 @@ const defaultFunction = {
                 }
 
                 totalCost += itemCost * req.count;
-                embed.addFields({name: reqName, value: itemCost.toLocaleString() + "₽ x " + req.count, inline: true});
+                embed.addFields({name: reqName, value: itemCost.toLocaleString(interaction.locale) + "₽ x " + req.count, inline: true});
             }
 
-            embed.addFields({name: 'Total', value: totalCost.toLocaleString() + "₽", inline: false});
+            embed.addFields({name: t('Total'), value: totalCost.toLocaleString(interaction.locale) + "₽", inline: false});
 
             embeds.push(embed);
 
@@ -133,18 +161,21 @@ const defaultFunction = {
         }
 
         if (matchedBarters.length > MAX_BARTERS) {
-            const ending = new MessageEmbed();
+            const ending = new EmbedBuilder();
 
-            ending.setTitle("+" + (matchedBarters.length - MAX_BARTERS) + " more");
+            ending.setTitle("+" + (matchedBarters.length - MAX_BARTERS) + ` ${t('more')}`);
             ending.setURL("https://tarkov.dev/barters/?search=" + encodeURIComponent(searchString));
 
             let otheritems = '';
 
             for (let i = MAX_BARTERS; i < matchedBarters.length; i = i + 1) {
-                const bitemname = `[${matchedBarters[i].rewardItems[0].item.name}](${matchedBarters[i].rewardItems[0].item.link}) (${matchedBarters[i].trader.name} LL${matchedBarters[i].level})`;
+                const barter = barters.find(b => b.id === matchedBarters[i]);
+                const rewardItem = items.find(it => it.id === barter.rewardItems[0].item.id);
+                const trader = traders.find(tr => tr.id === barter.trader.id);
+                const bitemname = `[${rewardItem.name}](${rewardItem.link}) (${trader.name} LL${barter.level})`;
 
                 if (bitemname.length + 2 + otheritems.length > 2048) {
-                    ending.setFooter({text: `${matchedBarters.length-i} additional results not shown.`,});
+                    ending.setFooter({text: `${matchedBarters.length-i} ${t('additional results not shown.')}`,});
                     break;
                 }
                 otheritems += bitemname + "\n";
@@ -156,7 +187,7 @@ const defaultFunction = {
 
         await interaction.editReply({ embeds: embeds });
     },
-    examples: '/barter slick'
+    examples: '/$t(barter) slick'
 };
 
 export default defaultFunction;

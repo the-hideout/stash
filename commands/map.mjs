@@ -1,37 +1,56 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import gameData from '../modules/game-data.mjs';
 import realTimeToTarkovTime from '../modules/time.mjs';
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('map')
         .setDescription('Get detailed information about a map')
+        .setNameLocalizations({
+            'es-ES': comT('map', {lng: 'es-ES'}),
+            ru: comT('map', {lng: 'ru'}),
+        })
+        .setDescriptionLocalizations({
+            'es-ES': comT('map_desc', {lng: 'es-ES'}),
+            ru: comT('map_desc', {lng: 'ru'}),
+        })
         .addStringOption(option => option
             .setName('map')
             .setDescription('Select a map')
+            .setNameLocalizations({
+                'es-ES': comT('map', {lng: 'es-ES'}),
+                ru: comT('map', {lng: 'ru'}),
+            })
+            .setDescriptionLocalizations({
+                'es-ES': comT('map_select', {lng: 'es-ES'}),
+                ru: comT('map_select', {lng: 'ru'}),
+            })
             .setRequired(true)
-            .setChoices(gameData.maps.choices())
+            .setChoices(...gameData.maps.choices())
         ),
 
     async execute(interaction) {
         await interaction.deferReply();
+        const t = getFixedT(interaction.locale);
         const mapId = interaction.options.getString('map');
 
-        const mapData = await gameData.maps.getAll();
-        const embed = new MessageEmbed();
+        const mapData = await gameData.maps.getAll(interaction.locale);
+        const embed = new EmbedBuilder();
 
         const selectedMapData = mapData.find(mapObject => mapObject.id === mapId);
-        let displayDuration = `${selectedMapData.raidDuration} minutes`;
+        let displayDuration = `${selectedMapData.raidDuration} ${t('minutes')}`;
 
         // Get left and right real tarkov time
         let left = realTimeToTarkovTime(new Date(), true);
         let right = realTimeToTarkovTime(new Date(), false);
         let displayTime = `${left} - ${right}`;
-        if (selectedMapData.name.includes('Factory')) {
+        if (selectedMapData.normalizedName.includes('factory')) {
             // If the map is Factory, set the times to static values
-            if (selectedMapData.name.includes('Night')) {
+            if (selectedMapData.normalizedName.includes('night')) {
                 displayTime = '03:00';
             } else {
                 displayTime = '15:00';
@@ -78,10 +97,10 @@ const defaultFunction = {
             embed.setURL(mapUrl);
         }
         embed.addFields(
-            { name: 'Duration ⌛', value: displayDuration, inline: true},
-            { name: 'Players 👥', value: displayPlayers, inline: true},
-            { name: 'Time 🕑', value: displayTime, inline: true},
-            { name: 'Bosses 💀', value: bossArray.join('\n'), inline: true}
+            { name: `${t('Duration')} ⌛`, value: displayDuration, inline: true},
+            { name: `${t('Players')} 👥`, value: displayPlayers, inline: true},
+            { name: `${t('Time')} 🕑`, value: displayTime, inline: true},
+            { name: `${t('Bosses')} 💀`, value: bossArray.join('\n'), inline: true}
         );
         if (selectedMapData.key) {
             embed.setImage(`https://tarkov.dev/maps/${selectedMapData.key}.jpg`);
@@ -89,7 +108,7 @@ const defaultFunction = {
 
         // If the map was made by a contributor, give them credit
         if (selectedMapData.source) {
-            embed.setFooter({ text: `Map made by ${selectedMapData.source}` });
+            embed.setFooter({ text: t('Map made by {{author}}', {author: selectedMapData.source})});
         }
 
         await interaction.editReply({
@@ -97,8 +116,8 @@ const defaultFunction = {
         });
     },
     examples: [
-        '/map woods',
-        '/map customs'
+        '/$t(map) Woods',
+        '/$t(map) customs'
     ]
 };
 

@@ -1,51 +1,56 @@
-import {SlashCommandBuilder} from '@discordjs/builders';
-import {MessageEmbed} from 'discord.js';
-import moment from 'moment';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import moment from 'moment/min/moment-with-locales.js';
 
 import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
 
 const subCommands = {
     show: async interaction => {
+        const t = getFixedT(interaction.locale);
         let prog = await progress.getProgress(interaction.user.id);
-        const embed = new MessageEmbed();
+
+        const embed = new EmbedBuilder();
         if (!prog) {
             prog = await progress.getDefaultProgress();
-            embed.setTitle(`Default progress - Level ${prog.level}`);
-            embed.setDescription(`You do not have any saved progress. Below are the defaults used to determine craft/barter/price unlocks and flea market fees.`);
+            embed.setTitle(`${t('Default progress')} - ${t('Level')} ${prog.level}`);
+            embed.setDescription(t(`You do not have any saved progress. Below are the defaults used to determine craft/barter/price unlocks and flea market fees.`));
         } else {
-            embed.setTitle(`${interaction.user.username} - Level ${prog.level}`);
-            embed.setDescription(`These values are used to determine craft/barter/price unlocks and flea market fees.`);
+            embed.setTitle(`${interaction.user.username} - ${('Level')} ${prog.level}`);
+            embed.setDescription(t(`These values are used to determine craft/barter/price unlocks and flea market fees.`));
         }
 
         const hideoutStatus = [];
         for (const stationId in prog.hideout) {
             const station = await gameData.hideout.get(stationId);
-            hideoutStatus.push(`${station.name} level ${prog.hideout[stationId]}`);
+            hideoutStatus.push(`${station.name} ${t('level')} ${prog.hideout[stationId]}`);
         }
-        if (hideoutStatus.length > 0) embed.addFields({name: 'Hideout 🏠', value: hideoutStatus.join('\n'), inline: true});
+        if (hideoutStatus.length > 0) embed.addFields({name: `${t('Hideout')} 🏠`, value: hideoutStatus.join('\n'), inline: true});
 
         const traderStatus = [];
         for (const traderId in prog.traders) {
             const trader = await gameData.traders.get(traderId);
-            traderStatus.push(`${trader.name} LL${prog.traders[traderId]}`);
+            traderStatus.push(`${trader.name} ${t('LL')}${prog.traders[traderId]}`);
         }
-        if (traderStatus.length > 0) embed.addFields({name: 'Traders 🛒', value: traderStatus.join('\n'), inline: true});
+        if (traderStatus.length > 0) embed.addFields({name: `${t('Traders')} 🛒`, value: traderStatus.join('\n'), inline: true});
 
         const skillStatus = [];
         for (const skillId in prog.skills) {
             const skill = await gameData.skills.get(skillId);
-            skillStatus.push(`${skill.name} level ${prog.skills[skillId]}`);
+            skillStatus.push(`${skill.name} ${t('level')} ${prog.skills[skillId]}`);
         }
-        if (skillStatus.length > 0) embed.addFields({name: 'Skills 💪', value: skillStatus.join('\n'), inline: true});
+        if (skillStatus.length > 0) embed.addFields({name: `${('Skills')} 💪`, value: skillStatus.join('\n'), inline: true});
 
         if (prog.tarkovTracker && prog.tarkovTracker.token) {
+            moment.locale(interaction.locale);
             let lastUpdate = moment(prog.tarkovTracker.lastUpdate).fromNow();
-            if (prog.tarkovTracker.lastUpdate == 0) lastUpdate = 'never';
+            if (prog.tarkovTracker.lastUpdate == 0) lastUpdate = t('never');
             const nextUpdate = moment(await progress.getUpdateTime(interaction.user.id)).fromNow();
-            embed.addFields({name: 'TarkovTracker 🧭', value: `Last update: ${lastUpdate}\nNext update: ${nextUpdate}`, inline: false});
+            embed.addFields({name: 'TarkovTracker 🧭', value: `${t('Last Updated')}: ${lastUpdate}\n${t('Next update')}: ${nextUpdate}`, inline: false});
         } else if (prog.tarkovTracker && prog.tarkovTracker.lastUpdateStatus === 'invalid') {
-            embed.addFields({name: 'TarkovTracker 🧭', value: '[❌ Invalid token](https://tarkovtracker.io/settings/)', inline: false});
+            embed.addFields({name: 'TarkovTracker 🧭', value: `[❌ ${t('Invalid token')}](https://tarkovtracker.io/settings/)`, inline: false});
         }
 
         await interaction.reply({
@@ -54,15 +59,17 @@ const subCommands = {
         });
     },
     level: async interaction => {
+        const t = getFixedT(interaction.locale);
         const level = interaction.options.getInteger('level');
         progress.setLevel(interaction.user.id, level);
         await interaction.reply({
-            content: `✅ PMC level set to ${level}.`,
+            content: `✅ ${t('PMC level set to {{level}}.', {level: level})}`,
             ephemeral: true
         });
     },
     trader: async interaction => {
         await interaction.deferReply({ephemeral: true});
+        const t = getFixedT(interaction.locale);
         const traderId = interaction.options.getString('trader');
         const level = interaction.options.getInteger('level');
         if (traderId === 'all') {
@@ -74,15 +81,14 @@ const subCommands = {
                 progress.setTrader(interaction.user.id, trader.id, lvl);
             }
             await interaction.editReply({
-                content: `✅ All traders set to ${level}.`
+                content: `✅ ${t('All traders set to {{level}}.', {level: level})}`
             });
             return;
         }
-
         const trader = await gameData.traders.get(traderId);
         if (!trader) {
             await interaction.editReply({
-                content: '❌ No matching trader found.'
+                content: `❌ ${t('No matching trader found.')}`
             });
             return;
         }
@@ -92,17 +98,18 @@ const subCommands = {
         progress.setTrader(interaction.user.id, trader.id, lvl);
 
         await interaction.editReply({
-            content: `✅ ${trader.name} set to LL${lvl}.`
+            content: `✅ ${t('{{thingName}} set to {{level}}.', {thingName: trader.name, level: lvl})}`
         });
     },
     hideout: async interaction => {
         await interaction.deferReply({ephemeral: true});
+        const t = getFixedT(interaction.locale);
         const stationId = interaction.options.getString('station');
         const level = interaction.options.getInteger('level');
         const prog = await progress.getProgress(interaction.user.id);
         let ttWarn = '';
         if (prog && prog.tarkovTracker.token) {
-            ttWarn = '\nNote: Progress synced via [TarkovTracker](https://tarkovtracker.io/settings/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.';
+            ttWarn = '\n'+t('Note: Progress synced via [TarkovTracker](https://tarkovtracker.io/settings/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.');
         }
         if (stationId === 'all') {
             const stations = await gameData.hideout.getAll();
@@ -113,7 +120,7 @@ const subCommands = {
                 progress.setHideout(interaction.user.id, station.id, lvl);
             }
             await interaction.editReply({
-                content: `✅ All hideout stations set to ${level}.${ttWarn}`
+                content: `✅ ${t('All hideout stations set to {{level}}.', {level: level})}${ttWarn}`
             });
             return;
         }
@@ -121,7 +128,7 @@ const subCommands = {
         const station = await gameData.hideout.get(stationId);
         if (!station) {
             await interaction.editReply({
-                content: '❌ No matching hideout station found.'
+                content: `❌ ${t('No matching hideout station found.')}`
             });
             return;
         }
@@ -131,10 +138,11 @@ const subCommands = {
         progress.setHideout(interaction.user.id, station.id, lvl);
 
         await interaction.editReply({
-            content: `✅ ${station.name} set to level ${lvl}.${ttWarn}`
+            content: `✅ ${t('{{thingName}} set to {{level}}.', {thingName: station.name, level: lvl})}${ttWarn}`
         });
     },
     skill: async interaction => {
+        const t = getFixedT(interaction.locale);
         const skillId = interaction.options.getString('skill');
         let level = interaction.options.getInteger('level');
         if (level > 50) level = 50;
@@ -142,42 +150,46 @@ const subCommands = {
         progress.setSkill(interaction.user.id, skillId, level);
         const skill = await gameData.skills.get(skillId);
         await interaction.reply({
-            content: `✅ ${skill.name} set to ${level}.`,
+            content: `✅ ${t('{{thingName}} set to {{level}}.', {thingName: skill.name, level: level})}`,
             ephemeral: true
         });
     },
     link: async interaction => {
+        const t = getFixedT(interaction.locale);
         const token = interaction.options.getString('token');
         if (!token) {
             await interaction.reply({
-                content: `❌ You must supply your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.`,
+                content: `❌ ${t('You must supply your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.')}`,
                 ephemeral: true
             });
             return;
         }
         if (!token.match(/^[a-zA-Z0-9]{22}$/)) {
             await interaction.reply({
-                content: `❌ The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.`,
+                content: `❌ ${t('The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.')}`,
                 ephemeral: true
             });
             return;
         }
 
         progress.setToken(interaction.user.id, token);
+        moment.locale(interaction.locale);
         const updateTime = moment(await progress.getUpdateTime(interaction.user.id)).fromNow();
         await interaction.reply({
-            content: `✅ Your hideout progress will update from TarkovTracker ${updateTime}.`,
+            content: `✅ ${t('Your hideout progress will update from TarkovTracker {{updateTime}}.', {updateTime: updateTime})}`,
             ephemeral: true
         });
     },
     unlink: async interaction => {
+        const t = getFixedT(interaction.locale);
         progress.setToken(interaction.user.id, false);
         await interaction.reply({
-            content: `✅ TarkovTracker account unlinked.`,
+            content: `✅ ${t('TarkovTracker account unlinked.')}`,
             ephemeral: true
         });
     },
     flea_market_fee: async interaction => {
+        const t = getFixedT(interaction.locale);
         const intel = interaction.options.getInteger('intel_center_level');
         let mgmt = interaction.options.getInteger('hideout_management_level');
         if (mgmt > 50) mgmt = 50;
@@ -185,7 +197,7 @@ const subCommands = {
         progress.setHideout(interaction.user.id, '5d484fdf654e7600691aadf8', intel);
         progress.setSkill(interaction.user.id, 'hideoutManagement', mgmt);
         await interaction.reply({
-            content: `✅ Intelligence Center set to ${intel}.\n✅ Hideout Management skill set to ${mgmt}.`,
+            content: `✅ ${t('{{thingName}} set to {{level}}.', {thingName: t('Intelligence Center'), level: intel})}.\n✅ ${t('Hideout Management skill set to {{managementLevel}}.', {managementLevel: mgmt})}`,
             ephemeral: true
         });
     }
@@ -195,107 +207,259 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('progress')
         .setDescription('Manage your customized hideout and trader progress')
+        .setNameLocalizations({
+            'es-ES': comT('progress', {lng: 'es-ES'}),
+            ru: comT('progress', {lng: 'ru'}),
+        })
+        .setDescriptionLocalizations({
+            'es-ES': comT('progress_desc', {lng: 'es-ES'}),
+            ru: comT('progress_desc', {lng: 'ru'}),
+        })
         .addSubcommand(subcommand => subcommand
             .setName('show')
             .setDescription('Show your customized progress')
+            .setNameLocalizations({
+                'es-ES': comT('show', {lng: 'es-ES'}),
+                ru: comT('show', {lng: 'ru'}),
+            })
+            .setDescriptionLocalizations({
+                'es-ES': comT('progress_show_desc', {lng: 'es-ES'}),
+                ru: comT('progress_show_desc', {lng: 'ru'}),
+            })
         )
         .addSubcommand(subcommand => subcommand
             .setName('level')
-            .setDescription('Set your PMC level')    
+            .setDescription('Set your PMC level')
+            .setNameLocalizations({
+                'es-ES': comT('level', {lng: 'es-ES'}),
+                ru: comT('level', {lng: 'ru'}),
+            })
+            .setDescriptionLocalizations({
+                'es-ES': comT('progress_level_desc', {lng: 'es-ES'}),
+                ru: comT('progress_level_desc', {lng: 'ru'}),
+            })
             .addIntegerOption(option => option
                 .setName('level')
                 .setDescription('PMC level')
+                .setNameLocalizations({
+                    'es-ES': comT('level', {lng: 'es-ES'}),
+                    ru: comT('level', {lng: 'ru'}),
+                })
+                .setDescriptionLocalizations({
+                    'es-ES': comT('progress_level_select', {lng: 'es-ES'}),
+                    ru: comT('progress_level_select', {lng: 'ru'}),
+                })
                 .setRequired(true)
             )
         )
         .addSubcommand(subcommand => subcommand
             .setName('trader')
             .setDescription('Set trader level')
+            .setNameLocalizations({
+                'es-ES': comT('trader', {lng: 'es-ES'}),
+                ru: comT('trader', {lng: 'ru'}),
+            })
+            .setDescriptionLocalizations({
+                'es-ES': comT('progress_trader_desc', {lng: 'es-ES'}),
+                ru: comT('progress_trader_desc', {lng: 'ru'}),
+            })
             .addStringOption(option => option
                 .setName('trader')
                 .setDescription('Trader')
+                .setNameLocalizations({
+                    'es-ES': comT('trader', {lng: 'es-ES'}),
+                    ru: comT('trader', {lng: 'ru'}),
+                })
+                .setDescriptionLocalizations({
+                    'es-ES': comT('Trader', {lng: 'es-ES'}),
+                    ru: comT('Trader', {lng: 'ru'}),
+                })
                 .setRequired(true)
-                .setChoices(gameData.traders.choices(true))
+                .setChoices(...gameData.traders.choices(true))
             )
             .addIntegerOption(option => option
                 .setName('level')
                 .setDescription('The trader\'s level')
+                .setNameLocalizations({
+                    'es-ES': comT('level', {lng: 'es-ES'}),
+                    ru: comT('level', {lng: 'ru'}),
+                })
+                .setDescriptionLocalizations({
+                    'es-ES': comT('progress_trader_level_select', {lng: 'es-ES'}),
+                    ru: comT('progress_trader_level_select', {lng: 'ru'}),
+                })
                 .setRequired(true)
-                .setChoices([
-                    ['1', 1],
-                    ['2', 2],
-                    ['3', 3],
-                    ['4', 4],
-                ])
+                .setChoices(
+                    {name: '1', value: 1},
+                    {name: '2', value: 2},
+                    {name: '3', value: 3},
+                    {name: '4', value: 4},
+                )
             )
         )
         .addSubcommand(subcommand => subcommand
             .setName('hideout')
             .setDescription('Set hideout station level')
+            .setNameLocalizations({
+                'es-ES': comT('hideout', {lng: 'es-ES'}),
+                ru: comT('hideout', {lng: 'ru'}),
+            })
+            .setDescriptionLocalizations({
+                'es-ES': comT('progress_hideout_desc', {lng: 'es-ES'}),
+                ru: comT('progress_hideout_desc', {lng: 'ru'}),
+            })
             .addStringOption(option => option
                 .setName('station')
                 .setDescription('Hideout Station')
+                .setNameLocalizations({
+                    'es-ES': comT('station', {lng: 'es-ES'}),
+                    ru: comT('station', {lng: 'ru'}),
+                })
+                .setDescriptionLocalizations({
+                    'es-ES': comT('progress_hideout_station_select', {lng: 'es-ES'}),
+                    ru: comT('progress_hideout_station_select', {lng: 'ru'}),
+                })
                 .setRequired(true)
-                .setChoices(gameData.hideout.choices(true))
+                .setChoices(...gameData.hideout.choices(true))
             )
             .addIntegerOption(option => option
                 .setName('level')
                 .setDescription('The station\'s level')
+                .setNameLocalizations({
+                    'es-ES': comT('level', {lng: 'es-ES'}),
+                    ru: comT('level', {lng: 'ru'}),
+                })
+                .setDescriptionLocalizations({
+                    'es-ES': comT('progress_hideout_level_select', {lng: 'es-ES'}),
+                    ru: comT('progress_hideout_level_select', {lng: 'ru'}),
+                })
                 .setRequired(true)
-                .setChoices([
-                    ['Not built', 0],
-                    ['1', 1],
-                    ['2', 2],
-                    ['3', 3],
-                    ['4', 4],
-                ])
+                .setChoices(
+                    {name: 'Not built', value: 0},
+                    {name: '1', value: 1},
+                    {name: '2', value: 2},
+                    {name: '3', value: 3},
+                    {name: '4', value: 4},
+                )
             )
         )
         .addSubcommand(subcommand => subcommand
             .setName('skill')
             .setDescription('Set skill level')
+            .setNameLocalizations({
+                'es-ES': comT('skill', {lng: 'es-ES'}),
+                ru: comT('skill', {lng: 'ru'}),
+            })
+            .setDescriptionLocalizations({
+                'es-ES': comT('progress_skill_desc', {lng: 'es-ES'}),
+                ru: comT('progress_skill_desc', {lng: 'ru'}),
+            })
             .addStringOption(option => option
                 .setName('skill')
                 .setDescription('Skill')
+                .setNameLocalizations({
+                    'es-ES': comT('skill', {lng: 'es-ES'}),
+                    ru: comT('skill', {lng: 'ru'}),
+                })
+                .setDescriptionLocalizations({
+                    'es-ES': comT('Skill', {lng: 'es-ES'}),
+                    ru: comT('Skill', {lng: 'ru'}),
+                })
                 .setRequired(true)
-                .setChoices(gameData.skills.choices(false))
+                .setChoices(...gameData.skills.choices(false))
             )
             .addIntegerOption(option => option
                 .setName('level')
                 .setDescription('The skill\'s level')
+                .setNameLocalizations({
+                    'es-ES': comT('level', {lng: 'es-ES'}),
+                    ru: comT('level', {lng: 'ru'}),
+                })
+                .setDescriptionLocalizations({
+                    'es-ES': comT('progress_skill_level_select', {lng: 'es-ES'}),
+                    ru: comT('progress_skill_level_select', {lng: 'ru'}),
+                })
                 .setRequired(true)
             )
         )
         .addSubcommand(subcommand => subcommand
             .setName('link')
             .setDescription('Link your TarkovTracker account to sync hideout progress')
+            .setNameLocalizations({
+                'es-ES': comT('link', {lng: 'es-ES'}),
+                ru: comT('link', {lng: 'ru'}),
+            })
+            .setDescriptionLocalizations({
+                'es-ES': comT('progress_link_desc', {lng: 'es-ES'}),
+                ru: comT('progress_link_desc', {lng: 'ru'}),
+            })
             .addStringOption(option => option
                 .setName('token')
-                .setRequired(true)
                 .setDescription('Your TarkovTracker API token from https://tarkovtracker.io/settings/')
+                .setNameLocalizations({
+                    'es-ES': comT('token', {lng: 'es-ES'}),
+                    ru: comT('token', {lng: 'ru'}),
+                })
+                .setDescriptionLocalizations({
+                    'es-ES': comT('progress_link_token_desc', {lng: 'es-ES'}),
+                    ru: comT('progress_link_token_desc', {lng: 'ru'}),
+                })
+                .setRequired(true)
             )
         )
         .addSubcommand(subcommand => subcommand
             .setName('unlink')
             .setDescription('Unlink your TarkovTracker account')
+            .setNameLocalizations({
+                'es-ES': comT('unlink', {lng: 'es-ES'}),
+                ru: comT('unlink', {lng: 'ru'}),
+            })
+            .setDescriptionLocalizations({
+                'es-ES': comT('progress_unlink_desc', {lng: 'es-ES'}),
+                ru: comT('progress_unlink_desc', {lng: 'ru'}),
+            })
         )
         .addSubcommand(subcommand => subcommand
             .setName('flea_market_fee')
-            .setDescription('Set your progress to accurately calculate flea market fees')    
+            .setDescription('Set your progress to accurately calculate flea market fees')
+            .setNameLocalizations({
+                'es-ES': comT('flea_market_fee', {lng: 'es-ES'}),
+                ru: comT('flea_market_fee', {lng: 'ru'}),
+            })
+            .setDescriptionLocalizations({
+                'es-ES': comT('progress_flea_market_fee_desc', {lng: 'es-ES'}),
+                ru: comT('progress_flea_market_fee_desc', {lng: 'ru'}),
+            })
             .addIntegerOption(option => option
                 .setName('intel_center_level')
                 .setDescription('Intelligence Center level')
+                .setNameLocalizations({
+                    'es-ES': comT('intel_center_level', {lng: 'es-ES'}),
+                    ru: comT('intel_center_level', {lng: 'ru'}),
+                })
+                .setDescriptionLocalizations({
+                    'es-ES': comT('progress_flea_market_fee_intel_select', {lng: 'es-ES'}),
+                    ru: comT('progress_flea_market_fee_intel_select', {lng: 'ru'}),
+                })
                 .setRequired(true)
-                .setChoices([
-                    ['Not built', 0],
-                    ['1', 1],
-                    ['2', 2],
-                    ['3', 3],
-                ])
+                .setChoices(
+                    {name: 'Not built', value: 0},
+                    {name: '1', value: 1},
+                    {name: '2', value: 2},
+                    {name: '3', value: 3},
+                )
             )
             .addIntegerOption(option => option
                 .setName('hideout_management_level')
                 .setDescription('Hideout Management skill level')
+                .setNameLocalizations({
+                    'es-ES': comT('hideout_management_level', {lng: 'es-ES'}),
+                    ru: comT('hideout_management_level', {lng: 'ru'}),
+                })
+                .setDescriptionLocalizations({
+                    'es-ES': comT('progress_flea_market_fee_mgmt_select', {lng: 'es-ES'}),
+                    ru: comT('progress_flea_market_fee_mgmt_select', {lng: 'ru'}),
+                })
                 .setRequired(true)
             )
         ),
@@ -304,9 +468,9 @@ const defaultFunction = {
         subCommands[interaction.options._subcommand](interaction);
     },
     examples: {
-        level: ['/progress level 42'],
-        trader: ['/progress trader Prapor 3', '/progress trader Therapist 2'],
-        link: '/progress link [TarkovTracker token]'
+        level: ['/$t(progress) $t(level) 42'],
+        trader: ['/$t(progress) $t(trader) Prapor 3', '/$t(progress) $t(trader) Therapist 2'],
+        link: '/$t(progress) $t(link) [TarkovTracker $t(token)]'
     }
 };
 

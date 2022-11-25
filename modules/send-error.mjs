@@ -1,10 +1,10 @@
 import {
-    MessageEmbed,
+    EmbedBuilder,
 } from 'discord.js';
 
 const sendError = async (client, member, details) => {
     let reportTo = await client.users.fetch(process.env.ADMIN_ID.split(',')[0], false);
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
 
     if (client.guilds.cache.has(process.env.ISSUE_SERVER_ID)) {
         const server = client.guilds.cache.get(process.env.ISSUE_SERVER_ID);

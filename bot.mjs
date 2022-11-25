@@ -4,14 +4,16 @@ import "@sentry/tracing";
 
 import {
     Client,
-    Intents,
-    Permissions,
+    GatewayIntentBits,
+    PermissionsBitField,
     Collection,
 } from 'discord.js';
 
 import commands from './classic-commands/index.mjs';
-import autocomplete, { fillCache } from './modules/autocomplete.mjs';
+import autocomplete from './modules/autocomplete.mjs';
 import progress from "./modules/progress-shard.mjs";
+import { updateAll, getTraders } from './modules/game-data.mjs';
+import { t } from './modules/translations.mjs';
 
 if (process.env.NODE_ENV === 'production') {
     Sentry.init({
@@ -24,9 +26,9 @@ if (process.env.NODE_ENV === 'production') {
 
 const discordClient = new Client({
     intents: [
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.DIRECT_MESSAGES,
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.DirectMessages,
     ],
     partials: ["CHANNEL"],
 });
@@ -42,9 +44,9 @@ for (const file of commandFiles) {
     discordClient.commands.set(command.default.data.name, command);
 }
 
-console.time('Fill-autocomplete-cache');
-await fillCache();
-console.timeEnd('Fill-autocomplete-cache');
+console.time('Prefetch-game-data');
+await updateAll();
+console.timeEnd('Prefetch-game-data');
 
 discordClient.on('ready', () => {
     console.log(`Logged in as ${discordClient.user.tag} on shard ${discordClient.shard.ids[0]}`);
@@ -60,14 +62,50 @@ discordClient.on('ready', () => {
         if (message.type === 'getReply') {
             if (message.data === 'messageUser') {
                 const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], userId: message.userId, success: false}};
-                discordClient.users.fetch(message.userId).then(user => {
+                discordClient.users.fetch(message.userId).then(async user => {
                     if (!user) return Promise.reject(new Error('User not found'));
-                    user.send(message.message).then(() => {
+                    if (typeof message.messageValues === 'object') {
+                        for (const field in message.messageValues) {
+                            if (field === 'trader') {
+                                const traders = await getTraders(message.messageValues?.lng);
+                                message.messageValues.trader = traders.find(tr => tr.id === message.messageValues.trader.id);
+                            }
+                        }
+                    }
+                    user.send(t(message.message, message.messageValues)).then(() => {
                         response.data.success = true;
                         discordClient.shard.send(response);
                     }).catch(error => {
                         response.error = {message: error.message, stack: error.stack};
                         discordClient.shard.send(response);
+                    });
+                }).catch(error => {
+                    response.error = {message: error.message, stack: error.stack};
+                    discordClient.shard.send(response);
+                });
+            }
+            if (message.data === 'messageChannel') {
+                const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], guildId: message.guildId, channelId: message.channelId, success: false}};
+                discordClient.guilds.fetch(message.guildId).then(guild => {
+                    if (!guild) return Promise.reject(new Error('Guild not found'));
+                    guild.channels.fetch(message.channelId).then(async channel => {
+                        if (!channel) return Promise.reject(new Error('Channel not found'));
+                        if (!channel.isTextBased) return Promise.reject(new Error('Channel is not text-based'));
+                        if (typeof message.messageValues === 'object') {
+                            for (const field in message.messageValues) {
+                                if (field === 'trader') {
+                                    const traders = await getTraders(guild.preferredLocale);
+                                    message.messageValues.trader = traders.find(tr => tr.id === message.messageValues.trader.id);
+                                }
+                            }
+                        }
+                        channel.send(t(message.message, message.messageValues)).then(() => {
+                            response.data.success = true;
+                            discordClient.shard.send(response);
+                        }).catch(error => {
+                            response.error = {message: error.message, stack: error.stack};
+                            discordClient.shard.send(response);
+                        });
                     });
                 }).catch(error => {
                     response.error = {message: error.message, stack: error.stack};
@@ -116,14 +154,14 @@ discordClient.on('messageCreate', async message => {
             continue;
         }
 
-        if (message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.SEND_MESSAGES)) {
+        if (message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(PermissionsBitField.Flags.SendMessages)) {
             const user = await discordClient.users.fetch(message.author.id, false);
             user.send(`Missing posting permissions in ${message.guild.name}#${message.channel.name} (${message.guild.id}). Replying here instead.\n\rIf you want to fix this, talk to your discord admin`);
 
             message.fallbackChannel = user;
         }
 
-        if (message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.EMBED_LINKS)) {
+        if (message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(PermissionsBitField.Flags.EmbedLinks)) {
             const user = await discordClient.users.fetch(message.author.id, false);
             user.send(`Missing embed permissions in ${message.guild.name}#${message.channel.name} (${message.guild.id}). Replying here instead.\n\rIf you want to fix this, talk to your discord admin`);
 
@@ -144,7 +182,7 @@ discordClient.on('messageCreate', async message => {
 
 discordClient.on('interactionCreate', async interaction => {
     if (interaction.isAutocomplete()) {
-        let options = autocomplete(interaction);
+        let options = await autocomplete(interaction);
 
         options = options.splice(0, 25);
 

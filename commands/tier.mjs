@@ -1,24 +1,35 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
-import lootTier, { getTiers } from '../modules/loot-tier.js';
+import lootTier, { getTiers } from '../modules/loot-tier.mjs';
+import { getFixedT } from '../modules/translations.mjs';
+
+const comT = getFixedT(null, 'command');
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('tier')
-        .setDescription('Shows the criteria for loot tiers'),
+        .setDescription('Shows the criteria for loot tiers')
+        .setNameLocalizations({
+            'es-ES': comT('tier', {lng: 'es-ES'}),
+            ru: comT('tier', {lng: 'ru'}),
+        })
+        .setDescriptionLocalizations({
+            'es-ES': comT('tier_desc', {lng: 'es-ES'}),
+            ru: comT('tier_desc', {lng: 'ru'}),
+        }),
 
     async execute(interaction) {
+        const t = getFixedT(interaction.locale);
         const tiers = getTiers();
-        const embed = new MessageEmbed()
-            .setTitle("Loot Tiers")
+        const embed = new EmbedBuilder()
+            .setTitle(t('Loot Tiers'))
             .setDescription(`
-                Loot tiers are divided primarily by the per-slot value of the item:
-                • ${lootTier(tiers.legendary).msg} ≥ ${tiers.legendary.toLocaleString()}₽
-                • ${lootTier(0, true).msg}
-                • ${lootTier(tiers.great).msg} ≥ ${tiers.great.toLocaleString()}₽
-                • ${lootTier(tiers.average).msg} ≥ ${tiers.average.toLocaleString()}₽
-                • ${lootTier(tiers.average -1).msg} < ${tiers.average.toLocaleString()}₽
+                ${t('Loot tiers are divided primarily by the per-slot value of the item')}:
+                • ${t(lootTier(tiers.legendary).msg)} ≥ ${tiers.legendary.toLocaleString(interaction.locale)}₽
+                • ${t(lootTier(0, true).msg)}
+                • ${t(lootTier(tiers.great).msg)} ≥ ${tiers.great.toLocaleString(interaction.locale)}₽
+                • ${t(lootTier(tiers.average).msg)} ≥ ${tiers.average.toLocaleString(interaction.locale)}₽
+                • ${t(lootTier(tiers.average -1).msg)} < ${tiers.average.toLocaleString(interaction.locale)}₽
             `);
 
         await interaction.reply({ embeds: [embed] });

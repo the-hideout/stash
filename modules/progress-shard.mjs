@@ -128,11 +128,14 @@ export default {
     async getRestockAlerts(id) {
         return getParentReply({data: 'userTraderRestockAlerts', userId: id});
     },
-    async addRestockAlert(id, traders) {
-        return getParentReply({data: 'addUserTraderRestockAlert', userId: id, traders: traders});
+    async addRestockAlert(id, traders, locale) {
+        return getParentReply({data: 'addUserTraderRestockAlert', userId: id, traders: traders, locale: locale});
     },
-    async removeRestockAlert(id, traders) {
-        return getParentReply({data: 'removeUserTraderRestockAlert', userId: id, traders: traders});
+    async removeRestockAlert(id, traders, locale) {
+        return getParentReply({data: 'removeUserTraderRestockAlert', userId: id, traders: traders, locale: locale});
+    },
+    async setRestockAlertChannel(guildId, channelId) {
+        return getParentReply({data: 'guildTraderRestockAlertChannel', guildId: guildId, channelId: channelId});
     },
     init(client) {
         discordClient = client;
