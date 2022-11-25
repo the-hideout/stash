@@ -404,7 +404,7 @@ const translationResources = {
 
 i18next.init({
     lng: 'en-US',
-    debug: true,
+    debug: process.env.NODE_ENV === 'development',
     resources: translationResources
 });
 
