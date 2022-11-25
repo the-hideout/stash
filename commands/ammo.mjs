@@ -160,7 +160,7 @@ const defaultFunction = {
         await interaction.editReply({ embeds: [embed] });
     },
     examples: [
-        '/ammo 7.62x51mm'
+        '/$t(ammo) 7.62x51mm'
     ]
 };
 

@@ -28,8 +28,8 @@ const defaultFunction = {
                     ru: comT('name', {lng: 'ru'}),
                 })
                 .setDescriptionLocalizations({
-                    'es-ES': comT('craft_name_desc', {lng: 'es-ES'}),
-                    ru: comT('craft_name_desc', {lng: 'ru'}),
+                    'es-ES': comT('name_search_desc', {lng: 'es-ES'}),
+                    ru: comT('name_search_desc', {lng: 'ru'}),
                 })
                 .setAutocomplete(true)
                 .setRequired(true);
@@ -199,7 +199,7 @@ const defaultFunction = {
 
         await interaction.editReply({ embeds: embeds });
     },
-    examples: '/craft 7n31'
+    examples: '/$t(craft) 7n31'
 };
 
 export default defaultFunction;

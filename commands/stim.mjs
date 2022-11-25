@@ -127,7 +127,7 @@ const defaultFunction = {
         await interaction.editReply({ embeds: embeds });
     },
     examples: [
-        '/stim Obdolbos'
+        '/$t(stim) Obdolbos'
     ]
 };
 

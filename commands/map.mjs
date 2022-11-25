@@ -116,8 +116,8 @@ const defaultFunction = {
         });
     },
     examples: [
-        '/map woods',
-        '/map customs'
+        '/$t(map) Woods',
+        '/$t(map) customs'
     ]
 };
 

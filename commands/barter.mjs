@@ -28,8 +28,8 @@ const defaultFunction = {
                     ru: comT('name', {lng: 'ru'}),
                 })
                 .setDescriptionLocalizations({
-                    'es-ES': comT('barter_name_desc', {lng: 'es-ES'}),
-                    ru: comT('barter_name_desc', {lng: 'ru'}),
+                    'es-ES': comT('name_search_desc', {lng: 'es-ES'}),
+                    ru: comT('name_search_desc', {lng: 'ru'}),
                 })
                 .setAutocomplete(true)
                 .setRequired(true);
@@ -187,7 +187,7 @@ const defaultFunction = {
 
         await interaction.editReply({ embeds: embeds });
     },
-    examples: '/barter slick'
+    examples: '/$t(barter) slick'
 };
 
 export default defaultFunction;

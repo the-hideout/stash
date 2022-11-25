@@ -415,8 +415,8 @@ const defaultFunction = {
                 ru: comT('unlink', {lng: 'ru'}),
             })
             .setDescriptionLocalizations({
-                'es-ES': comT('unlink', {lng: 'es-ES'}),
-                ru: comT('unlink', {lng: 'ru'}),
+                'es-ES': comT('progress_unlink_desc', {lng: 'es-ES'}),
+                ru: comT('progress_unlink_desc', {lng: 'ru'}),
             })
         )
         .addSubcommand(subcommand => subcommand
@@ -468,9 +468,9 @@ const defaultFunction = {
         subCommands[interaction.options._subcommand](interaction);
     },
     examples: {
-        level: ['/progress level 42'],
-        trader: ['/progress trader Prapor 3', '/progress trader Therapist 2'],
-        link: '/progress link [TarkovTracker token]'
+        level: ['/$t(progress) $t(level) 42'],
+        trader: ['/$t(progress) $t(trader) Prapor 3', '/$t(progress) $t(trader) Therapist 2'],
+        link: '/$t(progress) $t(link) [TarkovTracker $t(token)]'
     }
 };
 

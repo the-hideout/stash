@@ -179,8 +179,8 @@ const defaultFunction = {
         });
     },
     examples: [
-        '/boss Killa',
-        '/map Reshala'
+        '/$t(boss) Killa',
+        '/$t(boss) Reshala'
     ]
 };
 
