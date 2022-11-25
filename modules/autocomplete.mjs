@@ -2,7 +2,6 @@ import gameData from "./game-data.mjs";
 
 const caches = {
     default: async lang => {
-        console.log('getting default cache')
         return gameData.items.getAll(lang).then(items => items.map(item => item.name).sort());
     },
     barter: async lang => {

@@ -191,7 +191,11 @@ discordClient.on('interactionCreate', async interaction => {
                 name: name,
                 value: name,
             };
-        }));
+        })).catch(error => {
+            console.error('Error responding to autocomplete request');
+            console.error('interaction', interaction);
+            console.error(error);
+        });
 
         return true;
     }
