@@ -21,7 +21,23 @@ const gameData = {
             id: 'crafting',
             name: 'Crafting'
         }
-    ]
+    ],
+    languages: [
+        'cs',
+        'de',
+        'en',
+        'es',
+        'fr',
+        'hu',
+        'it',
+        'ja',
+        'pl',
+        'pt',
+        'ru',
+        'sk',
+        'tr',
+        'zh',
+    ],
 };
 
 const mapKeys = {
@@ -34,23 +50,6 @@ let bossChoices = [];
 let traderChoices = [];
 let hideoutChoices = [];
 
-export const languages = [
-    'cz',
-    'de',
-    'en',
-    'es',
-    'fr',
-    'hu',
-    'it',
-    'jp',
-    'pl',
-    'pt',
-    'ru',
-    'sk',
-    'tr',
-    'zh',
-];
-
 const updateIntervalMinutes = 10;
 
 const eventEmitter = new EventEmitter();
@@ -60,10 +59,23 @@ function validateLanguage(langCode) {
         return 'en';
     }
     langCode = langCode.split('-')[0];
-    if (!languages.includes(langCode)) {
+    if (!gameData.languages.includes(langCode)) {
         return 'en';
     }
     return langCode;
+}
+
+export async function updateLanguages() {
+    const query = `{
+        __type(name: "LanguageCode") {
+            enumValues {
+                name
+            }
+        }
+    }`;
+    const response = await graphqlRequest({ graphql: query });
+    gameData.languages = response.data.__type.enumValues.map(e => e.name);
+    return gameData.languages;
 }
 
 export async function updateMaps(lang = 'en') {
@@ -555,6 +567,7 @@ export async function getStims(lang = 'en') {
 
 export async function updateAll(lang = 'en') {
     await Promise.allSettled([
+        updateLanguages(),
         updateBarters(),
         updateCrafts(),
         updateMaps(lang).then(() => {
