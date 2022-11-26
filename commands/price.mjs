@@ -294,13 +294,7 @@ const defaultFunction = {
             }
 
             // Add the item weight
-            try {
-                body += `• ${t('Weight')}: \`${item.weight} ${t('kg')}\`\n`;
-            } catch (e) {
-                console.log(e);
-                body += `• ${t('Weight')}: \`${t('failed to get item weight')}\`\n`;
-            }
-            
+            body += `• ${t('Weight')}: \`${item.weight} ${t('kg')}\`\n`;
 
             // Add the item description
             embed.setDescription(body);

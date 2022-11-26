@@ -128,7 +128,6 @@ const translationResources = {
             'Enjoy': 'Disfrutar',
             'Escort': 'Escolta',
             'Examples': 'Ejemplos',
-            'failed to get item weight': 'no se pudo obtener el peso del artículo',
             'Fee': 'Tarifa',
             'Flea Market': 'Mercado de pulgas',
             'Flea Price (avg)': 'Precio de pulgas (promedio)',

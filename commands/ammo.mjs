@@ -89,7 +89,6 @@ const defaultFunction = {
         ]);
 
         const ammos = await getAmmo(interaction.locale);
-        console.log(ammos);
         let caliber = false;
         let penIcon = -1;
         for (const ammo of ammos) {

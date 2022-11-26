@@ -160,7 +160,6 @@ const defaultFunction = {
             embed.addFields({name: t('Total'), value: totalCost.toLocaleString(interaction.locale) + '₽', inline: false});
 
             embeds.push(embed);
-            console.log(toolsEmbed)
             if (toolsEmbed.data.fields?.length > 0) {
                 toolsEmbed.addFields({name: t('Total'), value: toolCost.toLocaleString(interaction.locale) + '₽', inline: false});
                 embeds.push(toolsEmbed);
