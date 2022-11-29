@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
-import { getBarters, getItems, getTraders } from '../modules/game-data.mjs';
+import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
 import { getFixedT } from '../modules/translations.mjs';
 
@@ -52,9 +52,9 @@ const defaultFunction = {
         const matchedBarters = [];
 
         const [items, barters, traders] = await Promise.all([
-            getItems(interaction.locale),
-            getBarters(),
-            getTraders(interaction.locale)
+            gameData.items.getAll(interaction.locale),
+            gameData.barters.getAll(),
+            gameData.traders.getAll(interaction.locale)
         ]);
         const searchedItems = items.filter(item => item.name.toLowerCase().includes(searchString.toLowerCase()));
 

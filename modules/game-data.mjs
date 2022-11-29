@@ -717,10 +717,7 @@ export default {
         getAll: getTraders,
         get: async (id, lang = 'en') => {
             const traders = await getTraders(lang);
-            for (const trader of traders) {
-                if (trader.id == id || trader.tarkovDataId == id) return trader;
-            }
-            return false;
+            return traders.find(trader => trader.id === id);
         },
         update: updateTraders,
         choices: includeAllOption => {
@@ -735,10 +732,7 @@ export default {
         getAll: getHideout,
         get: async (id, lang = 'en') => {
             const stations = await getHideout(lang);
-            for (const station of stations) {
-                if (station.id == id || station.tarkovDataId == id) return station;
-            }
-            return false;
+            return stations.find(station => station.id === id);
         },
         update: updateHideout,
         choices: includeAllOption => {
@@ -754,10 +748,7 @@ export default {
             return gameData.skills;
         },
         get: async id => {
-            for (const skill of gameData.skills) {
-                if (skill.id == id) return skill;
-            }
-            return false;
+            return gameData.skills.find(skill => skill.id === id);
         },
         choices: includeAllOption => {
             const choices = gameData.skills.map(skill => {
@@ -790,6 +781,10 @@ export default {
     },
     items: {
         getAll: getItems,
+        get: async (id, lang = 'en') => {
+            const items = await getItems(lang);
+            return items.find(item => item.id === id);
+        },
         getAmmo: getAmmo,
         getStims: getStims,
     },

@@ -3,7 +3,7 @@ import moment from 'moment/min/moment-with-locales.js';
 
 import lootTier from '../modules/loot-tier.mjs';
 import progress from '../modules/progress-shard.mjs';
-import { getBarters, getCrafts, getItems, getTraders, getHideout } from '../modules/game-data.mjs';
+import gameData from '../modules/game-data.mjs';
 import { getFixedT } from '../modules/translations.mjs';
 
 const comT = getFixedT(null, 'command');
@@ -44,11 +44,11 @@ const defaultFunction = {
         const searchString = interaction.options.getString('name');
 
         const [ items, traders, stations, barters, crafts ] = await Promise.all([
-            getItems(interaction.locale),
-            getTraders(interaction.locale),
-            getHideout(interaction.locale),
-            getBarters(),
-            getCrafts(),
+            gameData.items.getAll(interaction.locale),
+            gameData.traders.getAll(interaction.locale),
+            gameData.hideout.getAll(interaction.locale),
+            gameData.barters.getAll(),
+            gameData.crafts.getAll(),
         ]);
         const matchedItems = items.filter(i => i.name.toLowerCase().includes(searchString.toLowerCase()));
 

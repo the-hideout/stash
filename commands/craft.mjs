@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
-import { getItems, getCrafts, getHideout } from '../modules/game-data.mjs';
+import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
 import { getFixedT } from '../modules/translations.mjs';
 
@@ -52,9 +52,9 @@ const defaultFunction = {
         const matchedCrafts = [];
 
         const [items, crafts, stations] = await Promise.all([
-            getItems(interaction.locale),
-            getCrafts(),
-            getHideout(interaction.locale),
+            gameData.items.getAll(interaction.locale),
+            gameData.crafts.getAll(),
+            gameData.hideout.getAll(interaction.locale),
         ]);
 
         const searchedItems = items.filter(item => item.name.toLowerCase().includes(searchString.toLowerCase()));
