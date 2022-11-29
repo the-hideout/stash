@@ -466,10 +466,11 @@ export async function updateItemNames(lang = 'en') {
         }
     }`;
     const response = await graphqlRequest({ graphql: query });
-    gameData.itemNames[lang] = {};
-    response.data.items.forEach(item => {
-        gameData.itemNames[lang][item.id] = item;
-    })
+    
+    gameData.itemNames[lang] = response.data.items.reduce((langData, item) => {
+        langData[item.id] = item;
+        return langData;
+    }, {});
 
     return gameData.itemNames[lang];
 }
