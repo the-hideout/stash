@@ -7,7 +7,7 @@ import gameData from './modules/game-data.mjs';
 
 const { clientId, guildId, token } = JSON.parse(fs.readFileSync('config-dev.json'));
 
-await gameData.load();
+await gameData.updateAll(true);
 
 const commands = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.mjs'));

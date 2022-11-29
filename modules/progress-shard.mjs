@@ -139,6 +139,5 @@ export default {
     },
     init(client) {
         discordClient = client;
-        gameData.load();
     }
 }

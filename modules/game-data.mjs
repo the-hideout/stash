@@ -2,6 +2,7 @@ import EventEmitter from 'events';
 import got from 'got';
 import graphqlRequest from "./graphql-request.mjs";
 import { updateTiers } from './loot-tier.mjs';
+import { t } from "./translations.mjs";
 
 const gameData = {
     maps: {},
@@ -65,6 +66,37 @@ function validateLanguage(langCode) {
     return langCode;
 }
 
+// supported locales: https://discord.com/developers/docs/reference#locales
+function getDiscordLocale(langCode) {
+    const subs = {
+        cs: 'cs',
+        de: 'de',
+        en: 'en-US',
+        es: 'es-ES',
+        fr: 'fr',
+        hu: 'hu',
+        it: 'it',
+        ja: 'ja',
+        pl: 'pl',
+        pt: 'pt-BR',
+        ru: 'ru',
+        // sk: 'sk', // not currently supported
+        tr: 'tr',
+        zh: 'zh-CN',
+    };
+    return subs[langCode];
+}
+
+function getAllChoice() {
+    const allChoice = {name: 'All', value: 'all', name_localizations: {}};
+    for (const langCode of gameData.languages) {
+        const dLocale = getDiscordLocale(langCode);
+        if (!dLocale) continue;;
+        allChoice.name_localizations[dLocale] = t('All', {lng: langCode});
+    }
+    return allChoice;
+}
+
 export async function updateLanguages() {
     const query = `{
         __type(name: "LanguageCode") {
@@ -78,10 +110,10 @@ export async function updateLanguages() {
     return gameData.languages;
 }
 
-export async function updateMaps(lang = 'en') {
-    lang = validateLanguage(lang);
-    const query = `query {
-        maps(lang: ${lang}) {
+export async function updateMaps() {
+    let mapQueries = [];
+    for (const langCode of gameData.languages) {
+        mapQueries.push(`maps_${langCode}: maps(lang: ${langCode}) {
             id
             tarkovDataId
             name
@@ -110,68 +142,104 @@ export async function updateMaps(lang = 'en') {
                 spawnTimeRandom
                 spawnTrigger
             }
-        }
+        }`);
+    }
+    const query = `query {
+        ${mapQueries.join('\n')}
     }`;
-    const responses = await Promise.all([
-        graphqlRequest({ graphql: query }),
+    const [response, mapImages] = await Promise.all([
+        graphqlRequest({ graphql: query }).then(response => response.data),
         got('https://raw.githubusercontent.com/the-hideout/tarkov-dev/master/src/data/maps.json', {
             responseType: 'json',
             headers: { "user-agent": "stash-tarkov-dev" }
-        })
+        }).then(response => response.body)
     ]);
-    gameData.maps[lang] = responses[0].data.maps;     // graphql
 
-    if (lang === 'en') {
-        const newMapChoices = [];
-        const bosses = [];
-        // Loop through each map and collect names and bosses
+    for (const queryName in response) {
+        const lang = queryName.replace('maps_', '');
+        gameData.maps[lang] = response[queryName];
+        
         for (const mapData of gameData.maps[lang]) {
-            newMapChoices.push({name: mapData.name, value: mapData.id});
-            // Loop through each boss and push the boss name to the bossChoices array
-            for (const boss of mapData.bosses) {
-                // Don't add Rogues and Raiders
-                if (boss.normalizedName !== 'rogue' && boss.normalizedName !== 'raider') {
-                    if (bosses.some(bossChoice => bossChoice.value === boss.normalizedName)) {
-                        continue;
-                    }
-                    bosses.push({
-                        name: boss.name,
-                        value: boss.normalizedName
-                    });
-                }
+            let testKey = mapData.normalizedName;
+
+            if (mapKeys[mapData.id]) 
+                testKey = mapKeys[mapData.id];      // remap night-factory=>facory and the-lab=>labs map keys 
+            
+            for (const mapImage of mapImages) {
+                if (mapImage.normalizedName !== testKey) 
+                    continue;
+                
+                let map = mapImage.maps[0];
+
+                mapData.key = map.key;
+                mapData.source = map.source;
+                mapData.sourceLink = map.sourceLink;
+
+                break;
             }
         }
-        mapChoices = newMapChoices.sort((a, b) => {
-            return a.name.localeCompare(b.name);
-        });
-        bossChoices = bosses.sort((a, b) => {
-            return a.name.localeCompare(b.name);
-        });
     }
 
-    const mapImages = responses[1].body;        // static
+    const newMapChoices = [];
+    const bosses = [];
+    // Loop through each map and collect names and bosses
+    for (const mapData of gameData.maps.en) {
+        newMapChoices.push({
+            name: mapData.name, 
+            value: mapData.id, 
+            name_localizations: gameData.languages.reduce((loc, langCode) => {
+                const dLocale = getDiscordLocale(langCode);
+                if (dLocale) {
+                    loc[dLocale] = gameData.maps[langCode].find(m => m.id === mapData.id).name;
+                }
+                return loc;
+            }, {}),
+        });
 
-    for (const mapData of gameData.maps[lang]) {
-        let testKey = mapData.normalizedName;
-
-        if (mapKeys[mapData.id]) 
-            testKey = mapKeys[mapData.id];      // remap night-factory=>facory and the-lab=>labs map keys 
-        
-        for (const mapImage of mapImages) {
-            if (mapImage.normalizedName !== testKey) 
+        // Loop through each boss and push the boss name to the bossChoices array
+        for (const boss of mapData.bosses) {
+            const boss_loc = {};
+            // Don't add Rogues and Raiders
+            if (boss.normalizedName === 'rogue' || boss.normalizedName === 'raider') {
                 continue;
-            
-            let map = mapImage.maps[0];
+            }
+            // Don't add duplicates
+            if (bosses.some(bossChoice => bossChoice.value === boss.normalizedName)) {
+                continue;
+            }
 
-            mapData.key = map.key;
-            mapData.source = map.source;
-            mapData.sourceLink = map.sourceLink;
+            for (const langCode of gameData.languages) {
+                const locMap = gameData.maps[langCode].find(m => m.id === mapData.id);
+                if (!locMap) {
+                    continue;
+                }
+                for (const locBoss of locMap.bosses) {
+                    const dLocale = getDiscordLocale(langCode);
+                    if (!dLocale) {
+                        continue;
+                    }
+                    if (boss.normalizedName !== locBoss.normalizedName) {
+                        continue;
+                    }
+                    boss_loc[dLocale] = locBoss.name;
+                }
+            }
 
-            break;
+            bosses.push({
+                name: boss.name,
+                value: boss.normalizedName,
+                name_localizations: boss_loc,
+            });
         }
     }
+    mapChoices = newMapChoices.sort((a, b) => {
+        return a.name.localeCompare(b.name);
+    });
+    bossChoices = bosses.sort((a, b) => {
+        return a.name.localeCompare(b.name);
+    });
 
-    return gameData.maps[lang];
+    return gameData.maps;
 };
 
 export async function getMaps(lang = 'en') {
@@ -179,13 +247,13 @@ export async function getMaps(lang = 'en') {
     if (gameData.maps[lang]) {
         return gameData.maps[lang];
     }
-    return updateMaps(lang);
+    return updateMaps().then(ms => ms[lang]);
 };
 
-export async function updateTraders(lang = 'en') {
-    lang = validateLanguage(lang);
-    const query = `query {
-        traders(lang: ${lang}) {
+export async function updateTraders() {
+    const traderQueries = [];
+    for (const langCode of gameData.languages) {
+        traderQueries.push(`traders_${langCode}: traders(lang: ${langCode}) {
             id
             tarkovDataId
             name
@@ -196,22 +264,37 @@ export async function updateTraders(lang = 'en') {
                 level
                 payRate
             }
-        }
+        }`);
+    }
+    const query = `query {
+        ${traderQueries.join('\n')}
     }`;
-    const response = await graphqlRequest({ graphql: query });
-    gameData.traders[lang] = response.data.traders;
+    const response = await graphqlRequest({ graphql: query }).then(response => response.data);
 
-    if (lang === 'en') {
-        const newTraderChoices = [];
-        for (const traderData of gameData.traders[lang]) {
-            newTraderChoices.push({name: traderData.name, value: traderData.id});
-        }
-        traderChoices = newTraderChoices.sort((a,b) => {
-            return a.name.localeCompare(b.name);
-        });
+    for (const queryName in response) {
+        const lang = queryName.replace('traders_', '');
+        gameData.traders[lang] = response[queryName];
     }
 
-    return gameData.traders[lang];
+    const newTraderChoices = [];
+    for (const trader of gameData.traders.en) {
+        newTraderChoices.push({
+            name: trader.name, 
+            value: trader.id, 
+            name_localizations: gameData.languages.reduce((loc, langCode) => {
+                const dLocale = getDiscordLocale(langCode);
+                if (dLocale) {
+                    loc[dLocale] = gameData.traders[langCode].find(tr => tr.id === trader.id).name;
+                }
+                return loc;
+            }, {}),
+        });
+    }
+    traderChoices = newTraderChoices.sort((a,b) => {
+        return a.name.localeCompare(b.name);
+    });
+
+    return gameData.traders;
 };
 
 export async function getTraders(lang = 'en') {
@@ -219,13 +302,13 @@ export async function getTraders(lang = 'en') {
     if (gameData.traders[lang]) {
         return gameData.traders[lang];
     }
-    return updateTraders(lang);
+    return updateTraders().then(ts => ts[lang]);
 };
 
-export async function updateHideout(lang = 'en') {
-    lang = validateLanguage(lang);
-    const query = `query {
-        hideoutStations(lang: ${lang}) {
+export async function updateHideout() {
+    const hideoutQueries = [];
+    for (const langCode of gameData.languages) {
+        hideoutQueries.push(`hideout_${langCode}: hideoutStations(lang: ${langCode}) {
             id
             tarkovDataId
             name
@@ -234,22 +317,36 @@ export async function updateHideout(lang = 'en') {
                 tarkovDataId
                 level
             }
-        }
+        }`);
+    }
+    const query = `query {
+        ${hideoutQueries.join('\n')}
     }`;
-    const response = await graphqlRequest({ graphql: query });
-    gameData.hideout[lang] = response.data.hideoutStations;
-
-    if (lang === 'en') {
-        const newWideoutChoices = [];
-        for (const hideoutData of gameData.hideout[lang]) {
-            newWideoutChoices.push({name: hideoutData.name, value: hideoutData.id});
-        }
-        hideoutChoices = newWideoutChoices.sort((a,b) => {
-            return a.name.localeCompare(b.name);
-        });
+    const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+    for (const queryName in response) {
+        const lang = queryName.replace('hideout_', '');
+        gameData.hideout[lang] = response[queryName];
     }
 
-    return gameData.hideout[lang];
+    const newWideoutChoices = [];
+    for (const hideoutData of gameData.hideout.en) {
+        newWideoutChoices.push({
+            name: hideoutData.name, 
+            value: hideoutData.id, 
+            name_localizations: gameData.languages.reduce((loc, langCode) => {
+                const dLocale = getDiscordLocale(langCode);
+                if (dLocale) {
+                    loc[dLocale] = gameData.hideout[langCode].find(hi => hi.id === hideoutData.id).name;
+                }
+                return loc;
+            }, {}),
+        });
+    }
+    hideoutChoices = newWideoutChoices.sort((a,b) => {
+        return a.name.localeCompare(b.name);
+    });
+
+    return gameData.hideout;
 };
 
 export async function getHideout(lang = 'en') {
@@ -257,7 +354,7 @@ export async function getHideout(lang = 'en') {
     if (gameData.hideout[lang]) {
         return gameData.hideout[lang];
     }
-    return updateHideout(lang);
+    return updateHideout().then(hs => hs[lang]);
 };
 
 export async function getFlea() {
@@ -374,10 +471,11 @@ export async function updateItemNames(lang = 'en') {
         }
     }`;
     const response = await graphqlRequest({ graphql: query });
-    gameData.itemNames[lang] = {};
-    response.data.items.forEach(item => {
-        gameData.itemNames[lang][item.id] = item;
-    })
+    
+    gameData.itemNames[lang] = response.data.items.reduce((langData, item) => {
+        langData[item.id] = item;
+        return langData;
+    }, {});
 
     return gameData.itemNames[lang];
 }
@@ -565,52 +663,48 @@ export async function getStims(lang = 'en') {
     });
 }
 
-export async function updateAll(lang = 'en') {
+export async function updateAll(rejectOnError = false) {
+    await updateLanguages();
     await Promise.allSettled([
-        updateLanguages(),
         updateBarters(),
         updateCrafts(),
-        updateMaps(lang).then(() => {
-            const promises = [];
-            for (const langCode in gameData.maps) {
-                if (langCode === lang) {
-                    continue;
-                }
-                promises.push(updateMaps(langCode));
-            }
-            return Promise.all(promises);
-        }),
-        updateTraders(lang).then(() => {
-            const promises = [];
-            for (const langCode in gameData.traders) {
-                if (langCode === lang) {
-                    continue;
-                }
-                promises.push(updateTraders(langCode));
-            }
-            return Promise.all(promises);
-        }),
-        updateHideout(lang).then(() => {
-            const promises = [];
-            for (const langCode in gameData.traders) {
-                if (langCode === lang) {
-                    continue;
-                }
-                promises.push(updateTraders(langCode));
-            }
-            return Promise.all(promises);
-        }),
-        updateItems(lang).then (() => {
+        updateMaps(),
+        updateTraders(),
+        updateHideout(),
+        updateItems().then(() => {
             const promises = [];
             for (const langCode in gameData.itemNames) {
-                if (langCode === lang) {
+                if (langCode === 'en') {
                     continue;
                 }
                 promises.push(updateItemNames(langCode));
             }
             return Promise.all(promises);
         }),
-    ]);
+    ]).then(results => {
+        const taskNames = [
+            'barters',
+            'crafts',
+            'maps',
+            'traders',
+            'hideout',
+            'items',
+        ];
+        let reject = false;
+        results.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+                return;
+            }
+            console.error(`Error updating ${taskNames[index]}`, error);
+            if (rejectOnError && !reject) {
+                reject = error;
+            }
+        });
+        if (reject) {
+            return Promise.reject(reject);
+        }
+        return results;
+    });
     eventEmitter.emit('updated');
 }
 
@@ -635,17 +729,14 @@ export default {
         getAll: getTraders,
         get: async (id, lang = 'en') => {
             const traders = await getTraders(lang);
-            for (const trader of traders) {
-                if (trader.id == id || trader.tarkovDataId == id) return trader;
-            }
-            return false;
+            return traders.find(trader => trader.id === id);
         },
         update: updateTraders,
         choices: includeAllOption => {
             if (!includeAllOption) return traderChoices;
             return [
                 ...traderChoices,
-                {name: 'All', value: 'all'}
+                getAllChoice()
             ];
         }
     },
@@ -653,17 +744,14 @@ export default {
         getAll: getHideout,
         get: async (id, lang = 'en') => {
             const stations = await getHideout(lang);
-            for (const station of stations) {
-                if (station.id == id || station.tarkovDataId == id) return station;
-            }
-            return false;
+            return stations.find(station => station.id === id);
         },
         update: updateHideout,
         choices: includeAllOption => {
             if (!includeAllOption) return hideoutChoices;
             return [
                 ...hideoutChoices,
-                {name: 'All', value: 'all'}
+                getAllChoice()
             ];
         }
     },
@@ -672,33 +760,30 @@ export default {
             return gameData.skills;
         },
         get: async id => {
-            for (const skill of gameData.skills) {
-                if (skill.id == id) return skill;
-            }
-            return false;
+            return gameData.skills.find(skill => skill.id === id);
         },
         choices: includeAllOption => {
             const choices = gameData.skills.map(skill => {
-                return {name: skill.name, value: skill.id}
+                const skill_loc = {};
+                for (const lang of gameData.languages) {
+                    const langCode = getDiscordLocale(lang);
+                    if (!langCode) {
+                        continue;
+                    }
+                    skill_loc[langCode] = t(skill.name, {lng: lang});
+                }
+                return {name: skill.name, value: skill.id, name_localizations: skill_loc};
             });
             if (!includeAllOption) return choices;
             return [
                 ...choices,
-                {name: 'All', value: 'all'}
+                getAllChoice()
             ];
         }
     },
     flea: {
         get: getFlea,
         update: updateFlea
-    },
-    load: (lang = 'en') => {
-        return Promise.all([
-            getMaps(lang),
-            getTraders(lang),
-            getHideout(lang),
-            getFlea()
-        ]);
     },
     barters: {
         getAll: getBarters
@@ -708,8 +793,13 @@ export default {
     },
     items: {
         getAll: getItems,
+        get: async (id, lang = 'en') => {
+            const items = await getItems(lang);
+            return items.find(item => item.id === id);
+        },
         getAmmo: getAmmo,
         getStims: getStims,
     },
-    events: eventEmitter
+    events: eventEmitter,
+    updateAll: updateAll,
 };

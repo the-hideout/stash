@@ -12,10 +12,12 @@ if (process.env.NODE_ENV === "ci") {
     clientId = process.env.DISCORD_CLIENT_ID;
     token = process.env.DISCORD_TOKEN;
 } else {
-    let { clientId, token } = JSON.parse(fs.readFileSync('config.json'));
+    const config = JSON.parse(fs.readFileSync('config.json'));
+    clientId = config.clientId;
+    token = config.token;
 }
 
-await gameData.load();
+await gameData.updateAll(true);
 
 const commands = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.mjs'));
