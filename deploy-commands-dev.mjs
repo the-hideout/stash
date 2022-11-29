@@ -3,11 +3,11 @@ import fs from 'fs';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 
-import { updateAll } from './modules/game-data.mjs';
+import gameData from './modules/game-data.mjs';
 
 const { clientId, guildId, token } = JSON.parse(fs.readFileSync('config-dev.json'));
 
-await updateAll();
+await gameData.updateAll(true);
 
 const commands = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.mjs'));

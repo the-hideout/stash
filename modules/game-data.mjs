@@ -658,7 +658,7 @@ export async function getStims(lang = 'en') {
     });
 }
 
-export async function updateAll() {
+export async function updateAll(rejectOnError = false) {
     await updateLanguages();
     await Promise.allSettled([
         updateBarters(),
@@ -685,12 +685,19 @@ export async function updateAll() {
             'hideout',
             'items',
         ];
+        let reject = false;
         results.forEach((result, index) => {
             if (result.status === 'fulfilled') {
                 return;
             }
             console.error(`Error updating ${taskNames[index]}`, error);
+            if (rejectOnError && !reject) {
+                reject = error;
+            }
         });
+        if (reject) {
+            return Promise.reject(reject);
+        }
         return results;
     });
     eventEmitter.emit('updated');
@@ -788,5 +795,6 @@ export default {
         getAmmo: getAmmo,
         getStims: getStims,
     },
-    events: eventEmitter
+    events: eventEmitter,
+    updateAll: updateAll,
 };
