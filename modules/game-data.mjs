@@ -175,6 +175,65 @@ export async function updateMaps() {
         }
     }
 
+    const newMapChoices = [];
+    const bosses = [];
+    // Loop through each map and collect names and bosses
+    for (const mapData of gameData.maps.en) {
+        newMapChoices.push({
+            name: mapData.name, 
+            value: mapData.id, 
+            name_localizations: gameData.languages.reduce((loc, langCode) => {
+                const dLocale = getDiscordLocale(langCode);
+                if (dLocale) {
+                    loc[dLocale] = gameData.maps[langCode].find(m => m.id === mapData.id).name;
+                }
+                return loc;
+            }, {}),
+        });
+
+        // Loop through each boss and push the boss name to the bossChoices array
+        for (const boss of mapData.bosses) {
+            const boss_loc = {};
+            // Don't add Rogues and Raiders
+            if (boss.normalizedName === 'rogue' || boss.normalizedName === 'raider') {
+                continue;
+            }
+            // Don't add duplicates
+            if (bosses.some(bossChoice => bossChoice.value === boss.normalizedName)) {
+                continue;
+            }
+
+            for (const langCode of gameData.languages) {
+                const locMap = gameData.maps[langCode].find(m => m.id === mapData.id);
+                if (!locMap) {
+                    continue;
+                }
+                for (const locBoss of locMap.bosses) {
+                    const dLocale = getDiscordLocale(langCode);
+                    if (!dLocale) {
+                        continue;
+                    }
+                    if (boss.normalizedName !== locBoss.normalizedName) {
+                        continue;
+                    }
+                    boss_loc[dLocale] = locBoss.name;
+                }
+            }
+
+            bosses.push({
+                name: boss.name,
+                value: boss.normalizedName,
+                name_localizations: boss_loc,
+            });
+        }
+    }
+    mapChoices = newMapChoices.sort((a, b) => {
+        return a.name.localeCompare(b.name);
+    });
+    bossChoices = bosses.sort((a, b) => {
+        return a.name.localeCompare(b.name);
+    });
+
     return gameData.maps;
 };
 
@@ -212,6 +271,24 @@ export async function updateTraders() {
         gameData.traders[lang] = response[queryName];
     }
 
+    const newTraderChoices = [];
+    for (const trader of gameData.traders.en) {
+        newTraderChoices.push({
+            name: trader.name, 
+            value: trader.id, 
+            name_localizations: gameData.languages.reduce((loc, langCode) => {
+                const dLocale = getDiscordLocale(langCode);
+                if (dLocale) {
+                    loc[dLocale] = gameData.traders[langCode].find(tr => tr.id === trader.id).name;
+                }
+                return loc;
+            }, {}),
+        });
+    }
+    traderChoices = newTraderChoices.sort((a,b) => {
+        return a.name.localeCompare(b.name);
+    });
+
     return gameData.traders;
 };
 
@@ -245,6 +322,24 @@ export async function updateHideout() {
         const lang = queryName.replace('hideout_', '');
         gameData.hideout[lang] = response[queryName];
     }
+
+    const newWideoutChoices = [];
+    for (const hideoutData of gameData.hideout.en) {
+        newWideoutChoices.push({
+            name: hideoutData.name, 
+            value: hideoutData.id, 
+            name_localizations: gameData.languages.reduce((loc, langCode) => {
+                const dLocale = getDiscordLocale(langCode);
+                if (dLocale) {
+                    loc[dLocale] = gameData.hideout[langCode].find(hi => hi.id === hideoutData.id).name;
+                }
+                return loc;
+            }, {}),
+        });
+    }
+    hideoutChoices = newWideoutChoices.sort((a,b) => {
+        return a.name.localeCompare(b.name);
+    });
 
     return gameData.hideout;
 };
@@ -562,118 +657,40 @@ export async function getStims(lang = 'en') {
     });
 }
 
-export async function updateAll(lang = 'en') {
+export async function updateAll() {
     await updateLanguages();
-    await Promise.all([
+    await Promise.allSettled([
         updateBarters(),
         updateCrafts(),
         updateMaps(),
         updateTraders(),
         updateHideout(),
-        updateItems(lang).then(() => {
+        updateItems().then(() => {
             const promises = [];
             for (const langCode in gameData.itemNames) {
-                if (langCode === lang) {
+                if (langCode === 'en') {
                     continue;
                 }
                 promises.push(updateItemNames(langCode));
             }
             return Promise.all(promises);
         }),
-    ]);
-
-    const newMapChoices = [];
-    const bosses = [];
-    // Loop through each map and collect names and bosses
-    for (const mapData of gameData.maps.en) {
-        const map_loc = {};
-        for (const langCode of gameData.languages) {
-            const dLocale = getDiscordLocale(langCode);
-            if (!dLocale) {
-                continue;
+    ]).then(results => {
+        const taskNames = [
+            'barters',
+            'crafts',
+            'maps',
+            'traders',
+            'hideout',
+            'items',
+        ];
+        results.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+                return;
             }
-            const mapLoc = gameData.maps[langCode].find(m => m.id === mapData.id);
-            if (!mapLoc) {
-                continue;
-            }
-            map_loc[dLocale] = mapLoc.name;
-        }
-        newMapChoices.push({name: mapData.name, value: mapData.id, name_localizations: map_loc});
-        // Loop through each boss and push the boss name to the bossChoices array
-        for (const boss of mapData.bosses) {
-            const boss_loc = {};
-            // Don't add Rogues and Raiders
-            if (boss.normalizedName === 'rogue' || boss.normalizedName === 'raider') {
-                continue;
-            }
-            // Don't add duplicates
-            if (bosses.some(bossChoice => bossChoice.value === boss.normalizedName)) {
-                continue;
-            }
-
-            for (const langCode of gameData.languages) {
-                const locMap = gameData.maps[langCode].find(m => m.id === mapData.id);
-                if (!locMap) {
-                    continue;
-                }
-                for (const locBoss of locMap.bosses) {
-                    const dLocale = getDiscordLocale(langCode);
-                    if (!dLocale) {
-                        continue;
-                    }
-                    if (boss.normalizedName !== locBoss.normalizedName) {
-                        continue;
-                    }
-                    boss_loc[dLocale] = locBoss.name;
-                }
-            }
-
-            bosses.push({
-                name: boss.name,
-                value: boss.normalizedName,
-                name_localizations: boss_loc,
-            });
-        }
-    }
-    mapChoices = newMapChoices.sort((a, b) => {
-        return a.name.localeCompare(b.name);
-    });
-    bossChoices = bosses.sort((a, b) => {
-        return a.name.localeCompare(b.name);
-    });
-
-    const newTraderChoices = [];
-    for (const trader of gameData.traders.en) {
-        const trader_loc = {};
-        for (const langCode of gameData.languages) {
-            const dLocale = getDiscordLocale(langCode);
-            if (!dLocale) {
-                continue;
-            }
-            const traderLoc = gameData.traders[langCode].find(tr => tr.id === trader.id);
-            trader_loc[dLocale] = traderLoc.name;
-        }
-        newTraderChoices.push({name: trader.name, value: trader.id, name_localizations: trader_loc});
-    }
-    traderChoices = newTraderChoices.sort((a,b) => {
-        return a.name.localeCompare(b.name);
-    });
-
-    const newWideoutChoices = [];
-    for (const hideoutData of gameData.hideout.en) {
-        const hideout_loc = {};
-        for (const langCode of gameData.languages) {
-            const dLocale = getDiscordLocale(langCode);
-            if (!dLocale) {
-                continue;
-            }
-            const hideoutLoc = gameData.hideout[langCode].find(hi => hi.id === hideoutData.id);
-            hideout_loc[dLocale] = hideoutLoc.name;
-        }
-        newWideoutChoices.push({name: hideoutData.name, value: hideoutData.id, name_localizations: hideout_loc});
-    }
-    hideoutChoices = newWideoutChoices.sort((a,b) => {
-        return a.name.localeCompare(b.name);
+            console.error(`Error updating ${taskNames[index]}`, error);
+        });
+        return results;
     });
     eventEmitter.emit('updated');
 }
