@@ -3,7 +3,7 @@ import fs from 'fs';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 
-import gameData from './modules/game-data.mjs';
+import { updateAll } from './modules/game-data.mjs';
 
 let clientId;
 let token;
@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === "ci") {
     let { clientId, token } = JSON.parse(fs.readFileSync('config.json'));
 }
 
-await gameData.load();
+await updateAll();
 
 const commands = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.mjs'));
