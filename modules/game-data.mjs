@@ -66,6 +66,7 @@ function validateLanguage(langCode) {
     return langCode;
 }
 
+// supported locales: https://discord.com/developers/docs/reference#locales
 function getDiscordLocale(langCode) {
     const subs = {
         cs: 'cs',
@@ -79,6 +80,7 @@ function getDiscordLocale(langCode) {
         pl: 'pl',
         pt: 'pt-BR',
         ru: 'ru',
+        // sk: 'sk', // not currently supported
         tr: 'tr',
         zh: 'zh-CN',
     };
