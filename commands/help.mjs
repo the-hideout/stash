@@ -7,8 +7,8 @@ import { getFixedT } from '../modules/translations.mjs';
 const comT = getFixedT(null, 'command');
 
 const nameLocalizations = {
-    'es-ES': comT('command', {lng: 'es-ES'}),
-    ru: comT('command', {lng: 'ru'}),
+    'es-ES': comT('help', {lng: 'es-ES'}),
+    ru: comT('help', {lng: 'ru'}),
 };
 
 function getCommandOptions(command, locale = 'en') {
