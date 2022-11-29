@@ -6,6 +6,11 @@ import { getFixedT } from '../modules/translations.mjs';
 
 const comT = getFixedT(null, 'command');
 
+const nameLocalizations = {
+    'es-ES': comT('command', {lng: 'es-ES'}),
+    ru: comT('command', {lng: 'ru'}),
+};
+
 function getCommandOptions(command, locale = 'en') {
     let optionString = '';
     for (const option of command.options) {
@@ -49,9 +54,9 @@ for (const file of commandFiles) {
         hasSubcommands: command.default.data.options.length > 0 && command.default.data.options[0].options,
         examples: command.default.examples,
     }
-    commandChoices.push({name: command.default.data.name, value: command.default.data.name});
+    commandChoices.push({name: command.default.data.name, value: command.default.data.name, name_localizations: command.default.data.name_localizations});
 }
-commandChoices.push({name: 'help', value: 'help'});
+commandChoices.push({name: 'help', value: 'help', name_localizations: nameLocalizations});
 commandChoices = commandChoices.sort((a,b) => {
     return a.name.localeCompare(b.name);
 });
@@ -60,10 +65,7 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('help')
         .setDescription('Tells you a bit about the bot commands')
-        .setNameLocalizations({
-            'es-ES': comT('help', {lng: 'es-ES'}),
-            ru: comT('help', {lng: 'ru'}),
-        })
+        .setNameLocalizations(nameLocalizations)
         .setDescriptionLocalizations({
             'es-ES': comT('help_desc', {lng: 'es-ES'}),
             ru: comT('help_desc', {lng: 'ru'}),
