@@ -68,15 +68,18 @@ function validateLanguage(langCode) {
 
 function getDiscordLocale(langCode) {
     const subs = {
+        cs: 'cs',
         de: 'de',
         en: 'en-US',
         es: 'es-ES',
         fr: 'fr',
+        hu: 'hu',
         it: 'it',
         ja: 'ja',
         pl: 'pl',
         pt: 'pt-BR',
         ru: 'ru',
+        tr: 'tr',
         zh: 'zh-CN',
     };
     return subs[langCode];
