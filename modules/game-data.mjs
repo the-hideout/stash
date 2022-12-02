@@ -695,9 +695,9 @@ export async function updateAll(rejectOnError = false) {
             if (result.status === 'fulfilled') {
                 return;
             }
-            console.error(`Error updating ${taskNames[index]}`, error);
+            console.error(`Error updating ${taskNames[index]}`, result.reason);
             if (rejectOnError && !reject) {
-                reject = error;
+                reject = result.reason;
             }
         });
         if (reject) {
