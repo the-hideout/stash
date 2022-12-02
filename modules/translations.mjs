@@ -6,9 +6,11 @@ import i18next from 'i18next';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
+console.log(__filename);
+console.log(__dirname);
 const translationResources = {};
 const translationsPath = path.join(__dirname, '..', 'translations');
+console.log(translationsPath);
 const translationFiles = fs.readdirSync(translationsPath).filter(file => file.endsWith('.json'));
 for (const file of translationFiles) {
     const langCode = file.split('.')[0];
