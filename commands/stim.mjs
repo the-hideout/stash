@@ -1,9 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import { getStims } from '../modules/game-data.mjs';
-import { getFixedT } from '../modules/translations.mjs';
-
-const comT = getFixedT(null, 'command');
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const MAX_ITEMS = 2;
 
@@ -11,25 +9,13 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('stim')
         .setDescription('Get stim injector information')
-        .setNameLocalizations({
-            'es-ES': comT('stim', {lng: 'es-ES'}),
-            ru: comT('stim', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('stim_desc', {lng: 'es-ES'}),
-            ru: comT('stim_desc', {lng: 'ru'}),
-        })
+        .setNameLocalizations(getCommandLocalizations('stim'))
+        .setDescriptionLocalizations(getCommandLocalizations('stim_desc'))
         .addStringOption(option => {
             return option.setName('name')
                 .setDescription('Stim to search for')
-                .setNameLocalizations({
-                    'es-ES': comT('name', {lng: 'es-ES'}),
-                    ru: comT('name', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('stim_name_desc', {lng: 'es-ES'}),
-                    ru: comT('stim_name_desc', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('name'))
+                .setDescriptionLocalizations(getCommandLocalizations('stim_name_desc'))
                 .setAutocomplete(true)
                 .setRequired(true);
         }),

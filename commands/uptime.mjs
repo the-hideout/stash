@@ -1,22 +1,14 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import { formatHMS } from '../modules/utils.mjs';
-import { getFixedT } from '../modules/translations.mjs';
-
-const comT = getFixedT(null, 'command');
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('uptime')
         .setDescription('Shows the uptime of the bot')
-        .setNameLocalizations({
-            'es-ES': comT('uptime', {lng: 'es-ES'}),
-            ru: comT('uptime', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('uptime_desc', {lng: 'es-ES'}),
-            ru: comT('uptime_desc', {lng: 'ru'}),
-        }),
+        .setNameLocalizations(getCommandLocalizations('uptime'))
+        .setDescriptionLocalizations(getCommandLocalizations('uptime_desc')),
     async execute(interaction) {
         const t = getFixedT(interaction.locale);
         const embed = new EmbedBuilder();

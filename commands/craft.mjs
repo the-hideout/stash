@@ -2,35 +2,21 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
-import { getFixedT } from '../modules/translations.mjs';
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const MAX_CRAFTS = 2;
-
-const comT = getFixedT(null, 'command');
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('craft')
         .setDescription('Find crafts with a specific item')
-        .setNameLocalizations({
-            'es-ES': comT('craft', {lng: 'es-ES'}),
-            ru: comT('craft', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('craft_desc', {lng: 'es-ES'}),
-            ru: comT('craft_desc', {lng: 'ru'}),
-        })
+        .setNameLocalizations(getCommandLocalizations('craft'))
+        .setDescriptionLocalizations(getCommandLocalizations('craft_desc'))
         .addStringOption(option => {
             return option.setName('name')
                 .setDescription('Item name to search for')
-                .setNameLocalizations({
-                    'es-ES': comT('name', {lng: 'es-ES'}),
-                    ru: comT('name', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('name_search_desc', {lng: 'es-ES'}),
-                    ru: comT('name_search_desc', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('name'))
+                .setDescriptionLocalizations(getCommandLocalizations('name_search_desc'))
                 .setAutocomplete(true)
                 .setRequired(true);
         }),

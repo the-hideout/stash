@@ -2,33 +2,19 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import gameData from '../modules/game-data.mjs';
 import realTimeToTarkovTime from '../modules/time.mjs';
-import { getFixedT } from '../modules/translations.mjs';
-
-const comT = getFixedT(null, 'command');
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('map')
         .setDescription('Get detailed information about a map')
-        .setNameLocalizations({
-            'es-ES': comT('map', {lng: 'es-ES'}),
-            ru: comT('map', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('map_desc', {lng: 'es-ES'}),
-            ru: comT('map_desc', {lng: 'ru'}),
-        })
+        .setNameLocalizations(getCommandLocalizations('map'))
+        .setDescriptionLocalizations(getCommandLocalizations('map_desc'))
         .addStringOption(option => option
             .setName('map')
             .setDescription('Select a map')
-            .setNameLocalizations({
-                'es-ES': comT('map', {lng: 'es-ES'}),
-                ru: comT('map', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('map_select', {lng: 'es-ES'}),
-                ru: comT('map_select', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('map'))
+            .setDescriptionLocalizations(getCommandLocalizations('map_select_desc'))
             .setRequired(true)
             .setChoices(...gameData.maps.choices())
         ),

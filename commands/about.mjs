@@ -6,22 +6,14 @@ import {
 } from 'discord.js';
 import got from 'got';
 
-import { getFixedT } from '../modules/translations.mjs';
-
-const comT = getFixedT(null, 'command');
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('about')
         .setDescription('Tells you a bit about the bot')
-        .setNameLocalizations({
-            'es-ES': comT('about', {lng: 'es-ES'}),
-            ru: comT('about', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('about_desc', {lng: 'es-ES'}),
-            ru: comT('about_desc', {lng: 'ru'}),
-        }),
+        .setNameLocalizations(getCommandLocalizations('about'))
+        .setDescriptionLocalizations(getCommandLocalizations('about_desc')),
     async execute(interaction) {
         await interaction.deferReply();
         const t = getFixedT(interaction.locale);

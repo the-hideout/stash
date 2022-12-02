@@ -1,9 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import graphqlRequest from '../modules/graphql-request.mjs';
 import generalError from '../modules/general-error.mjs';
-import { getFixedT } from '../modules/translations.mjs';
-
-const comT = getFixedT(null, 'command');
+import { getCommandLocalizations } from '../modules/translations.mjs';
 
 const statusCodes = [
     '🟢 OK',
@@ -23,14 +21,8 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('status')
         .setDescription('Gives you the current server status')
-        .setNameLocalizations({
-            'es-ES': comT('status', {lng: 'es-ES'}),
-            ru: comT('status', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('status_desc', {lng: 'es-ES'}),
-            ru: comT('status_desc', {lng: 'ru'}),
-        }),
+        .setNameLocalizations(getCommandLocalizations('status'))
+        .setDescriptionLocalizations(getCommandLocalizations('status_desc')),
     async execute(interaction) {
         await interaction.deferReply();
         const embed = new EmbedBuilder();

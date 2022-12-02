@@ -1,7 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import gameData from '../modules/game-data.mjs';
-import { getFixedT } from '../modules/translations.mjs';
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const baseImageUrl = 'https://assets.tarkov.dev';
 
@@ -64,31 +64,17 @@ const bossDetails = [
     }
 ];
 
-const comT = getFixedT(null, 'command');
-
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('boss')
         .setDescription('Get detailed information about a boss')
-        .setNameLocalizations({
-            'es-ES': comT('boss', {lng: 'es-ES'}),
-            ru: comT('boss', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('boss_desc', {lng: 'es-ES'}),
-            ru: comT('boss_desc', {lng: 'ru'}),
-        })
+        .setNameLocalizations(getCommandLocalizations('boss'))
+        .setDescriptionLocalizations(getCommandLocalizations('boss_desc'))
         .addStringOption(option => option
             .setName('boss')
             .setDescription('Select a boss')
-            .setNameLocalizations({
-                'es-ES': comT('boss', {lng: 'es-ES'}),
-                ru: comT('boss', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('boss_select', {lng: 'es-ES'}),
-                ru: comT('boss_select', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('boss'))
+            .setDescriptionLocalizations(getCommandLocalizations('boss_select_desc'))
             .setRequired(true)
             .setChoices(...gameData.bosses.choices())
         ),

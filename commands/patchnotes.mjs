@@ -3,9 +3,7 @@ import got from 'got';
 import * as cheerio from 'cheerio';
 import TurndownService from 'turndown';
 
-import { getFixedT } from '../modules/translations.mjs';
-
-const comT = getFixedT(null, 'command');
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const MAX_EMBED_LENGTH = 4096;
 const URL = 'https://www.escapefromtarkov.com/news?page=1&filter=2';
@@ -40,14 +38,8 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('patchnotes')
         .setDescription('Get latest patch notes')
-        .setNameLocalizations({
-            'es-ES': comT('patchnotes', {lng: 'es-ES'}),
-            ru: comT('patchnotes', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('patchnotes_desc', {lng: 'es-ES'}),
-            ru: comT('patchnotes_desc', {lng: 'ru'}),
-        }),
+        .setNameLocalizations(getCommandLocalizations('patchnotes'))
+        .setDescriptionLocalizations(getCommandLocalizations('patchnotes_desc')),
     async execute(interaction) {
         await interaction.deferReply();
         const t = getFixedT(interaction.locale);

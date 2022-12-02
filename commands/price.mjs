@@ -4,9 +4,7 @@ import moment from 'moment/min/moment-with-locales.js';
 import lootTier from '../modules/loot-tier.mjs';
 import progress from '../modules/progress-shard.mjs';
 import gameData from '../modules/game-data.mjs';
-import { getFixedT } from '../modules/translations.mjs';
-
-const comT = getFixedT(null, 'command');
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const MAX_ITEMS = 2;
 
@@ -14,25 +12,13 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('price')
         .setDescription('Get an item\'s flea and trader value')
-        .setNameLocalizations({
-            'es-ES': comT('price', {lng: 'es-ES'}),
-            ru: comT('price', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('price_desc', {lng: 'es-ES'}),
-            ru: comT('price_desc', {lng: 'ru'}),
-        })
+        .setNameLocalizations(getCommandLocalizations('price'))
+        .setDescriptionLocalizations(getCommandLocalizations('price_desc'))
         .addStringOption(option => {
             return option.setName('name')
                 .setDescription('Item name to search for')
-                .setNameLocalizations({
-                    'es-ES': comT('name', {lng: 'es-ES'}),
-                    ru: comT('name', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('name_search_desc', {lng: 'es-ES'}),
-                    ru: comT('name_search_desc', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('name'))
+                .setDescriptionLocalizations(getCommandLocalizations('name_search_desc'))
                 .setAutocomplete(true)
                 .setRequired(true);
         }),

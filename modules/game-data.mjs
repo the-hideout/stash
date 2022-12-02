@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 import got from 'got';
 import graphqlRequest from "./graphql-request.mjs";
 import { updateTiers } from './loot-tier.mjs';
-import { t } from "./translations.mjs";
+import { t, getDiscordLocale } from "./translations.mjs";
 
 const gameData = {
     maps: {},
@@ -66,32 +66,11 @@ function validateLanguage(langCode) {
     return langCode;
 }
 
-// supported locales: https://discord.com/developers/docs/reference#locales
-function getDiscordLocale(langCode) {
-    const subs = {
-        cs: 'cs',
-        de: 'de',
-        en: 'en-US',
-        es: 'es-ES',
-        fr: 'fr',
-        hu: 'hu',
-        it: 'it',
-        ja: 'ja',
-        pl: 'pl',
-        pt: 'pt-BR',
-        ru: 'ru',
-        // sk: 'sk', // not currently supported
-        tr: 'tr',
-        zh: 'zh-CN',
-    };
-    return subs[langCode];
-}
-
 function getAllChoice() {
     const allChoice = {name: 'All', value: 'all', name_localizations: {}};
     for (const langCode of gameData.languages) {
         const dLocale = getDiscordLocale(langCode);
-        if (!dLocale) continue;;
+        if (!dLocale) continue;
         allChoice.name_localizations[dLocale] = t('All', {lng: langCode});
     }
     return allChoice;
