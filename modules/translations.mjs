@@ -1,10 +1,14 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import i18next from 'i18next';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const translationResources = {};
-const translationsPath = path.join(path.dirname(decodeURI(import.meta.url.substring(8))), '..', 'translations');
+const translationsPath = path.join(__dirname, '..', 'translations');
 const translationFiles = fs.readdirSync(translationsPath).filter(file => file.endsWith('.json'));
 for (const file of translationFiles) {
     const langCode = file.split('.')[0];
