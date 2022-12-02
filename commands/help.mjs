@@ -63,7 +63,7 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('help')
         .setDescription('Tells you a bit about the bot commands')
-        .setNameLocalizations(nameLocalizations('help'))
+        .setNameLocalizations(getCommandLocalizations('help'))
         .setDescriptionLocalizations(getCommandLocalizations('help_desc'))
         .addStringOption(option => option
             .setName('command')

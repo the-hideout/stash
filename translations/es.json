@@ -202,7 +202,7 @@
         "send_alert": "enviar_alerta",
         "show": "mostrar",
         "skill": "habilidad",
-        "Skill": "Habilidad",
+        "skill_desc": "Habilidad",
         "station": "estación",
         "status": "estado",
         "status_desc": "Le da el estado actual del servidor",
@@ -213,7 +213,7 @@
         "tier_desc": "Muestra los criterios para los niveles de botín",
         "token": "token",
         "trader": "comerciante",
-        "Trader": "Comerciante",
+        "trader_desc": "Comerciante",
         "unlink": "desvincular",
         "uptime": "uptime",
         "uptime_desc": "Muestra el tiempo de actividad del bot"

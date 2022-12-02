@@ -111,7 +111,7 @@ const defaultFunction = {
                 .setName('trader')
                 .setDescription('Trader')
                 .setNameLocalizations(getCommandLocalizations('trader'))
-                .setDescriptionLocalizations(getCommandLocalizations('Trader'))
+                .setDescriptionLocalizations(getCommandLocalizations('trader_desc'))
                 .setRequired(true)
                 .setChoices(...gameData.traders.choices(true))
             )
