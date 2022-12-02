@@ -22,6 +22,7 @@ export function getDiscordLocale(langCode) {
         hu: 'hu',
         it: 'it',
         ja: 'ja',
+        ko: 'ko',
         pl: 'pl',
         pt: 'pt-BR',
         'pt-BR': 'pt-BR',
