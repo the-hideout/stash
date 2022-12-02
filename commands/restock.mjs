@@ -68,6 +68,7 @@ const subCommands = {
     },
     channel: async interaction => {
         await interaction.deferReply({ephemeral: true});
+        const t = getFixedT(interaction.locale);
         const isAdmin = interaction.memberPermissions.has(PermissionFlagsBits.Administrator);
         if (!isAdmin) {
             await interaction.editReply({
