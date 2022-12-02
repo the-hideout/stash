@@ -36,7 +36,7 @@ export function getDiscordLocale(langCode) {
 
 i18next.init({
     lng: 'en-US',
-    debug: process.env.NODE_ENV === 'development',
+    debug: true, // process.env.NODE_ENV === 'development',
     resources: translationResources
 });
 
@@ -59,9 +59,14 @@ export function getCommandLocalizations(key) {
     return localization;
 }
 
+export function getAvailableLanguages() {
+    return Object.keys(translationResources);
+}
+
 export default {
     t: i18next.t,
     getFixedT: i18next.getFixedT,
     getCommandLocalizations: getCommandLocalizations,
     getDiscordLocale: getDiscordLocale,
+    getAvailableLanguages: getAvailableLanguages,
 };

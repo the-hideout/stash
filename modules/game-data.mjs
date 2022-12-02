@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 import got from 'got';
 import graphqlRequest from "./graphql-request.mjs";
 import { updateTiers } from './loot-tier.mjs';
-import { t, getDiscordLocale } from "./translations.mjs";
+import { t, getDiscordLocale, getAvailableLanguages } from "./translations.mjs";
 
 const gameData = {
     maps: {},
@@ -68,7 +68,7 @@ function validateLanguage(langCode) {
 
 function getAllChoice() {
     const allChoice = {name: 'All', value: 'all', name_localizations: {}};
-    for (const langCode of gameData.languages) {
+    for (const langCode of getAvailableLanguages()) {
         const dLocale = getDiscordLocale(langCode);
         if (!dLocale) continue;
         allChoice.name_localizations[dLocale] = t('All', {lng: langCode});
@@ -744,7 +744,7 @@ export default {
         choices: includeAllOption => {
             const choices = gameData.skills.map(skill => {
                 const skill_loc = {};
-                for (const lang of gameData.languages) {
+                for (const lang of getAvailableLanguages()) {
                     const langCode = getDiscordLocale(lang);
                     if (!langCode) {
                         continue;
