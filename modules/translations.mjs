@@ -2,11 +2,11 @@ import fs from 'fs';
 import i18next from 'i18next';
 
 const translationResources = {};
-
-const translationFiles = fs.readdirSync('./translations').filter(file => file.endsWith('.json'));
+const translationsPath = `${process.cwd()}/translations`;
+const translationFiles = fs.readdirSync(translationsPath).filter(file => file.endsWith('.json'));
 for (const file of translationFiles) {
     const langCode = file.split('.')[0];
-    translationResources[langCode] = JSON.parse(fs.readFileSync(`./translations/${file}`));
+    translationResources[langCode] = JSON.parse(fs.readFileSync(`${translationsPath}/${file}`));
 }
 
 // supported locales: https://discord.com/developers/docs/reference#locales
