@@ -282,7 +282,7 @@ const startRestockAlerts = async () => {
                 const alertTime = new Date(trader.resetTime) - new Date() - 1000 * 60;
                 if (alertTime < 0) continue;
                 setTimeout(() => {
-                    const restockMessage = '🛒 {{trader.name}} restock in {{numMinutes}} minute(s) 🛒';
+                    const restockMessage = '🛒 {{trader.name}} restock in {{numMinutes}} minutes 🛒';
                     const messageVars = {trader, numMinutes: tarkovTrackerUpdateIntervalMinutes};
                     for (const userId in userProgress) {
                         if (!userProgress[userId].alerts) continue;
