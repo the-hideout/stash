@@ -7,7 +7,6 @@
         "🔴 Poor": "🔴 Pobre",
         "🛒 {{trader.name}} restock in {{numMinutes}} minutes 🛒": "🛒 {{trader.name}} reposición en {{numMinutes}} minuto 🛒",
         "{{thingName}} set to {{level}}.": "{{thingName}} establecido en {{level}}.",
-        "/help [command]": "/ayuda [comando]",
         "A Dmg": "Daño A",
         "About": "Sobre",
         "additional results not shown.": "no se muestran resultados adicionales.",

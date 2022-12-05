@@ -84,7 +84,7 @@ const defaultFunction = {
                 [${t('Come visit us in our server.')}](https://discord.gg/XPAsKGHSzH)
                 ${t('You can learn more about the bot\'s commands by entering:')}`);
             embed.addFields({ 
-                name: t('/help [command]'), 
+                name: `/${comT('help', {lng: interaction.locale})} [${comT('command', {lng: interaction.locale})}]`,
                 value: `${t('Where [command] is one of the following commands:')} \n`+Object.keys(commands).map(comm => comT(comm, {lng: interaction.locale})).join('\n')
             });
 
