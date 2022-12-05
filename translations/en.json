@@ -166,7 +166,7 @@
         "map_select_desc": "Select a map",
         "message": "message",
         "name": "name",
-        "name_search_desc": "Nombre del elemento a buscar",
+        "name_search_desc": "Item name to search for",
         "patchnotes": "patchnotes",
         "patchnotes_desc": "Get latest patch notes",
         "price": "price",
