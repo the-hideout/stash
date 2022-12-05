@@ -4,9 +4,7 @@ import { ChannelType, PermissionFlagsBits } from 'discord-api-types/v10';
 
 import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
-import { getFixedT } from '../modules/translations.mjs';
-
-const comT = getFixedT(null, 'command');
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const subCommands = {
     show: async interaction => {
@@ -70,6 +68,7 @@ const subCommands = {
     },
     channel: async interaction => {
         await interaction.deferReply({ephemeral: true});
+        const t = getFixedT(interaction.locale);
         const isAdmin = interaction.memberPermissions.has(PermissionFlagsBits.Administrator);
         if (!isAdmin) {
             await interaction.editReply({
@@ -96,87 +95,45 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('restock')
         .setDescription('Show or set alerts for trader restock timers')
-        .setNameLocalizations({
-            'es-ES': comT('restock', {lng: 'es-ES'}),
-            ru: comT('restock', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('restock_desc', {lng: 'es-ES'}),
-            ru: comT('restock_desc', {lng: 'ru'}),
-        })
+        .setNameLocalizations(getCommandLocalizations('restock'))
+        .setDescriptionLocalizations(getCommandLocalizations('restock_desc'))
         .addSubcommand(subcommand => subcommand
             .setName('show')
             .setDescription('Show trader restock timers')
-            .setNameLocalizations({
-                'es-ES': comT('show', {lng: 'es-ES'}),
-                ru: comT('show', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('restock_show_desc', {lng: 'es-ES'}),
-                ru: comT('restock_show_desc', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('show'))
+            .setDescriptionLocalizations(getCommandLocalizations('restock_show_desc'))
         )
         .addSubcommand(subcommand => subcommand
             .setName('alert')
             .setDescription('Set alerts for trader restocks')
-            .setNameLocalizations({
-                'es-ES': comT('alert', {lng: 'es-ES'}),
-                ru: comT('alert', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('restock_alert_desc', {lng: 'es-ES'}),
-                ru: comT('restock_alert_desc', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('alert'))
+            .setDescriptionLocalizations(getCommandLocalizations('restock_alert_desc'))
             .addStringOption(option => option
                 .setName('trader')
                 .setDescription('Trader')
-                .setNameLocalizations({
-                    'es-ES': comT('trader', {lng: 'es-ES'}),
-                    ru: comT('trader', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('Trader', {lng: 'es-ES'}),
-                    ru: comT('Trader', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('trader'))
+                .setDescriptionLocalizations(getCommandLocalizations('trader_desc'))
                 .setRequired(true)
                 .setChoices(...gameData.traders.choices(true))
             )
             .addBooleanOption(option => option
                 .setName('send_alert')
                 .setDescription('Whether to send an alert')
-                .setNameLocalizations({
-                    'es-ES': comT('send_alert', {lng: 'es-ES'}),
-                    ru: comT('send_alert', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('restock_alert_send_desc', {lng: 'es-ES'}),
-                    ru: comT('restock_alert_send_desc', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('send_alert'))
+                .setDescriptionLocalizations(getCommandLocalizations('restock_alert_send_desc'))
                 .setRequired(true)
             )
         )
         .addSubcommand(subcommand => subcommand
             .setName('channel')
             .setDescription('Announce trader restocks in a Discord channel')
-            .setNameLocalizations({
-                'es-ES': comT('channel', {lng: 'es-ES'}),
-                ru: comT('channel', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('restock_channel_desc', {lng: 'es-ES'}),
-                ru: comT('restock_channel_desc', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('channel'))
+            .setDescriptionLocalizations(getCommandLocalizations('restock_channel_desc'))
             .addChannelOption(option => 
                 option.setName('channel')
                 .setDescription('The channel on this server in which to make announcements')
-                .setNameLocalizations({
-                    'es-ES': comT('channel', {lng: 'es-ES'}),
-                    ru: comT('channel', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('restock_channel_select', {lng: 'es-ES'}),
-                    ru: comT('restock_channel_select', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('channel'))
+                .setDescriptionLocalizations(getCommandLocalizations('restock_channel_select_desc'))
                 .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement))
         ),
     async execute(interaction) {

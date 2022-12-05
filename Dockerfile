@@ -16,6 +16,7 @@ COPY index.mjs .
 COPY classic-commands/ classic-commands/
 COPY commands/ commands/
 COPY modules/ modules/
+COPY translations/ translations/
 
 ENTRYPOINT [ "node" ]
 CMD [ "index.mjs" ]

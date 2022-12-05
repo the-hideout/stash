@@ -1,14 +1,12 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import got from 'got';
 
-import { getFixedT } from '../modules/translations.mjs';
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const URL = 'https://tarkov-changes.com';
 const MAX_EMBED_LENGTH = 4096;
 let changes = false;
 let lastCheck = new Date(0);
-
-const comT = getFixedT(null, 'command');
 
 const getChanges = async () => {
     if (changes && new Date() - lastCheck < 1000 * 60 * 10) return changes;
@@ -22,14 +20,8 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('changes')
         .setDescription('Get the latest changes for EFT')
-        .setNameLocalizations({
-            'es-ES': comT('changes', {lng: 'es-ES'}),
-            ru: comT('changes', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('changes_desc', {lng: 'es-ES'}),
-            ru: comT('changes_desc', {lng: 'ru'}),
-        }),
+        .setNameLocalizations(getCommandLocalizations('changes'))
+        .setDescriptionLocalizations(getCommandLocalizations('changes_desc')),
     async execute(interaction) {
         await interaction.deferReply();
         const t = getFixedT(interaction.locale);

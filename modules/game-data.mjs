@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 import got from 'got';
 import graphqlRequest from "./graphql-request.mjs";
 import { updateTiers } from './loot-tier.mjs';
-import { t } from "./translations.mjs";
+import { t, getDiscordLocale, getCommandLocalizations } from "./translations.mjs";
 
 const gameData = {
     maps: {},
@@ -16,11 +16,13 @@ const gameData = {
     skills: [
         {
             id: 'hideoutManagement',
-            name: 'Hideout Management'
+            name: 'Hideout Management',
+            command_translation_key: 'hideout_management_skill_desc'
         },
         {
             id: 'crafting',
-            name: 'Crafting'
+            name: 'Crafting',
+            command_translation_key: 'crafting_skill_desc',
         }
     ],
     languages: [
@@ -66,35 +68,8 @@ function validateLanguage(langCode) {
     return langCode;
 }
 
-// supported locales: https://discord.com/developers/docs/reference#locales
-function getDiscordLocale(langCode) {
-    const subs = {
-        cs: 'cs',
-        de: 'de',
-        en: 'en-US',
-        es: 'es-ES',
-        fr: 'fr',
-        hu: 'hu',
-        it: 'it',
-        ja: 'ja',
-        pl: 'pl',
-        pt: 'pt-BR',
-        ru: 'ru',
-        // sk: 'sk', // not currently supported
-        tr: 'tr',
-        zh: 'zh-CN',
-    };
-    return subs[langCode];
-}
-
 function getAllChoice() {
-    const allChoice = {name: 'All', value: 'all', name_localizations: {}};
-    for (const langCode of gameData.languages) {
-        const dLocale = getDiscordLocale(langCode);
-        if (!dLocale) continue;;
-        allChoice.name_localizations[dLocale] = t('All', {lng: langCode});
-    }
-    return allChoice;
+    return {name: 'All', value: 'all', name_localizations: getCommandLocalizations('all_desc')};
 }
 
 export async function updateLanguages() {
@@ -764,15 +739,7 @@ export default {
         },
         choices: includeAllOption => {
             const choices = gameData.skills.map(skill => {
-                const skill_loc = {};
-                for (const lang of gameData.languages) {
-                    const langCode = getDiscordLocale(lang);
-                    if (!langCode) {
-                        continue;
-                    }
-                    skill_loc[langCode] = t(skill.name, {lng: lang});
-                }
-                return {name: skill.name, value: skill.id, name_localizations: skill_loc};
+                return {name: skill.name, value: skill.id, name_localizations: getCommandLocalizations(skill.command_translation_key)};
             });
             if (!includeAllOption) return choices;
             return [

@@ -3,9 +3,7 @@ import moment from 'moment/min/moment-with-locales.js';
 
 import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
-import { getFixedT } from '../modules/translations.mjs';
-
-const comT = getFixedT(null, 'command');
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const subCommands = {
     show: async interaction => {
@@ -207,87 +205,45 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('progress')
         .setDescription('Manage your customized hideout and trader progress')
-        .setNameLocalizations({
-            'es-ES': comT('progress', {lng: 'es-ES'}),
-            ru: comT('progress', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('progress_desc', {lng: 'es-ES'}),
-            ru: comT('progress_desc', {lng: 'ru'}),
-        })
+        .setNameLocalizations(getCommandLocalizations('progress'))
+        .setDescriptionLocalizations(getCommandLocalizations('progress_desc'))
         .addSubcommand(subcommand => subcommand
             .setName('show')
             .setDescription('Show your customized progress')
-            .setNameLocalizations({
-                'es-ES': comT('show', {lng: 'es-ES'}),
-                ru: comT('show', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('progress_show_desc', {lng: 'es-ES'}),
-                ru: comT('progress_show_desc', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('show'))
+            .setDescriptionLocalizations(getCommandLocalizations('progress_show_desc'))
         )
         .addSubcommand(subcommand => subcommand
             .setName('level')
             .setDescription('Set your PMC level')
-            .setNameLocalizations({
-                'es-ES': comT('level', {lng: 'es-ES'}),
-                ru: comT('level', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('progress_level_desc', {lng: 'es-ES'}),
-                ru: comT('progress_level_desc', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('level'))
+            .setDescriptionLocalizations(getCommandLocalizations('progress_level_desc'))
             .addIntegerOption(option => option
                 .setName('level')
                 .setDescription('PMC level')
-                .setNameLocalizations({
-                    'es-ES': comT('level', {lng: 'es-ES'}),
-                    ru: comT('level', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('progress_level_select', {lng: 'es-ES'}),
-                    ru: comT('progress_level_select', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('level'))
+                .setDescriptionLocalizations(getCommandLocalizations('progress_level_select_desc'))
                 .setRequired(true)
             )
         )
         .addSubcommand(subcommand => subcommand
             .setName('trader')
             .setDescription('Set trader level')
-            .setNameLocalizations({
-                'es-ES': comT('trader', {lng: 'es-ES'}),
-                ru: comT('trader', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('progress_trader_desc', {lng: 'es-ES'}),
-                ru: comT('progress_trader_desc', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('trader'))
+            .setDescriptionLocalizations(getCommandLocalizations('progress_trader_desc'))
             .addStringOption(option => option
                 .setName('trader')
                 .setDescription('Trader')
-                .setNameLocalizations({
-                    'es-ES': comT('trader', {lng: 'es-ES'}),
-                    ru: comT('trader', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('Trader', {lng: 'es-ES'}),
-                    ru: comT('Trader', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('trader'))
+                .setDescriptionLocalizations(getCommandLocalizations('trader_desc'))
                 .setRequired(true)
                 .setChoices(...gameData.traders.choices(true))
             )
             .addIntegerOption(option => option
                 .setName('level')
                 .setDescription('The trader\'s level')
-                .setNameLocalizations({
-                    'es-ES': comT('level', {lng: 'es-ES'}),
-                    ru: comT('level', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('progress_trader_level_select', {lng: 'es-ES'}),
-                    ru: comT('progress_trader_level_select', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('level'))
+                .setDescriptionLocalizations(getCommandLocalizations('progress_trader_level_select_desc'))
                 .setRequired(true)
                 .setChoices(
                     {name: '1', value: 1},
@@ -300,39 +256,21 @@ const defaultFunction = {
         .addSubcommand(subcommand => subcommand
             .setName('hideout')
             .setDescription('Set hideout station level')
-            .setNameLocalizations({
-                'es-ES': comT('hideout', {lng: 'es-ES'}),
-                ru: comT('hideout', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('progress_hideout_desc', {lng: 'es-ES'}),
-                ru: comT('progress_hideout_desc', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('hideout'))
+            .setDescriptionLocalizations(getCommandLocalizations('progress_hideout_desc'))
             .addStringOption(option => option
                 .setName('station')
                 .setDescription('Hideout Station')
-                .setNameLocalizations({
-                    'es-ES': comT('station', {lng: 'es-ES'}),
-                    ru: comT('station', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('progress_hideout_station_select', {lng: 'es-ES'}),
-                    ru: comT('progress_hideout_station_select', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('station'))
+                .setDescriptionLocalizations(getCommandLocalizations('progress_hideout_station_select_desc'))
                 .setRequired(true)
                 .setChoices(...gameData.hideout.choices(true))
             )
             .addIntegerOption(option => option
                 .setName('level')
                 .setDescription('The station\'s level')
-                .setNameLocalizations({
-                    'es-ES': comT('level', {lng: 'es-ES'}),
-                    ru: comT('level', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('progress_hideout_level_select', {lng: 'es-ES'}),
-                    ru: comT('progress_hideout_level_select', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('level'))
+                .setDescriptionLocalizations(getCommandLocalizations('progress_hideout_level_select_desc'))
                 .setRequired(true)
                 .setChoices(
                     {name: '-', value: 0},
@@ -346,101 +284,53 @@ const defaultFunction = {
         .addSubcommand(subcommand => subcommand
             .setName('skill')
             .setDescription('Set skill level')
-            .setNameLocalizations({
-                'es-ES': comT('skill', {lng: 'es-ES'}),
-                ru: comT('skill', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('progress_skill_desc', {lng: 'es-ES'}),
-                ru: comT('progress_skill_desc', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('skill'))
+            .setDescriptionLocalizations(getCommandLocalizations('progress_skill_desc'))
             .addStringOption(option => option
                 .setName('skill')
                 .setDescription('Skill')
-                .setNameLocalizations({
-                    'es-ES': comT('skill', {lng: 'es-ES'}),
-                    ru: comT('skill', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('Skill', {lng: 'es-ES'}),
-                    ru: comT('Skill', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('skill'))
+                .setDescriptionLocalizations(getCommandLocalizations('skill_desc'))
                 .setRequired(true)
                 .setChoices(...gameData.skills.choices(false))
             )
             .addIntegerOption(option => option
                 .setName('level')
                 .setDescription('The skill\'s level')
-                .setNameLocalizations({
-                    'es-ES': comT('level', {lng: 'es-ES'}),
-                    ru: comT('level', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('progress_skill_level_select', {lng: 'es-ES'}),
-                    ru: comT('progress_skill_level_select', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('level'))
+                .setDescriptionLocalizations(getCommandLocalizations('progress_skill_level_select_desc'))
                 .setRequired(true)
             )
         )
         .addSubcommand(subcommand => subcommand
             .setName('link')
             .setDescription('Link your TarkovTracker account to sync hideout progress')
-            .setNameLocalizations({
-                'es-ES': comT('link', {lng: 'es-ES'}),
-                ru: comT('link', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('progress_link_desc', {lng: 'es-ES'}),
-                ru: comT('progress_link_desc', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('link'))
+            .setDescriptionLocalizations(getCommandLocalizations('progress_link_desc'))
             .addStringOption(option => option
                 .setName('token')
                 .setDescription('Your TarkovTracker API token from https://tarkovtracker.io/settings/')
-                .setNameLocalizations({
-                    'es-ES': comT('token', {lng: 'es-ES'}),
-                    ru: comT('token', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('progress_link_token_desc', {lng: 'es-ES'}),
-                    ru: comT('progress_link_token_desc', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('token'))
+                .setDescriptionLocalizations(getCommandLocalizations('progress_link_token_desc'))
                 .setRequired(true)
             )
         )
         .addSubcommand(subcommand => subcommand
             .setName('unlink')
             .setDescription('Unlink your TarkovTracker account')
-            .setNameLocalizations({
-                'es-ES': comT('unlink', {lng: 'es-ES'}),
-                ru: comT('unlink', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('progress_unlink_desc', {lng: 'es-ES'}),
-                ru: comT('progress_unlink_desc', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('unlink'))
+            .setDescriptionLocalizations(getCommandLocalizations('progress_unlink_desc'))
         )
         .addSubcommand(subcommand => subcommand
             .setName('flea_market_fee')
             .setDescription('Set your progress to accurately calculate flea market fees')
-            .setNameLocalizations({
-                'es-ES': comT('flea_market_fee', {lng: 'es-ES'}),
-                ru: comT('flea_market_fee', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('progress_flea_market_fee_desc', {lng: 'es-ES'}),
-                ru: comT('progress_flea_market_fee_desc', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('flea_market_fee'))
+            .setDescriptionLocalizations(getCommandLocalizations('progress_flea_market_fee_desc'))
             .addIntegerOption(option => option
                 .setName('intel_center_level')
                 .setDescription('Intelligence Center level')
-                .setNameLocalizations({
-                    'es-ES': comT('intel_center_level', {lng: 'es-ES'}),
-                    ru: comT('intel_center_level', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('progress_flea_market_fee_intel_select', {lng: 'es-ES'}),
-                    ru: comT('progress_flea_market_fee_intel_select', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('intel_center_level'))
+                .setDescriptionLocalizations(getCommandLocalizations('progress_flea_market_fee_intel_select_desc'))
                 .setRequired(true)
                 .setChoices(
                     {name: '-', value: 0},
@@ -452,14 +342,8 @@ const defaultFunction = {
             .addIntegerOption(option => option
                 .setName('hideout_management_level')
                 .setDescription('Hideout Management skill level')
-                .setNameLocalizations({
-                    'es-ES': comT('hideout_management_level', {lng: 'es-ES'}),
-                    ru: comT('hideout_management_level', {lng: 'ru'}),
-                })
-                .setDescriptionLocalizations({
-                    'es-ES': comT('progress_flea_market_fee_mgmt_select', {lng: 'es-ES'}),
-                    ru: comT('progress_flea_market_fee_mgmt_select', {lng: 'ru'}),
-                })
+                .setNameLocalizations(getCommandLocalizations('hideout_management_level'))
+                .setDescriptionLocalizations(getCommandLocalizations('progress_flea_market_fee_mgmt_select_desc'))
                 .setRequired(true)
             )
         ),

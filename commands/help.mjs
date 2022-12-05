@@ -2,9 +2,7 @@ import fs from 'fs';
 
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
-import { getFixedT } from '../modules/translations.mjs';
-
-const comT = getFixedT(null, 'command');
+import { getFixedT, getCommandLocalizations, comT } from '../modules/translations.mjs';
 
 const nameLocalizations = {
     'es-ES': comT('help', {lng: 'es-ES'}),
@@ -65,22 +63,13 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('help')
         .setDescription('Tells you a bit about the bot commands')
-        .setNameLocalizations(nameLocalizations)
-        .setDescriptionLocalizations({
-            'es-ES': comT('help_desc', {lng: 'es-ES'}),
-            ru: comT('help_desc', {lng: 'ru'}),
-        })
+        .setNameLocalizations(getCommandLocalizations('help'))
+        .setDescriptionLocalizations(getCommandLocalizations('help_desc'))
         .addStringOption(option => option
             .setName('command')
             .setDescription('Get help about command')
-            .setNameLocalizations({
-                'es-ES': comT('command', {lng: 'es-ES'}),
-                ru: comT('command', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('help_command_desc', {lng: 'es-ES'}),
-                ru: comT('help_command_desc', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('command'))
+            .setDescriptionLocalizations(getCommandLocalizations('help_command_desc'))
             .setChoices(...commandChoices)
         ),
 

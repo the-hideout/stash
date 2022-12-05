@@ -1,34 +1,20 @@
 import { SlashCommandBuilder } from "discord.js";
 
 import sendError from '../modules/send-error.mjs';
-import { getFixedT } from '../modules/translations.mjs';
-
-const comT = getFixedT(null, 'command');
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName("issue")
         .setDescription("Send issues to the developers")
-        .setNameLocalizations({
-            'es-ES': comT('issue', {lng: 'es-ES'}),
-            ru: comT('issue', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('issue_desc', {lng: 'es-ES'}),
-            ru: comT('issue_desc', {lng: 'ru'}),
-        })
+        .setNameLocalizations(getCommandLocalizations('issue'))
+        .setDescriptionLocalizations(getCommandLocalizations('issue_desc'))
         .addStringOption(option => option
             .setRequired(true)
             .setName("message")
             .setDescription("Enter your message")
-            .setNameLocalizations({
-                'es-ES': comT('message', {lng: 'es-ES'}),
-                ru: comT('message', {lng: 'ru'}),
-            })
-            .setDescriptionLocalizations({
-                'es-ES': comT('issue_message_desc', {lng: 'es-ES'}),
-                ru: comT('issue_message_desc', {lng: 'ru'}),
-            })
+            .setNameLocalizations(getCommandLocalizations('message'))
+            .setDescriptionLocalizations(getCommandLocalizations('issue_message_desc'))
             .setRequired(true)
         ),
 

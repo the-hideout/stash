@@ -1,9 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import fs from 'fs';
 
-import { getFixedT } from '../modules/translations.mjs';
-
-const comT = getFixedT(null, 'command');
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const rouletteData = JSON.parse(fs.readFileSync('data/roulette.json'));
 
@@ -11,14 +9,8 @@ const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('roulette')
         .setDescription('Spin the roulette wheel for a fun or challenging game of Tarkov!')
-        .setNameLocalizations({
-            'es-ES': comT('roulette', {lng: 'es-ES'}),
-            ru: comT('roulette', {lng: 'ru'}),
-        })
-        .setDescriptionLocalizations({
-            'es-ES': comT('roulette_desc', {lng: 'es-ES'}),
-            ru: comT('roulette_desc', {lng: 'ru'}),
-        }),
+        .setNameLocalizations(getCommandLocalizations('roulette'))
+        .setDescriptionLocalizations(getCommandLocalizations('roulette_desc')),
     async execute(interaction) {
         const t = getFixedT(interaction.locale);
 
