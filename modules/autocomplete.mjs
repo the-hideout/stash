@@ -26,7 +26,7 @@ const caches = {
     stim: async lang => {
         return gameData.items.getStims(lang).then(items => items.map(item => item.name).sort());
     }
-}
+};
 
 async function autocomplete(interaction) {
     let searchString;

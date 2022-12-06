@@ -670,7 +670,7 @@ export async function updateAll(rejectOnError = false) {
             if (result.status === 'fulfilled') {
                 return;
             }
-            console.error(`Error updating ${taskNames[index]}`, result.reason);
+            console.error(`Error updating ${taskNames[index]}: ${result.reason.message} (${new Date()})`);
             if (rejectOnError && !reject) {
                 reject = result.reason;
             }
