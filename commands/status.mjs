@@ -1,7 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import graphqlRequest from '../modules/graphql-request.mjs';
 import generalError from '../modules/general-error.mjs';
-import { getCommandLocalizations } from '../modules/translations.mjs';
+import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const statusCodes = [
     '🟢 OK',
@@ -25,6 +25,7 @@ const defaultFunction = {
         .setDescriptionLocalizations(getCommandLocalizations('status_desc')),
     async execute(interaction) {
         await interaction.deferReply();
+        const t = getFixedT(interaction.locale);
         const embed = new EmbedBuilder();
         let currentStatus;
 
@@ -51,14 +52,14 @@ const defaultFunction = {
         } catch (requestError) {
             console.error(requestError);
 
-            generalError(interaction, 'Something went wrong when trying to fetch status, please try again');
+            generalError(interaction, t('Something went wrong when trying to fetch status, please try again'));
 
             return true;
         }
 
         const globalStatus = currentStatus.currentStatuses.find(status => status.name === 'Global');
 
-        embed.setTitle(globalStatus.message);
+        embed.setTitle(t('Escape from Tarkov Status'));
         embed.setURL('https://status.escapefromtarkov.com/');
 
         if (currentStatus.messages.length > 0) {
