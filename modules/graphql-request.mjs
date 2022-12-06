@@ -4,30 +4,17 @@ const url = 'https://api.tarkov.dev/graphql';
 
 const graphqlRequest = async (options) => {
     if (!options.hasOwnProperty('graphql')) {
-        throw new Error("You must provide graphql");
+        return Promise.reject(new Error('You must provide a graphql query'));
     }
 
-    if (options.hasOwnProperty('channel') && options.channel.sendTyping) {
-        options.channel.sendTyping();
-    }
-
-    try {
-        const requestBody = JSON.stringify({
+    return got.post(url, {
+        responseType: 'json',
+        body: JSON.stringify({
             query: options.graphql,
-        });
-
-        const response = await got.post(url, {
-            responseType: 'json',
-            body: requestBody,
-            headers: { "user-agent": "stash-tarkov-dev" }
-        });
-
-        return response.body;
-    } catch (requestError) {
-        console.error(requestError);
-
-        throw requestError;
-    }
+        }),
+        headers: { "user-agent": "stash-tarkov-dev" },
+        resolveBodyOnly: true,
+    });
 };
 
 export default graphqlRequest;
