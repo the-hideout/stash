@@ -52,7 +52,6 @@ const defaultFunction = {
         if (!searchString) {
             await interaction.editReply({
                 content: t('You need to specify an ammo type'),
-                ephemeral: true,
             });
 
             return true;
@@ -86,7 +85,6 @@ const defaultFunction = {
         if (!caliber) {
             await interaction.editReply({
                 content: t('No matching ammo found'),
-                ephemeral: true,
             });
 
             return true;
