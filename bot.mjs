@@ -192,9 +192,9 @@ discordClient.on('interactionCreate', async interaction => {
                 value: name,
             };
         })).catch(error => {
-            console.error('Error responding to autocomplete request');
-            console.error('interaction', interaction);
-            console.error(error);
+            console.error(`Error responding to /${interaction.commandName} command autocomplete request for locale ${interaction.locale}: ${error}`);
+            //console.error('interaction', interaction);
+            //console.error(error);
         });
 
         return true;
