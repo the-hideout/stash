@@ -14,7 +14,7 @@
   },
   "type": "module",
   "dependencies": {
-    "@discordjs/rest": "^0.2.0-canary.0",
+    "@discordjs/rest": "^1.4.0",
     "@sentry/node": "^6.19.4",
     "@sentry/tracing": "^6.19.4",
     "ascii-table": "^0.0.9",
@@ -23,14 +23,14 @@
     "cron": "^1.8.2",
     "cross-env": "^7.0.3",
     "discord-api-types": "^0.37.19",
-    "discord.js": "^14.6.0",
+    "discord.js": "^14.7.1",
     "dotenv": "^14.1.0",
-    "got": "^12.1.0",
-    "i18next": "^22.0.4",
+    "got": "^12.5.3",
+    "i18next": "^22.1.4",
     "moment": "^2.29.4",
-    "nodemon": "^2.0.15",
+    "nodemon": "^2.0.20",
     "turndown": "^7.1.1",
-    "uuid": "^8.3.2"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@railway/cli": "^2.0.10"

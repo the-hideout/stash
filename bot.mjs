@@ -1,13 +1,13 @@
 import fs from 'fs';
 import * as Sentry from "@sentry/node";
 import "@sentry/tracing";
-
 import {
     Client,
     GatewayIntentBits,
     PermissionsBitField,
     Collection,
 } from 'discord.js';
+import { ChannelType } from 'discord-api-types/v9';
 
 import commands from './classic-commands/index.mjs';
 import autocomplete from './modules/autocomplete.mjs';
@@ -133,53 +133,6 @@ discordClient.on('guildCreate', async guild => {
     }
 });
 
-discordClient.on('messageCreate', async message => {
-    if (message.channel.type != 'DM' && message.channel.type != 'GUILD_TEXT') {
-        return false;
-    }
-
-    if (message.author.bot) {
-        // Don't do anything from other bots
-        return false;
-    }
-
-    let formattedMessage = message.content.toLowerCase();
-
-    if (message.mentions.has(discordClient.user)) {
-        formattedMessage = '!help';
-    }
-
-    for (const command in commands) {
-        if (formattedMessage.indexOf(command) !== 0) {
-            continue;
-        }
-
-        if (message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(PermissionsBitField.Flags.SendMessages)) {
-            const user = await discordClient.users.fetch(message.author.id, false);
-            user.send(`Missing posting permissions in ${message.guild.name}#${message.channel.name} (${message.guild.id}). Replying here instead.\n\rIf you want to fix this, talk to your discord admin`);
-
-            message.fallbackChannel = user;
-        }
-
-        if (message.channel.type === 'GUILD_TEXT' && !message.guild.me.permissionsIn(message.channel).has(PermissionsBitField.Flags.EmbedLinks)) {
-            const user = await discordClient.users.fetch(message.author.id, false);
-            user.send(`Missing embed permissions in ${message.guild.name}#${message.channel.name} (${message.guild.id}). Replying here instead.\n\rIf you want to fix this, talk to your discord admin`);
-
-            message.fallbackChannel = user;
-        }
-
-        console.log(formattedMessage);
-
-        try {
-            commands[command](message, discordClient);
-        } catch (error) {
-            console.error(error);
-        }
-
-        return true;
-    }
-});
-
 discordClient.on('interactionCreate', async interaction => {
     if (interaction.isAutocomplete()) {
         let options = await autocomplete(interaction);
@@ -202,7 +155,7 @@ discordClient.on('interactionCreate', async interaction => {
 
     let command = false;
 
-    if (interaction.isSelectMenu()) {
+    if (interaction.isStringSelectMenu()) {
         command = discordClient.commands.get(interaction.message.interaction.commandName);
     } else if (interaction.isCommand()) {
         command = discordClient.commands.get(interaction.commandName);
