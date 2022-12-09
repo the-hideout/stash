@@ -4,12 +4,9 @@ import "@sentry/tracing";
 import {
     Client,
     GatewayIntentBits,
-    PermissionsBitField,
     Collection,
 } from 'discord.js';
-import { ChannelType } from 'discord-api-types/v9';
 
-import commands from './classic-commands/index.mjs';
 import autocomplete from './modules/autocomplete.mjs';
 import progress from "./modules/progress-shard.mjs";
 import { updateAll, getTraders } from './modules/game-data.mjs';
