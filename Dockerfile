@@ -13,7 +13,6 @@ USER node
 COPY data/ data/
 COPY bot.mjs .
 COPY index.mjs .
-COPY classic-commands/ classic-commands/
 COPY commands/ commands/
 COPY modules/ modules/
 COPY translations/ translations/

@@ -47,6 +47,9 @@ const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('
 
 for (const file of commandFiles) {
     const command = await import(`./${file}`);
+    if (command.default.data.name === 'stash') {
+        continue;
+    }
     commands[command.default.data.name] = {
         ...command.default.data,
         hasSubcommands: command.default.data.options.length > 0 && command.default.data.options[0].options,
