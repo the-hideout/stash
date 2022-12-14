@@ -108,7 +108,7 @@ const defaultFunction = {
             .setName('servers')
             .setDescription('List total number of servers in which bot is a member')
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
+        .setDefaultMemberPermissions(0)
         .addSubcommand(subcommand => subcommand
             .setName('find_server')
             .setDescription('Search for member server by name')
