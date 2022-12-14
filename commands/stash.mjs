@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 
 function userIsAuthorized(interaction) {
     return !!process.env.ADMIN_ID && process.env.ADMIN_ID.split(',').includes(interaction.user.id)
@@ -108,6 +108,7 @@ const defaultFunction = {
             .setName('servers')
             .setDescription('List total number of servers in which bot is a member')
         )
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
         .addSubcommand(subcommand => subcommand
             .setName('find_server')
             .setDescription('Search for member server by name')
