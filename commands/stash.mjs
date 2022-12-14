@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 function userIsAuthorized(interaction) {
     return !!process.env.ADMIN_ID && process.env.ADMIN_ID.split(',').includes(interaction.user.id)
