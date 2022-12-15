@@ -39,14 +39,12 @@ const defaultFunction = {
         const matchedItems = items.filter(i => i.name.toLowerCase().includes(searchString.toLowerCase()));
 
         if (matchedItems.length === 0) {
-            await interaction.deleteReply();
-            await interaction.followUp({
+            return interaction.editReply({
                 content: t('Found no results for "{{searchString}}"', {
                     searchString: searchString
                 }),
                 ephemeral: true,
             });
-            return false;
         }
 
         let embeds = [];
@@ -317,7 +315,7 @@ const defaultFunction = {
             embeds.push(ending);
         }
 
-        await interaction.editReply({ embeds: embeds });
+        return interaction.editReply({ embeds: embeds });
     },
     examples: [
         '/$t(price) bitcoin'

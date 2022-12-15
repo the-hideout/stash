@@ -91,9 +91,7 @@ const defaultFunction = {
                 value: `${t('Where [command] is one of the following commands:')} \n`+Object.keys(commands).map(comm => comT(comm, {lng: interaction.locale})).join('\n')
             });
 
-            await interaction.reply({ embeds: [embed] });
-
-            return true;
+            return interaction.reply({ embeds: [embed] });
         }
 
         const cmd = commands[helpCommand];
@@ -136,7 +134,7 @@ const defaultFunction = {
             }
         }
 
-        await interaction.reply({ embeds: [embed] });
+        return interaction.reply({ embeds: [embed] });
     },
     examples: [
         '/$t(help) $t(barter)',

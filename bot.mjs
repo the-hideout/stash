@@ -165,7 +165,7 @@ discordClient.on('interactionCreate', async interaction => {
     try {
         await command.default.execute(interaction);
     } catch (error) {
-        console.error(error);
+        console.error(`Error executing /${interaction.commandName} command`, error);
 
         const message = {
             content: 'There was an error while executing this command!',

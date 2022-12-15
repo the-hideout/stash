@@ -25,7 +25,7 @@ const subCommands = {
         embed.setTitle(`Servers: ${totalGuilds}`);
         embed.setDescription(`Total reach: ${totalMembers} users\nShards: ${interaction.client.shard.count}`);
 
-        interaction.editReply({ embeds: [embed] }).catch(console.error);
+        return interaction.editReply({ embeds: [embed] }).catch(console.error);
     },
     find_server: async interaction => {
         await interaction.deferReply({ephemeral: true});
@@ -72,7 +72,7 @@ const subCommands = {
             embed.setTitle(`Could not find server with name ${searchName}`);
         }
             
-        interaction.editReply({ embeds: [embed] }).catch(console.error);
+        return interaction.editReply({ embeds: [embed] }).catch(console.error);
     },
     leave_server: async interaction => {
         await interaction.deferReply({ephemeral: true});
@@ -96,7 +96,7 @@ const subCommands = {
             return true;
         });
         
-        interaction.editReply(response).catch(console.error);
+        return interaction.editReply(response).catch(console.error);
     },
 };
 
