@@ -101,7 +101,7 @@ if (process.env.NODE_ENV === 'production') {
                 timeout: { request: 5000 }
             }
         ).catch(error => {
-            console.log('Healthcheck error:', error);
+            console.error(`Healthcheck error: ${error}`);
         });
     });
     healthcheckJob.start();
