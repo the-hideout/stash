@@ -25,7 +25,7 @@ const defaultFunction = {
 
         sendError(client, member, details);
 
-        interaction.reply({
+        return interaction.reply({
             content: t("Thanks for reporting, we're on it!"),
             ephemeral: true,
         });

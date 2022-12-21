@@ -160,7 +160,7 @@ const defaultFunction = {
         }
 
         // Send the message
-        await interaction.editReply({
+        return interaction.editReply({
             embeds: [embed, ...mapEmbeds],
         });
     },

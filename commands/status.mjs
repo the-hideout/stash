@@ -52,9 +52,7 @@ const defaultFunction = {
         } catch (requestError) {
             console.error(requestError);
 
-            generalError(interaction, t('Something went wrong when trying to fetch status, please try again'));
-
-            return true;
+            return generalError(interaction, t('Something went wrong when trying to fetch status, please try again'));
         }
 
         const globalStatus = currentStatus.currentStatuses.find(status => status.name === 'Global');
@@ -72,7 +70,7 @@ const defaultFunction = {
             embed.addFields({name: message.name, value: statusCodes[message.status], inline: true});
         }
 
-        await interaction.editReply({ embeds: [embed] });
+        return interaction.editReply({ embeds: [embed] });
     },
 };
 

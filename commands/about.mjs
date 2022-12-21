@@ -58,7 +58,7 @@ const defaultFunction = {
             embed.addFields({name: t('Contributors'), value: contributorsString});
         }
 
-        interaction.editReply({ embeds: [embed] });
+        return interaction.editReply({ embeds: [embed] });
     },
 };
 

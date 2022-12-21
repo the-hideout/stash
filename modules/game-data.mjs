@@ -639,7 +639,14 @@ export async function getStims(lang = 'en') {
 }
 
 export async function updateAll(rejectOnError = false) {
-    await updateLanguages();
+    try {
+        await updateLanguages();
+    } catch (error) {
+        console.error(`Error updating languages: ${error.message} (${new Date()})`);
+        if (rejectOnError) {
+            return Promise.reject(error);
+        }
+    }
     await Promise.allSettled([
         updateBarters(),
         updateCrafts(),

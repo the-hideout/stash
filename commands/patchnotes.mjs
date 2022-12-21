@@ -59,7 +59,7 @@ const defaultFunction = {
         embed.setTitle(`${notes.title}`);
         embed.setFooter({text: notes.date});
         embed.setDescription(message);
-        await interaction.editReply({ embeds: [embed] });
+        return interaction.editReply({ embeds: [embed] });
     }
 };
 
