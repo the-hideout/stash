@@ -39,7 +39,7 @@ const defaultFunction = {
         embed.setTitle(`${t('Latest EFT Changes')} 🗒️`);
         embed.setDescription(message);
         embed.setFooter({text: t('Get the full data from {{url}}', {url: URL})});
-        await interaction.editReply({ embeds: [embed] });
+        return interaction.editReply({ embeds: [embed] });
     }
 };
 

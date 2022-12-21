@@ -30,6 +30,15 @@ const defaultFunction = {
 
         const matchedStims = stims.filter(item => item.name.toLowerCase().includes(searchString.toLowerCase()));
 
+        if (matchedStims.length === 0) {
+            return interaction.editReply({
+                content: t('Found no results for "{{searchString}}"', {
+                    searchString: searchString
+                }),
+                ephemeral: true,
+            });
+        }
+
         let embeds = [];
 
         for (const item of stims) {
@@ -110,7 +119,7 @@ const defaultFunction = {
             embeds.push(ending);
         }
 
-        await interaction.editReply({ embeds: embeds });
+        return interaction.editReply({ embeds: embeds });
     },
     examples: [
         '/$t(stim) Obdolbos'

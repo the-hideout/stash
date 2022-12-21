@@ -27,7 +27,7 @@ const subCommands = {
                 })}`});
             }
 
-            await interaction.editReply({
+            return interaction.editReply({
                 embeds: [embed]
             });
         } catch (error) {
@@ -62,7 +62,7 @@ const subCommands = {
             }).join(', ');
         }
 
-        await interaction.editReply({
+        return interaction.editReply({
             content: `✅ ${t(`Restock alert ${action} for {{traderName}}.`, {traderName: forWho})}${allAlerts}`
         });
     },
@@ -71,21 +71,19 @@ const subCommands = {
         const t = getFixedT(interaction.locale);
         const isAdmin = interaction.memberPermissions.has(PermissionFlagsBits.Administrator);
         if (!isAdmin) {
-            await interaction.editReply({
+            return interaction.editReply({
                 content: `❌ ${t('You must be an administrator to set channel restock alerts.')}`
             });
-            return;
         }
         const channel = interaction.options.getChannel('channel');
         if (!channel) {
             await progress.setRestockAlertChannel(interaction.guildId, false);
-            await interaction.editReply({
+            return interaction.editReply({
                 content: `✅ ${t('Restock alert channel disabled for this server.')}`
             });
-            return;
         }
-        const result = await progress.setRestockAlertChannel(interaction.guildId, channel?.id);
-        await interaction.editReply({
+        await progress.setRestockAlertChannel(interaction.guildId, channel?.id);
+        return interaction.editReply({
             content: `✅ ${t('Restock alert channel set to #{{channelName}}.', {channelName: channel.name})}`
         });
     },

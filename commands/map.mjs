@@ -97,7 +97,7 @@ const defaultFunction = {
             embed.setFooter({ text: t('Map made by {{author}}', {author: selectedMapData.source})});
         }
 
-        await interaction.editReply({
+        return interaction.editReply({
             embeds: [embed],
         });
     },

@@ -22,7 +22,7 @@ const defaultFunction = {
         embed.setDescription(t('Click the link above to invite the Stash bot to your Discord server!'));
         embed.setURL(BOT_INVITE_LINK);
         embed.setFooter({ text: `${t('Enjoy')} ❤️` });
-        await interaction.reply({ embeds: [embed] });
+        return interaction.reply({ embeds: [embed] });
     },
 };
 

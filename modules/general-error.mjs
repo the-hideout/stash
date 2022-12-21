@@ -18,7 +18,7 @@ const generalError = async (interaction, message) => {
     embed.setTitle(t('❌ ERROR ❌'));
     embed.setDescription(message);
 
-    sendTo.send({
+    return sendTo.send({
         embeds: [embed],
     });
 };

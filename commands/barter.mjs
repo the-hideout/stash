@@ -26,13 +26,10 @@ const defaultFunction = {
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
-            await interaction.deleteReply();
-            await interaction.followUp({
+            return interaction.editReply({
                 content: t('You need to specify a search term'),
                 ephemeral: true,
             });
-
-            return true;
         }
 
         const matchedBarters = [];
@@ -56,15 +53,12 @@ const defaultFunction = {
         }
 
         if (matchedBarters.length === 0) {
-            await interaction.deleteReply();
-            await interaction.followUp({
+            return interaction.editReply({
                 content: t(`Found no results for "{{searchString}}"`, {
                     searchString: searchString
                 }),
                 ephemeral: true,
             });
-
-            return true;
         }
 
         let embeds = [];
@@ -171,7 +165,7 @@ const defaultFunction = {
             embeds.push(ending);
         }
 
-        await interaction.editReply({ embeds: embeds });
+        return interaction.editReply({ embeds: embeds });
     },
     examples: '/$t(barter) slick'
 };

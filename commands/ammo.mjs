@@ -50,11 +50,9 @@ const defaultFunction = {
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
-            await interaction.editReply({
+            return interaction.editReply({
                 content: t('You need to specify an ammo type'),
             });
-
-            return true;
         }
 
         const embed = new EmbedBuilder();
@@ -83,11 +81,11 @@ const defaultFunction = {
             }
         }
         if (!caliber) {
-            await interaction.editReply({
-                content: t('No matching ammo found'),
+            return interaction.editReply({
+                content: t(`Found no results for "{{searchString}}"`, {
+                    searchString: searchString
+                }),
             });
-
-            return true;
         }
 
         let caliberLabel = ammoLabels[caliber];
@@ -140,7 +138,7 @@ const defaultFunction = {
         }
 
         embed.setDescription('```' + table.toString() + '```');
-        await interaction.editReply({ embeds: [embed] });
+        return interaction.editReply({ embeds: [embed] });
     },
     examples: [
         '/$t(ammo) 7.62x51mm'

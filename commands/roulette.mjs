@@ -23,7 +23,7 @@ const defaultFunction = {
             text: `${t('Good Luck!')} 🎲`,
         });
 
-        await interaction.reply({ embeds: [embed] });
+        return interaction.reply({ embeds: [embed] });
     },
 };
 

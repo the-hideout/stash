@@ -51,7 +51,7 @@ const subCommands = {
             embed.addFields({name: 'TarkovTracker 🧭', value: `[❌ ${t('Invalid token')}](https://tarkovtracker.io/settings/)`, inline: false});
         }
 
-        await interaction.reply({
+        return interaction.reply({
             embeds: [embed],
             ephemeral: true
         });
@@ -60,7 +60,7 @@ const subCommands = {
         const t = getFixedT(interaction.locale);
         const level = interaction.options.getInteger('level');
         progress.setLevel(interaction.user.id, level);
-        await interaction.reply({
+        return interaction.reply({
             content: `✅ ${t('PMC level set to {{level}}.', {level: level})}`,
             ephemeral: true
         });
@@ -78,24 +78,22 @@ const subCommands = {
                 if (lvl > maxValue) lvl = maxValue;
                 progress.setTrader(interaction.user.id, trader.id, lvl);
             }
-            await interaction.editReply({
+            return interaction.editReply({
                 content: `✅ ${t('All traders set to {{level}}.', {level: level})}`
             });
-            return;
         }
         const trader = await gameData.traders.get(traderId);
         if (!trader) {
-            await interaction.editReply({
+            return interaction.editReply({
                 content: `❌ ${t('No matching trader found.')}`
             });
-            return;
         }
         let lvl = level;
         let maxValue = trader.levels[trader.levels.length-1].level;
         if (lvl > maxValue) lvl = maxValue;
         progress.setTrader(interaction.user.id, trader.id, lvl);
 
-        await interaction.editReply({
+        return interaction.editReply({
             content: `✅ ${t('{{thingName}} set to {{level}}.', {thingName: trader.name, level: lvl})}`
         });
     },
@@ -117,25 +115,23 @@ const subCommands = {
                 if (lvl > maxValue) lvl = maxValue;
                 progress.setHideout(interaction.user.id, station.id, lvl);
             }
-            await interaction.editReply({
+            return interaction.editReply({
                 content: `✅ ${t('All hideout stations set to {{level}}.', {level: level})}${ttWarn}`
             });
-            return;
         }
 
         const station = await gameData.hideout.get(stationId);
         if (!station) {
-            await interaction.editReply({
+            return interaction.editReply({
                 content: `❌ ${t('No matching hideout station found.')}`
             });
-            return;
         }
         let lvl = level;
         let maxValue = station.levels[station.levels.length-1].level;
         if (lvl > maxValue) lvl = maxValue;
         progress.setHideout(interaction.user.id, station.id, lvl);
 
-        await interaction.editReply({
+        return interaction.editReply({
             content: `✅ ${t('{{thingName}} set to {{level}}.', {thingName: station.name, level: lvl})}${ttWarn}`
         });
     },
@@ -147,7 +143,7 @@ const subCommands = {
         if (level < 0) level = 0;
         progress.setSkill(interaction.user.id, skillId, level);
         const skill = await gameData.skills.get(skillId);
-        await interaction.reply({
+        return interaction.reply({
             content: `✅ ${t('{{thingName}} set to {{level}}.', {thingName: skill.name, level: level})}`,
             ephemeral: true
         });
@@ -156,24 +152,22 @@ const subCommands = {
         const t = getFixedT(interaction.locale);
         const token = interaction.options.getString('token');
         if (!token) {
-            await interaction.reply({
+            return interaction.reply({
                 content: `❌ ${t('You must supply your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.')}`,
                 ephemeral: true
             });
-            return;
         }
         if (!token.match(/^[a-zA-Z0-9]{22}$/)) {
-            await interaction.reply({
+            return interaction.reply({
                 content: `❌ ${t('The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.')}`,
                 ephemeral: true
             });
-            return;
         }
 
         progress.setToken(interaction.user.id, token);
         moment.locale(interaction.locale);
         const updateTime = moment(await progress.getUpdateTime(interaction.user.id)).fromNow();
-        await interaction.reply({
+        return interaction.reply({
             content: `✅ ${t('Your hideout progress will update from TarkovTracker {{updateTime}}.', {updateTime: updateTime})}`,
             ephemeral: true
         });
@@ -181,7 +175,7 @@ const subCommands = {
     unlink: async interaction => {
         const t = getFixedT(interaction.locale);
         progress.setToken(interaction.user.id, false);
-        await interaction.reply({
+        return interaction.reply({
             content: `✅ ${t('TarkovTracker account unlinked.')}`,
             ephemeral: true
         });
@@ -194,7 +188,7 @@ const subCommands = {
         if (mgmt < 0) mgmt = 0;
         progress.setHideout(interaction.user.id, '5d484fdf654e7600691aadf8', intel);
         progress.setSkill(interaction.user.id, 'hideoutManagement', mgmt);
-        await interaction.reply({
+        return interaction.reply({
             content: `✅ ${t('{{thingName}} set to {{level}}.', {thingName: t('Intelligence Center'), level: intel})}.\n✅ ${t('Hideout Management skill set to {{managementLevel}}.', {managementLevel: mgmt})}`,
             ephemeral: true
         });

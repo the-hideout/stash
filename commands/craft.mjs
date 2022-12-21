@@ -27,12 +27,10 @@ const defaultFunction = {
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
-            await interaction.editReply({
+            return interaction.editReply({
                 content: t('You need to specify a search term'),
                 ephemeral: true,
             });
-
-            return true;
         }
 
         const matchedCrafts = [];
@@ -57,13 +55,10 @@ const defaultFunction = {
         }
 
         if (matchedCrafts.length === 0) {
-            await interaction.deleteReply();
-            await interaction.followUp({
+            return interaction.editReply({
                 content: t('Found no results for "{{searchString}}"', {searchString: searchString}),
                 ephemeral: true,
             });
-
-            return true;
         }
 
         let embeds = [];
@@ -182,7 +177,7 @@ const defaultFunction = {
             embeds.push(ending);
         }
 
-        await interaction.editReply({ embeds: embeds });
+        return interaction.editReply({ embeds: embeds });
     },
     examples: '/$t(craft) 7n31'
 };
