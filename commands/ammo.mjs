@@ -77,7 +77,6 @@ const defaultFunction = {
 
         let ammos = await getAmmo(interaction.locale);
         let caliber = false;
-        let penIcon = -1;
         for (const ammo of ammos) {
             if (ammo.name.toLowerCase().replace(/\./g, '').includes(searchString.toLowerCase().replace(/\./g, ''))) {
                 caliber = ammo.properties.caliber;
