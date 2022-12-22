@@ -277,7 +277,7 @@ const startRestockAlerts = async () => {
         for (const trader of traders) {
             const currentTimer = restockTimers[trader.id];
             if (currentTimer != trader.resetTime) {
-                console.log(`Setting new restock timer for ${trader.name} at ${trader.resetTime}`);
+                //console.log(`Setting new restock timer for ${trader.name} at ${trader.resetTime}`);
                 restockTimers[trader.id] = trader.resetTime;
                 const alertTime = new Date(trader.resetTime) - new Date() - 1000 * 60;
                 if (alertTime < 0) continue;
@@ -314,7 +314,7 @@ const startRestockAlerts = async () => {
         }
     };
 
-    gameData.events.on('updated', setRestockTimers);
+    gameData.events.on('updatedTraders', setRestockTimers);
     setRestockTimers();
 };
 
