@@ -3,7 +3,6 @@ import asciiTable from 'ascii-table';
 
 import { getAmmo } from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
-import { dateTimestampInSeconds } from '@sentry/utils';
 
 const ammoLabels = {
     Caliber12g: '12/70',
