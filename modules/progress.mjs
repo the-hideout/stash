@@ -314,7 +314,7 @@ const startRestockAlerts = async () => {
         }
     };
 
-    gameData.events.on('updated', setRestockTimers);
+    gameData.events.on('updatedTraders', setRestockTimers);
     setRestockTimers();
 };
 

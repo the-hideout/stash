@@ -268,7 +268,7 @@ export async function updateTraders() {
     traderChoices = newTraderChoices.sort((a,b) => {
         return a.name.localeCompare(b.name);
     });
-
+    eventEmitter.emit('updatedTraders');
     return gameData.traders;
 };
 
