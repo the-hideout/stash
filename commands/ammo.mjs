@@ -3,6 +3,7 @@ import asciiTable from 'ascii-table';
 
 import { getAmmo } from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import { dateTimestampInSeconds } from '@sentry/utils';
 
 const ammoLabels = {
     Caliber12g: '12/70',
@@ -55,23 +56,27 @@ const defaultFunction = {
             });
         }
 
+        const clientStatus = interaction.member?.presence?.clientStatus;
+        let mobile = clientStatus?.mobile === 'online' && clientStatus?.desktop !== 'online' && clientStatus?.web !== 'online';
+
         const embed = new EmbedBuilder();
         embed.setURL(`https://tarkov.dev/ammo`);
 
         const table = new asciiTable();
         const tableData = [];
-
-        table.removeBorder();
-        table.addRow([
+        const tableHeaders = [
             t('Name'),
             t('Pen'),
             t('Dmg'),
             t('A Dmg'),
             t('Frag'),
             t('Velo'),
-        ]);
+        ];
 
-        const ammos = await getAmmo(interaction.locale);
+        table.removeBorder();
+        table.addRow(tableHeaders);
+
+        let ammos = await getAmmo(interaction.locale);
         let caliber = false;
         let penIcon = -1;
         for (const ammo of ammos) {
@@ -82,62 +87,74 @@ const defaultFunction = {
         }
         if (!caliber) {
             return interaction.editReply({
-                content: t(`Found no results for "{{searchString}}"`, {
+                content: t('Found no results for "{{searchString}}"', {
                     searchString: searchString
                 }),
             });
         }
 
-        let caliberLabel = ammoLabels[caliber];
-        if (!caliberLabel) caliberLabel = caliber.replace('Caliber', '');
-        embed.setTitle(`${caliberLabel} ${t('Ammo Table')}`);
-
-        for (const ammo of ammos) {
-            if (ammo.properties.caliber !== caliber) {
-                continue;
-            }
-            if (!embed.thumbnail || penIcon < ammo.properties.penetrationPower) {
-                embed.setThumbnail(ammo.iconLink);
-                if (embed.thumbnail) penIcon = ammo.properties.penetrationPower;
-            }
+        ammos = ammos.filter(ammo => ammo.properties.caliber === caliber).map(ammo => {
             let damage = ammo.properties.damage;
             let projectileCount = ammo.properties.projectileCount;
 
             if (projectileCount > 1) {
                 damage = damage * projectileCount;
-            }
+            };
+            return {
+                ...ammo,
+                properties: {
+                    ...ammo.properties,
+                    totalDamage: damage
+                }
+            };
+        }).sort((x, y) => {
+            // sort penetrationPower, then damage by descending order
+            // could add subcommand for multiple sorting methods
+            return y.properties.penetrationPower - x.properties.penetrationPower || y.properties.totalDamage - x.properties.totalDamage;
+        });
 
-            tableData.push([
-                ammo.shortName,
-                ammo.properties.penetrationPower,
-                damage,
-                ammo.properties.armorDamage,
-                Math.floor(ammo.properties.fragmentationChance * 100),
-                ammo.properties.initialSpeed,
-            ]);
+        let caliberLabel = ammoLabels[caliber];
+        if (!caliberLabel) caliberLabel = caliber.replace('Caliber', '');
+        embed.setTitle(`${caliberLabel} ${t('Ammo Table')}`);
+
+        if (ammos.length > 0) {
+            embed.setThumbnail(ammos[0].iconLink);
         }
 
-        // sort penetrationPower, then damage by descending order
-        // could add subcommand for multiple sorting methods
-        tableData.sort(
-            function (x, y) {
-                return y[1] - x[1] || y[2] - x[2];
-            }
-        );
+        for (const ammo of ammos) {
+            tableData.push([
+                ammo.shortName.substring(0, 11),
+                ammo.properties.penetrationPower,
+                ammo.properties.totalDamage,
+                ammo.properties.armorDamage,
+                `${Math.floor(ammo.properties.fragmentationChance * 100)} %`,
+                `${ammo.properties.initialSpeed || 0} m/s`,
+            ]);
+        }
 
         for (const i in tableData) {
             table.addRow([
-                tableData[i][0],
-                tableData[i][1],
-                tableData[i][2],
-                tableData[i][3],
-                `${tableData[i][4]} %`,
-                `${tableData[i][5]} m/s`,
+                ...tableData[i],
             ]);
             table.setAlign(i, asciiTable.LEFT);
+            if (!mobile) {
+                continue;
+            } 
+            embed.addFields({
+                name: tableData[i][0],
+                value: tableData[i].reduce((data, value, index) =>{
+                    if (index !== 0) {
+                        data.push(`${tableHeaders[index]}: ${value}`);
+                    };
+                    return data;
+                }, []).join('\n'),
+                inline: true,
+            });
         }
 
-        embed.setDescription('```' + table.toString() + '```');
+        if (!mobile) {
+            embed.setDescription('```' + table.toString() + '```');
+        }
         return interaction.editReply({ embeds: [embed] });
     },
     examples: [
