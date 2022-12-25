@@ -31,14 +31,14 @@ const defaultFunction = {
         var message = `**${t('Changes provided by')} https://tarkov-changes.com**\n\n${data}`;
 
         if (message.length >= MAX_EMBED_LENGTH) {
-            message = `${t('Sorry, the current change list is too long to be displayed in Discord')}\n\n${t('Please visit {{url}} for more information', {url: URL})}`;
+            message = `${t('Sorry, the current change list is too long to be displayed in Discord')}\n\n${t('Please visit {{url}} for more information', {url: URL, interpolation: { escapeValue: false } })}`;
         }
 
         const embed = new EmbedBuilder();
         embed.setURL(URL);
         embed.setTitle(`${t('Latest EFT Changes')} 🗒️`);
         embed.setDescription(message);
-        embed.setFooter({text: t('Get the full data from {{url}}', {url: URL})});
+        embed.setFooter({text: t('Get the full data from {{url}}', {url: URL, interpolation: { escapeValue: false } })});
         return interaction.editReply({ embeds: [embed] });
     }
 };

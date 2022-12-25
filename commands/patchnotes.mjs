@@ -48,7 +48,7 @@ const defaultFunction = {
 
         var message;
         if (notes.notes.length >= MAX_EMBED_LENGTH) {
-            const truncateMessage = `...\n\n${t('Too many notes to display.')}\n\n${t('[Click here]({{url}}) for full notes.', {url: notes.link})}`;
+            const truncateMessage = `...\n\n${t('Too many notes to display.')}\n\n${t('[Click here]({{url}}) for full notes.', {url: notes.link, interpolation: { escapeValue: false } })}`;
             message = notes.notes.substring(0, MAX_EMBED_LENGTH-truncateMessage.length)+truncateMessage;
         } else {
             message = notes.notes
