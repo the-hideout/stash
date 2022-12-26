@@ -3,10 +3,14 @@ import cron from 'cron';
 import { ShardingManager } from 'discord.js';
 
 import progress from './modules/progress.mjs';
+import gameData from './modules/game-data.mjs';
+import webhook from './modules/webhook.mjs'
 
 const manager = new ShardingManager('./bot.mjs', { token: process.env.DISCORD_API_TOKEN });
 let healthcheckJob = false;
 let shutdownSignalReceived = false;
+
+const startingChoices = {};
 
 manager.on('shardCreate', shard => {
     console.log(`Created shard ${shard.id}`);
@@ -109,3 +113,39 @@ if (process.env.NODE_ENV === 'production') {
 } else {
     console.log("Healthcheck disabled");
 }
+
+gameData.updateAll().then(() => {
+    const choiceTypes = [
+        'traders',
+        'maps',
+        'bosses'
+    ];
+    for (const choiceType of choiceTypes) {
+        startingChoices[choiceType] = gameData[choiceType].choices();
+    }
+    gameData.events.on('updated', () => {
+        for (const choiceType of choiceTypes) {
+            startingChoices[choiceType].forEach(startChoice => {
+                if (!gameData[choiceType].choices().some(currChoice => currChoice.value === startChoice.value)) {
+                    // startChoice has been removed
+                    console.warn(`${choiceType} choice ${startChoice.name} (${startChoice.value}) is no longer available via the API.`);
+                    webhook({
+                        title: `Choice for ${choiceType} removed from API`,
+                        message: `${startChoice.name} (${startChoice.value})`,
+                    });
+                }
+            });
+            gameData[choiceType].choices().forEach(currChoice => {
+                if (!startingChoices[choiceType].some(startChoice => currChoice.value === startChoice.value)) {
+                    // currChoice is missing from choices
+                    console.warn(`${choiceType} choice ${currChoice.name} (${currChoice.value}) is new but not registered as a choice.`);
+                    webhook({
+                        title: `Choice for ${choiceType} is new`,
+                        message: `${currChoice.name} (${currChoice.value})`,
+                    });
+                }
+            });
+        }
+    });
+});
+
