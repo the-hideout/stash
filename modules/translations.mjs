@@ -43,7 +43,8 @@ export function getDiscordLocale(langCode) {
 i18next.init({
     lng: 'en-US',
     debug: process.env.NODE_ENV !== 'ci',
-    resources: translationResources
+    resources: translationResources,
+    fallbackLng: 'en-US',
 });
 
 export const comT = i18next.getFixedT(null, 'command');
