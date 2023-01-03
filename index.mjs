@@ -1,10 +1,11 @@
+import { fork } from 'child_process';
+
 import got from 'got';
 import cron from 'cron';
 import { ShardingManager } from 'discord.js';
 
 import progress from './modules/progress.mjs';
 import gameData from './modules/game-data.mjs';
-import webhook from './modules/webhook.mjs'
 
 const manager = new ShardingManager('./bot.mjs', { token: process.env.DISCORD_API_TOKEN });
 let healthcheckJob = false;
@@ -124,27 +125,34 @@ gameData.updateAll().then(() => {
         startingChoices[choiceType] = gameData[choiceType].choices();
     }
     gameData.events.on('updated', () => {
+        let registerCommands = false;
         for (const choiceType of choiceTypes) {
             startingChoices[choiceType].forEach(startChoice => {
-                if (!gameData[choiceType].choices().some(currChoice => currChoice.value === startChoice.value)) {
+                if (!gameData[choiceType].choices().some(currChoice => currChoice.value === startChoice.value && currChoice.name === startChoice.name)) {
                     // startChoice has been removed
                     console.warn(`${choiceType} choice ${startChoice.name} (${startChoice.value}) is no longer available via the API.`);
-                    webhook({
-                        title: `Choice for ${choiceType} removed from API`,
-                        message: `${startChoice.name} (${startChoice.value})`,
-                    });
+                    registerCommands = true;
                 }
             });
             gameData[choiceType].choices().forEach(currChoice => {
-                if (!startingChoices[choiceType].some(startChoice => currChoice.value === startChoice.value)) {
+                if (!startingChoices[choiceType].some(startChoice => currChoice.value === startChoice.value && currChoice.name === startChoice.name)) {
                     // currChoice is missing from choices
                     console.warn(`${choiceType} choice ${currChoice.name} (${currChoice.value}) is new but not registered as a choice.`);
-                    webhook({
-                        title: `Choice for ${choiceType} is new`,
-                        message: `${currChoice.name} (${currChoice.value})`,
-                    });
+                    registerCommands = true;
                 }
             });
+        }
+        if (registerCommands) {
+            const args = { env: { NODE_ENV: 'ci' } };
+            let dev = '';
+            if (process.env.NODE_ENV === 'development') {
+                dev = '-dev';
+            } else {
+                args.env.DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
+                args.env.DISCORD_TOKEN = process.env.DISCORD_API_TOKEN;
+            }
+
+            fork(`./deploy-commands${dev}.mjs`, args);
         }
     });
 });

@@ -42,7 +42,7 @@ export function getDiscordLocale(langCode) {
 
 i18next.init({
     lng: 'en-US',
-    debug: true, // process.env.NODE_ENV === 'development',
+    debug: process.env.NODE_ENV !== 'ci',
     resources: translationResources
 });
 
