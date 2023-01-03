@@ -1,6 +1,6 @@
 import got from 'got';
 
-const url = 'https://tarkovtracker.io/api/v1/';
+const url = 'https://tarkovtracker.io/api/v2/';
 
 export async function apiRequest(token, endpoint) {
     if (!token) {
@@ -19,7 +19,7 @@ export async function apiRequest(token, endpoint) {
              }
         });
 
-        return response.body;
+        return response.body.data;
     } catch (requestError) {
         //console.error(requestError);
 
