@@ -102,14 +102,13 @@ const updateTarkovTracker = async () => {
         const user = users[i];
         try {
             const ttprog = await getProgress(user.tarkovTracker.token);
-            userProgress[user.id].level = ttprog.level;
+            //userProgress[user.id].level = ttprog.level;
             userProgress[user.id].hideout = {};
-            for (const moduleId in ttprog.hideout) {
-                const module = ttprog.hideout[moduleId];
+            for (const module of ttprog.hideoutModulesProgress) {
                 if (!module.complete) continue;
                 for (const station of hideout) {
                     for (const level of station.levels) {
-                        if (level.tarkovDataId == moduleId) {
+                        if (level.id == module.id) {
                             if (!userProgress[user.id].hideout[station.id] || userProgress[user.id].hideout[station.id] < level.level) {
                                 userProgress[user.id].hideout[station.id] = level.level;
                             }
