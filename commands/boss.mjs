@@ -161,8 +161,8 @@ const defaultFunction = {
         
         let overflowEmbeds = [];
         if (mapEmbeds.length >= 10) {
-            overflowEmbeds = mapEmbeds.slice(8);
-            mapEmbeds.splice(8)
+            overflowEmbeds = mapEmbeds.slice(9);
+            mapEmbeds.splice(9)
         }
 
         // Send the message
