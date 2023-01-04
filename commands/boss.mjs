@@ -85,6 +85,7 @@ const defaultFunction = {
 
         // Get the boss name from the command interaction
         const bossName = interaction.options.getString('boss');
+        console.log(bossName);
 
         // Fetch all current map/boss data
         const maps = await gameData.maps.getAll(interaction.locale);
@@ -158,10 +159,26 @@ const defaultFunction = {
             }
             mapEmbeds.length = 0;
         }
+        
+        let overflowEmbeds = [];
+        console.log(mapEmbeds);
+        if (mapEmbeds.length >= 10) {
+            overflowEmbeds = mapEmbeds.slice(8);
+            mapEmbeds.splice(8)
+        }
+        console.log(mapEmbeds);
+        console.log(overflowEmbeds);
 
         // Send the message
         return interaction.editReply({
             embeds: [embed, ...mapEmbeds],
+        }).then(reply => {
+            if (overflowEmbeds.length > 0) {
+                return interaction.followUp({
+                    embeds: overflowEmbeds
+                })
+            }
+            return reply;
         });
     },
     examples: [
