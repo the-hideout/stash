@@ -60,7 +60,7 @@ const defaultFunction = {
         embed.setTitle(t('Escape from Tarkov Status'));
         embed.setURL('https://status.escapefromtarkov.com/');
 
-        if (currentStatus.messages.length > 0) {
+        if (currentStatus.messages.length > 0 && currentStatus.messages[0].content) {
             embed.setDescription(currentStatus.messages[0].content);
         }
 
