@@ -85,7 +85,6 @@ const defaultFunction = {
 
         // Get the boss name from the command interaction
         const bossName = interaction.options.getString('boss');
-        console.log(bossName);
 
         // Fetch all current map/boss data
         const maps = await gameData.maps.getAll(interaction.locale);
@@ -161,13 +160,10 @@ const defaultFunction = {
         }
         
         let overflowEmbeds = [];
-        console.log(mapEmbeds);
         if (mapEmbeds.length >= 10) {
             overflowEmbeds = mapEmbeds.slice(8);
             mapEmbeds.splice(8)
         }
-        console.log(mapEmbeds);
-        console.log(overflowEmbeds);
 
         // Send the message
         return interaction.editReply({
