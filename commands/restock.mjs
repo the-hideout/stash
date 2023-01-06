@@ -4,7 +4,7 @@ import { ChannelType, PermissionFlagsBits } from 'discord-api-types/v10';
 
 import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
-import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import { getFixedT, getCommandLocalizations, getTranslationChoices } from '../modules/translations.mjs';
 
 const subCommands = {
     show: async interaction => {
@@ -82,7 +82,8 @@ const subCommands = {
                 content: `✅ ${t('Restock alert channel disabled for this server.')}`
             });
         }
-        await progress.setRestockAlertChannel(interaction.guildId, channel?.id);
+        const locale = interaction.options.getString('locale') || 'en';
+        await progress.setRestockAlertChannel(interaction.guildId, channel?.id, locale);
         return interaction.editReply({
             content: `✅ ${t('Restock alert channel set to #{{channelName}}.', {channelName: channel.name})}`
         });
@@ -133,6 +134,12 @@ const defaultFunction = {
                 .setNameLocalizations(getCommandLocalizations('channel'))
                 .setDescriptionLocalizations(getCommandLocalizations('restock_channel_select_desc'))
                 .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement))
+            .addStringOption(option =>
+                option.setName('locale')
+                .setDescription('The language in which to post the restock notification')
+                .setNameLocalizations(getCommandLocalizations('locale'))
+                .setDescriptionLocalizations(getCommandLocalizations('restock_channel_locale_desc'))
+                .setChoices(...getTranslationChoices()))
         ),
     async execute(interaction) {
         subCommands[interaction.options._subcommand](interaction);

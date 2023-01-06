@@ -62,7 +62,7 @@ manager.on('shardCreate', shard => {
                     response.data = message.token;
                 }
                 if (message.data === 'guildTraderRestockAlertChannel') {
-                    response.data = await progress.setGuildTraderRestockAlertChannel(message.guildId, message.channelId);
+                    response.data = await progress.setGuildTraderRestockAlertChannel(message.guildId, message.channelId, message.locale);
                 }
             } catch (error) {
                 response.data = null;
