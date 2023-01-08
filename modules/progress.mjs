@@ -302,7 +302,8 @@ const startRestockAlerts = async () => {
                             if (!guildSettings.restockAlertChannel) {
                                 continue;
                             }
-                            messageChannel(guildId, guildSettings.restockAlertChannel, restockMessage, messageVars).catch(error => {
+                            const locale = guildSettings.restockAlertLocale || 'en';
+                            messageChannel(guildId, guildSettings.restockAlertChannel, restockMessage, {...messageVars, lng: locale}).catch(error => {
                                 console.log(`Error sending ${trader.name} restock notification to channel ${guildId} ${guildSettings.restockAlertChannel}: ${error.message}`);
                                 userProgress.guilds[guildId].restockAlertChannel = false;
                             });
@@ -317,7 +318,7 @@ const startRestockAlerts = async () => {
     setRestockTimers();
 };
 
-function setGuildTraderRestockAlertChannel(guildId, channelId) {
+function setGuildTraderRestockAlertChannel(guildId, channelId, locale) {
     if (!userProgress.guilds) {
         userProgress.guilds = {};
     }
@@ -327,6 +328,7 @@ function setGuildTraderRestockAlertChannel(guildId, channelId) {
         };
     }
     userProgress.guilds[guildId].restockAlertChannel = channelId;
+    userProgress.guilds[guildId].restockAlertLocale = locale;
     return userProgress.guilds[guildId];
 }
 

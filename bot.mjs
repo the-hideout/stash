@@ -89,7 +89,7 @@ discordClient.on('ready', () => {
                         if (typeof message.messageValues === 'object') {
                             for (const field in message.messageValues) {
                                 if (field === 'trader') {
-                                    const traders = await getTraders(guild.preferredLocale);
+                                    const traders = await getTraders(message.messageValues.lng);
                                     message.messageValues.trader = traders.find(tr => tr.id === message.messageValues.trader.id);
                                 }
                             }
@@ -161,7 +161,9 @@ discordClient.on('interactionCreate', async interaction => {
         await command.default.execute(interaction);
     } catch (error) {
         console.error(`Error executing /${interaction.commandName} command`, error);
-
+        if (error.message === 'Unknown Message') {
+            return;
+        }
         const message = {
             content: 'There was an error while executing this command!',
             ephemeral: true,

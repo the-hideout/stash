@@ -66,9 +66,19 @@ export function getCommandLocalizations(key) {
     return localization;
 }
 
+export function getTranslationChoices() {
+    return Object.keys(translationResources).map(langCode => {
+        return {
+            name: langCode,
+            value: langCode,
+        };
+    });
+}
+
 export default {
     t: i18next.t,
     getFixedT: i18next.getFixedT,
     getCommandLocalizations: getCommandLocalizations,
     getDiscordLocale: getDiscordLocale,
+    getTranslationChoices: getTranslationChoices,
 };

@@ -89,38 +89,41 @@ export async function updateMaps() {
     let mapQueries = [];
     for (const langCode of gameData.languages) {
         mapQueries.push(`maps_${langCode}: maps(lang: ${langCode}) {
-            id
-            tarkovDataId
-            name
-            normalizedName
-            wiki
-            description
-            enemies
-            raidDuration
-            players
-            bosses {
-                name
-                normalizedName
-                spawnChance
-                spawnLocations {
-                    name
-                    chance
-                }
-                escorts {
-                    name
-                    amount {
-                        count
-                        chance
-                    }
-                }
-                spawnTime
-                spawnTimeRandom
-                spawnTrigger
-            }
+            ...MapFields
         }`);
     }
     const query = `query {
         ${mapQueries.join('\n')}
+    }
+    fragment MapFields on Map {
+        id
+        tarkovDataId
+        name
+        normalizedName
+        wiki
+        description
+        enemies
+        raidDuration
+        players
+        bosses {
+            name
+            normalizedName
+            spawnChance
+            spawnLocations {
+                name
+                chance
+            }
+            escorts {
+                name
+                amount {
+                    count
+                    chance
+                }
+            }
+            spawnTime
+            spawnTimeRandom
+            spawnTrigger
+        }
     }`;
     const [response, mapImages] = await Promise.all([
         graphqlRequest({ graphql: query }).then(response => response.data),
@@ -229,20 +232,23 @@ export async function updateTraders() {
     const traderQueries = [];
     for (const langCode of gameData.languages) {
         traderQueries.push(`traders_${langCode}: traders(lang: ${langCode}) {
-            id
-            tarkovDataId
-            name
-            resetTime
-            discount
-            levels {
-                id
-                level
-                payRate
-            }
+            ...TraderFields
         }`);
     }
     const query = `query {
         ${traderQueries.join('\n')}
+    }
+    fragment TraderFields on Trader {
+        id
+        tarkovDataId
+        name
+        resetTime
+        discount
+        levels {
+            id
+            level
+            payRate
+        }
     }`;
     const response = await graphqlRequest({ graphql: query }).then(response => response.data);
 
@@ -284,18 +290,21 @@ export async function updateHideout() {
     const hideoutQueries = [];
     for (const langCode of gameData.languages) {
         hideoutQueries.push(`hideout_${langCode}: hideoutStations(lang: ${langCode}) {
-            id
-            tarkovDataId
-            name
-            levels {
-                id
-                tarkovDataId
-                level
-            }
+            ...HideoutStationFields
         }`);
     }
     const query = `query {
         ${hideoutQueries.join('\n')}
+    }
+    fragment HideoutStationFields on HideoutStation {
+        id
+        tarkovDataId
+        name
+        levels {
+            id
+            tarkovDataId
+            level
+        }
     }`;
     const response = await graphqlRequest({ graphql: query }).then(response => response.data);
     for (const queryName in response) {
@@ -617,7 +626,10 @@ export async function getItems(lang = 'en') {
     if (lang === 'en') {
         return gameData.items;
     }
-    const itemNames = await getItemNames(lang);
+    const itemNames = await getItemNames(lang).catch(error => {
+        console.log(`Error getting ${lang} item names: ${error.message}`);
+        return {};
+    });
     return gameData.items.map(item => {
         return {
             ...item,
@@ -654,14 +666,14 @@ export async function updateAll(rejectOnError = false) {
         updateTraders(),
         updateHideout(),
         updateItems().then(() => {
-            const promises = [];
-            for (const langCode in gameData.itemNames) {
+            return Promise.all(Object.keys(gameData.itemNames).map(async langCode => {
                 if (langCode === 'en') {
-                    continue;
+                    return Promise.resolve();
                 }
-                promises.push(updateItemNames(langCode));
-            }
-            return Promise.all(promises);
+                return updateItemNames(langCode).catch(error => {
+                    console.log(`Error updating ${langCode} item names: ${error.message}`);
+                });
+            }));
         }),
     ]).then(results => {
         const taskNames = [
