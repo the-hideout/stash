@@ -86,8 +86,12 @@ const defaultFunction = {
             { name: `${t('Duration')} ⌛`, value: displayDuration, inline: true},
             { name: `${t('Players')} 👥`, value: displayPlayers, inline: true},
             { name: `${t('Time')} 🕑`, value: displayTime, inline: true},
-            { name: `${t('Bosses')} 💀`, value: bossArray.join('\n'), inline: true}
         );
+        if (bossArray.length > 0) {
+            embed.addFields(
+                { name: `${t('Bosses')} 💀`, value: bossArray.join('\n') || t('N/A'), inline: true}
+            );  
+        }
         if (selectedMapData.key) {
             embed.setImage(`https://tarkov.dev/maps/${selectedMapData.key}.jpg`);
         }
