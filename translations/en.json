@@ -5,7 +5,7 @@
         "🟢 Great": "🟢 Great",
         "⭐ Legendary ⭐": "⭐ Legendary ⭐",
         "🔴 Poor": "🔴 Poor",
-        "🛒 {{trader.name}} restock in {{numMinutes}} minutes 🛒": "🛒 {{trader.name}} restock in {{numMinutes}} minute 🛒",
+        "🛒 {{trader.name}} restock in {{numMinutes}} minutes 🛒": "🛒 {{trader.name}} restock in {{numMinutes}} minutes 🛒",
         "❌ ERROR ❌": "❌ ERROR ❌",
         "{{thingName}} set to {{level}}.": "{{thingName}} set to {{level}}.",
         "A Dmg": "A Dmg",

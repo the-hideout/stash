@@ -37,6 +37,8 @@ const defaultProgress = {
 
 const tarkovTrackerUpdateIntervalMinutes = 1;
 
+const restockAlertMinutes = 3;
+
 let shardingManager;
 
 const buildDefaultProgress = id => {
@@ -278,11 +280,11 @@ const startRestockAlerts = async () => {
             if (currentTimer != trader.resetTime) {
                 //console.log(`Setting new restock timer for ${trader.name} at ${trader.resetTime}`);
                 restockTimers[trader.id] = trader.resetTime;
-                const alertTime = new Date(trader.resetTime) - new Date() - 1000 * 60;
+                const alertTime = new Date(trader.resetTime) - new Date() - 1000 * 60 * restockAlertMinutes;
                 if (alertTime < 0) continue;
                 setTimeout(() => {
                     const restockMessage = '🛒 {{trader.name}} restock in {{numMinutes}} minutes 🛒';
-                    const messageVars = {trader, numMinutes: tarkovTrackerUpdateIntervalMinutes};
+                    const messageVars = {trader, numMinutes: restockAlertMinutes};
                     for (const userId in userProgress) {
                         if (!userProgress[userId].alerts) continue;
                         if (userProgress[userId].alerts.restock.includes(trader.id)) {

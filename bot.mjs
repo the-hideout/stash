@@ -137,7 +137,7 @@ discordClient.on('interactionCreate', async interaction => {
                 value: name,
             };
         })).catch(error => {
-            console.error(`Error responding to /${interaction.commandName} command autocomplete request for locale ${interaction.locale}: ${error}`);
+            console.error(`Error responding to /${interaction.commandName} command autocomplete request for locale ${interaction.locale} on shard ${discordClient.shard.ids[0]}: ${error}`);
             //console.error('interaction', interaction);
             //console.error(error);
         });
@@ -160,7 +160,7 @@ discordClient.on('interactionCreate', async interaction => {
     try {
         await command.default.execute(interaction);
     } catch (error) {
-        console.error(`Error executing /${interaction.commandName} command`, error);
+        console.error(`Error executing /${interaction.commandName} command on shard ${discordClient.shard.ids[0]}`, error);
         if (error.message === 'Unknown Message') {
             return;
         }
