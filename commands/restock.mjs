@@ -69,15 +69,15 @@ const subCommands = {
     channel: async interaction => {
         await interaction.deferReply({ephemeral: true});
         const t = getFixedT(interaction.locale);
+        if (interaction.channel.type === ChannelType.DM || interaction.channel.type === ChannelType.GroupDM) {
+            return interaction.editReply({
+                content: `❌ ${t('You must invoke this command in the server with the channel in which you want restock alerts.')}`
+            });
+        }
         const isAdmin = interaction.memberPermissions.has(PermissionFlagsBits.Administrator);
         if (!isAdmin) {
             return interaction.editReply({
                 content: `❌ ${t('You must be an administrator to set channel restock alerts.')}`
-            });
-        }
-        if (interaction.channel.type === ChannelType.DM || interaction.channel.type === ChannelType.GroupDM) {
-            return interaction.editReply({
-                content: `❌ ${t('You must invoke this command in the server with the channel in which you want restock alerts.')}`
             });
         }
         const channel = interaction.options.getChannel('channel');
