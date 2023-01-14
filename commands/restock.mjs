@@ -75,6 +75,11 @@ const subCommands = {
                 content: `❌ ${t('You must be an administrator to set channel restock alerts.')}`
             });
         }
+        if (interaction.channel.type === ChannelType.DM || interaction.channel.type === ChannelType.GroupDM) {
+            return interaction.editReply({
+                content: `❌ ${t('You must invoke this command in the server with the channel in which you want restock alerts.')}`
+            });
+        }
         const channel = interaction.options.getChannel('channel');
         if (!channel) {
             await progress.setRestockAlertChannel(interaction.guildId, false);
