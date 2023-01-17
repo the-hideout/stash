@@ -2,10 +2,12 @@ import EventEmitter from 'events';
 import got from 'got';
 import graphqlRequest from "./graphql-request.mjs";
 import { updateTiers } from './loot-tier.mjs';
-import { t, getDiscordLocale, getCommandLocalizations } from "./translations.mjs";
+import { getDiscordLocale, getCommandLocalizations } from "./translations.mjs";
 
 const gameData = {
     maps: {},
+    bosses: false,
+    bossNames: {},
     traders: {},
     hideout: {},
     barters: false,
@@ -88,7 +90,7 @@ export async function updateLanguages() {
 export async function updateMaps() {
     let mapQueries = [];
     for (const langCode of gameData.languages) {
-        mapQueries.push(`maps_${langCode}: maps(lang: ${langCode}) {
+        mapQueries.push(`${langCode}: maps(lang: ${langCode}) {
             ...MapFields
         }`);
     }
@@ -115,6 +117,7 @@ export async function updateMaps() {
             }
             escorts {
                 name
+                normalizedName
                 amount {
                     count
                     chance
@@ -133,9 +136,8 @@ export async function updateMaps() {
         }).then(response => response.body)
     ]);
 
-    for (const queryName in response) {
-        const lang = queryName.replace('maps_', '');
-        gameData.maps[lang] = response[queryName];
+    for (const lang in response) {
+        gameData.maps[lang] = response[lang];
         
         for (const mapData of gameData.maps[lang]) {
             let testKey = mapData.normalizedName;
@@ -227,6 +229,102 @@ export async function getMaps(lang = 'en') {
     }
     return updateMaps().then(ms => ms[lang]);
 };
+
+export async function updateBosses() {
+    let bossQueries = [];
+    for (const langCode of gameData.languages) {
+        if (langCode === 'en') {
+            continue;
+        }
+        bossQueries.push(`${langCode}: bosses(lang: ${langCode}) {
+            ...BossName
+        }`);
+    }
+    const query = `query {
+        bosses {
+            name
+            normalizedName
+            health {
+                max
+            }
+            equipment {
+                item {
+                    id
+                    containsItems {
+                        item {
+                            id
+                        }
+                    }
+                }
+            }
+            items {
+                id
+            }
+        }
+        ${bossQueries.join('\n')}
+    }
+    fragment BossName on MobInfo {
+        name
+        normalizedName
+    }`;
+    const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+    gameData.bosses = response.bosses.map(boss => {
+        return {
+            ...boss,
+            health: boss.health.reduce((total, healthPart) => {
+                total += healthPart.max;
+                return total;
+            },0),
+        }
+    });
+
+    for (const lang in response) {
+        if (lang === 'bosses') {
+            continue;
+        }
+        gameData.bossNames[lang] = response[lang].reduce((langData, boss) => {
+            langData[boss.normalizedName] = boss;
+            return langData;
+        }, {});
+    }
+
+    /*const newBossChoices = [];
+    for (const boss of gameData.bosses) {
+        newBossChoices.push({
+            name: boss.name, 
+            value: normalizedName, 
+            name_localizations: gameData.languages.reduce((loc, langCode) => {
+                const dLocale = getDiscordLocale(langCode);
+                if (dLocale) {
+                    loc[dLocale] = gameData.bossNames[langCode].find(b => b.normalizedName === boss.normalizedName).name;
+                }
+                return loc;
+            }, {}),
+        });
+    }
+    bossChoices = newBossChoices.sort((a,b) => {
+        return a.name.localeCompare(b.name);
+    });*/
+    eventEmitter.emit('updatedBosses');
+    return gameData.bosses;
+};
+
+export async function getBosses(lang = 'en') {
+    lang = validateLanguage(lang);
+    if (!gameData.bosses) {
+        await updateBosses();
+    }
+    if (lang === 'en') {
+        return gameData.bosses;
+    }
+    const bossNames = gameData.bossNames[lang] || {};
+    return gameData.bosses.map(boss => {
+        return {
+            ...boss,
+            ...bossNames[boss.normalizedName],
+        }
+    });
+}
 
 export async function updateTraders() {
     const traderQueries = [];
@@ -663,6 +761,7 @@ export async function updateAll(rejectOnError = false) {
         updateBarters(),
         updateCrafts(),
         updateMaps(),
+        updateBosses(),
         updateTraders(),
         updateHideout(),
         updateItems().then(() => {
@@ -680,6 +779,7 @@ export async function updateAll(rejectOnError = false) {
             'barters',
             'crafts',
             'maps',
+            'bosses',
             'traders',
             'hideout',
             'items',
@@ -715,6 +815,7 @@ export default {
         }
     },
     bosses: {
+        getAll: getBosses,
         choices: () => {
             return bossChoices;
         }

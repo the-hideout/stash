@@ -124,6 +124,7 @@
         "You do not have any saved progress. Below are the defaults used to determine craft/barter/price unlocks and flea market fees.": "You do not have any saved progress. Below are the defaults used to determine craft/barter/price unlocks and flea market fees.",
         "You have restock alerts enabled for": "You have restock alerts enabled for",
         "You must be an administrator to set channel restock alerts.": "You must be an administrator to set channel restock alerts.",
+        "You must invoke this command in the server with the channel in which you want restock alerts.": "You must invoke this command in the server with the channel in which you want restock alerts.",
         "You must supply your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.": "You must supply your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.",
         "You need to specify a search term": "You need to specify a search term",
         "You need to specify an ammo type": "You need to specify an ammo type",
