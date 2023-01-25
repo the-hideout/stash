@@ -54,5 +54,17 @@
     {
         "name": "Gun Game 🔫",
         "description": "Go into raid with any kit you like. However, every enemy you kill, you must replace your current gun with theirs. Rinse and repeat for the whole raid"
+    },
+    {
+        "name": "Bomberman 💣",
+        "description": "Go into raid with just grenades equiped and blast every enemy away which crosses your path."
+    },
+    {
+        "name": "Be the Scav",
+        "description": "Equip like a Scav, arm and leg shots only."
+    },
+    {
+        "name": "Frogger 🐸",
+        "description": "Enter Raid, you can only move by jumping."
     }
 ]
