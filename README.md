@@ -4,7 +4,7 @@
 
 Stash is a Discord bot that helps you play Escape from Tarkov!
 
-This is the official [Tarkov.dev](https://tarkov.dev) Discord bot
+This is the official [Tarkov.dev](https://tarkov.dev) Discord bot.
 
 To add the bot to your server, just click the link below:
 
@@ -12,9 +12,9 @@ To add the bot to your server, just click the link below:
 
 ## About 💡
 
-This bot takes all the data from [Tarkov.dev](https://tarkov.dev) and exposes it in a user-friendly way
+This bot takes all the data from [Tarkov.dev](https://tarkov.dev) and exposes it in a user-friendly way.
 
-This bot is open source and supported by the team behind [Tarkov.dev](https://tarkov.dev)
+This bot is open source and supported by the team behind [Tarkov.dev](https://tarkov.dev).
 
 ### Commands 💬
 
@@ -41,14 +41,14 @@ This bot is open source and supported by the team behind [Tarkov.dev](https://ta
 
 ## Development 🔨
 
-For development you need to create two files in your local directory. One is for registering commands and the other one is for running the bot.
+For development you need to create two files in your local directory, one is for registering commands and the other one is for running the bot.
 
 The files are:
 
 - `config-dev.json`
 - `.env`
 
-### Create a Disord Bot
+### Create a Discord Bot
 
 Before you can test the bot locally, you will need to create a Discord bot.
 
@@ -80,7 +80,7 @@ Copy the `guildId` from the Discord server you want to add the bot to:
 
 ![guild id](./assets/3-copy-id.png)
 
-> Note: In order to copy a guild id, you will need to have Discord developer mode enabled, scroll down in the guide to see how to do so (its easy!)
+> Note: In order to copy a `guildId`, you will need to have Discord developer mode enabled, scroll down in the guide to see how to do so (it's easy!)
 
 #### token
 
@@ -110,17 +110,17 @@ To add the DEV bot to your server, click this link where you've replaced the `<M
 
 ### How to Enable Developer Mode
 
-In order to copy certain values (such as channel/guild/user IDs) you need to enable developer mode in the Discord client
+In order to copy certain values (such as channel/guild/user IDs), you need to enable developer mode in the Discord client:
 
 1. In Discord, open your User Settings by clicking the Settings Cog next to your user name on the bottom.
 2. Go to Appearance and enable Developer Mode under the Advanced section, then close User Settings.
-3. Open your Discord server, right-click on the server name, then select Copy ID (to obtain the "guild ID" of your Discord server)
+3. Open your Discord server, right-click on the server name, then select Copy ID (to obtain the "guild ID" of your Discord server).
 
 ---
 
 ### Starting the Bot 🚀
 
-Before you start the bot you will need to register the Slash commands in your test server:
+Before you start the bot, you will need to register the Slash commands in your test server:
 
 ```console
 $ npm run dev-commands
