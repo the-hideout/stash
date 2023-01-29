@@ -7,7 +7,7 @@
     "node": "16.*"
   },
   "scripts": {
-    "start": "node index.mjs",
+    "start": "node -r newrelic index.mjs",
     "dev": "cross-env NODE_ENV=development NEW_RELIC_ENABLED=false nodemon --ignore cache/ -r dotenv/config index.mjs",
     "dev-commands": "cross-env NODE_ENV=ci node deploy-commands-dev.mjs",
     "deploy": "railway up"
@@ -28,6 +28,7 @@
     "got": "^12.5.3",
     "i18next": "^22.1.4",
     "moment": "^2.29.4",
+    "newrelic": "^9.8.1",
     "nodemon": "^2.0.20",
     "turndown": "^7.1.1",
     "uuid": "^9.0.0"
