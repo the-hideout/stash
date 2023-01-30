@@ -12,7 +12,7 @@ const graphqlRequest = async (options) => {
         body: JSON.stringify({
             query: options.graphql,
         }),
-        headers: { "user-agent": "stash-tarkov-dev" },
+        headers: { "user-agent": "stash-tarkov-dev", "Content-Type": 'application/json' },
         resolveBodyOnly: true,
     });
 };
