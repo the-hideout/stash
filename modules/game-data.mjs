@@ -329,7 +329,7 @@ export async function getBosses(lang = 'en') {
 export async function updateTraders() {
     const traderQueries = [];
     for (const langCode of gameData.languages) {
-        traderQueries.push(`traders_${langCode}: traders(lang: ${langCode}) {
+        traderQueries.push(`${langCode}: traders(lang: ${langCode}) {
             ...TraderFields
         }`);
     }
@@ -350,9 +350,8 @@ export async function updateTraders() {
     }`;
     const response = await graphqlRequest({ graphql: query }).then(response => response.data);
 
-    for (const queryName in response) {
-        const lang = queryName.replace('traders_', '');
-        gameData.traders[lang] = response[queryName];
+    for (const lang in response) {
+        gameData.traders[lang] = response[lang];
     }
 
     const newTraderChoices = [];
@@ -387,7 +386,7 @@ export async function getTraders(lang = 'en') {
 export async function updateHideout() {
     const hideoutQueries = [];
     for (const langCode of gameData.languages) {
-        hideoutQueries.push(`hideout_${langCode}: hideoutStations(lang: ${langCode}) {
+        hideoutQueries.push(`${langCode}: hideoutStations(lang: ${langCode}) {
             ...HideoutStationFields
         }`);
     }
@@ -405,9 +404,8 @@ export async function updateHideout() {
         }
     }`;
     const response = await graphqlRequest({ graphql: query }).then(response => response.data);
-    for (const queryName in response) {
-        const lang = queryName.replace('hideout_', '');
-        gameData.hideout[lang] = response[queryName];
+    for (const lang in response) {
+        gameData.hideout[lang] = response[lang];
     }
 
     const newWideoutChoices = [];
