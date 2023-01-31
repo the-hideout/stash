@@ -70,6 +70,9 @@ manager.on('shardCreate', shard => {
             }
             return shard.send(response);
         }
+        if (message.type === 'reportIssue') {
+            manager.broadcast(message);
+        }
         if (message.uuid) {
             shard.emit(message.uuid, message);
         }

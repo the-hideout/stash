@@ -511,5 +511,6 @@ export default {
         process.on( 'SIGBREAK', saveOnExit);
         process.on( 'SIGHUP', saveOnExit);
         progressLoaded = true;
-    }
+    },
+    messageChannel
 }

@@ -5,6 +5,7 @@ import {
     Client,
     GatewayIntentBits,
     Collection,
+    EmbedBuilder,
 } from 'discord.js';
 
 import autocomplete from './modules/autocomplete.mjs';
@@ -56,6 +57,25 @@ discordClient.on('ready', () => {
     });
 
     process.on('message', async message => {
+        if (message.type === 'reportIssue') {
+            if (discordClient.guilds.cache.has(process.env.ISSUE_SERVER_ID)) {
+                const server = discordClient.guilds.cache.get(process.env.ISSUE_SERVER_ID);
+                const reportingChannel = server.channels.cache.get(process.env.ISSUE_CHANNEL_ID);
+        
+                if (reportingChannel) {
+                    const embed = new EmbedBuilder();
+                    embed.setTitle('New Issue Reported 🐞');
+                    embed.setDescription(`**Issue Description:**\n${message.details}`);    
+                    embed.setFooter({
+                        text: `This issue was reported by @${message.user} | ${message.reportLocation}`,
+                    });
+                    reportingChannel.send({
+                        embeds: [embed],
+                    })
+                }
+            }
+            return;
+        }
         if (!message.uuid) return;
         if (message.type === 'getReply') {
             if (message.data === 'messageUser') {
