@@ -1,6 +1,5 @@
-import { SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 
-import sendError from '../modules/send-error.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 
 const defaultFunction = {
@@ -22,9 +21,13 @@ const defaultFunction = {
         const t = getFixedT(interaction.locale);
         const { client, member } = interaction;
         const details = interaction.options.getString("message");
-
-        sendError(client, member, details);
-
+    
+        client.shard.send({
+            type: 'reportIssue', 
+            details: details,
+            user: member.user.username,
+            reportLocation: member.guild ? `Server: ${member.guild.name}` : 'Reported in a DM',
+        });
         return interaction.reply({
             content: t("Thanks for reporting, we're on it!"),
             ephemeral: true,
