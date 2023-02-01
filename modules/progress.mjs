@@ -306,6 +306,7 @@ const startRestockAlerts = async () => {
                             }
                             const locale = guildSettings.restockAlertLocale || 'en';
                             messageChannel(guildId, guildSettings.restockAlertChannel, restockMessage, {...messageVars, lng: locale}).catch(error => {
+                                // only rejects if all shards fail to send the message
                                 console.log(`Error sending ${trader.name} restock notification to channel ${guildId} ${guildSettings.restockAlertChannel}: ${error.message}`);
                                 userProgress.guilds[guildId].restockAlertChannel = false;
                             });

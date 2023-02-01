@@ -80,8 +80,11 @@ discordClient.on('ready', () => {
         if (message.type === 'getReply') {
             if (message.data === 'messageUser') {
                 const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], userId: message.userId, success: false}};
-                discordClient.users.fetch(message.userId).then(async user => {
-                    if (!user) return Promise.reject(new Error('User not found'));
+                try {
+                    const user = await discordClient.users.fetch(message.userId);
+                    if (!user) {
+                        throw new Error('User not found');
+                    }
                     if (typeof message.messageValues === 'object') {
                         for (const field in message.messageValues) {
                             if (field === 'trader') {
@@ -90,39 +93,37 @@ discordClient.on('ready', () => {
                             }
                         }
                     }
-                    return user.send(t(message.message, message.messageValues)).then(() => {
-                        response.data.success = true;
-                        discordClient.shard.send(response);
-                    });
-                }).catch(error => {
+                    await user.send(t(message.message, message.messageValues));
+                    response.data.success = true;
+                } catch (error) {
                     response.error = {message: error.message, stack: error.stack};
-                    discordClient.shard.send(response);
-                });
+                }
+                discordClient.shard.send(response);
             }
             if (message.data === 'messageChannel') {
                 const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], guildId: message.guildId, channelId: message.channelId, success: false}};
-                discordClient.guilds.fetch(message.guildId).then(async guild => {
-                    if (!guild) return Promise.reject(new Error('Guild not found'));
-                    return guild.channels.fetch(message.channelId).then(async channel => {
-                        if (!channel) return Promise.reject(new Error('Channel not found'));
-                        if (!channel.isTextBased) return Promise.reject(new Error('Channel is not text-based'));
-                        if (typeof message.messageValues === 'object') {
-                            for (const field in message.messageValues) {
-                                if (field === 'trader') {
-                                    const traders = await getTraders(message.messageValues.lng);
-                                    message.messageValues.trader = traders.find(tr => tr.id === message.messageValues.trader.id);
-                                }
+                try {
+                    const channel = await discordClient.channels.fetch(message.channelId);
+                    if (!channel) {
+                        throw new Error('Channel not found');
+                    }
+                    if (!channel.isTextBased()) {
+                        throw new Error('Channel is not text-based');
+                    }
+                    if (typeof message.messageValues === 'object') {
+                        for (const field in message.messageValues) {
+                            if (field === 'trader') {
+                                const traders = await getTraders(message.messageValues.lng);
+                                message.messageValues.trader = traders.find(tr => tr.id === message.messageValues.trader.id);
                             }
                         }
-                        return channel.send(t(message.message, message.messageValues)).then(() => {
-                            response.data.success = true;
-                            discordClient.shard.send(response);
-                        });
-                    });
-                }).catch(error => {
+                    }
+                    await channel.send(t(message.message, message.messageValues));
+                    response.data.success = true;
+                } catch (error) {
                     response.error = {message: error.message, stack: error.stack};
-                    discordClient.shard.send(response);
-                });
+                }
+                discordClient.shard.send(response);
             }
             return;
         }
