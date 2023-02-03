@@ -147,6 +147,7 @@ discordClient.on('guildCreate', async guild => {
 });
 
 discordClient.on('interactionCreate', async interaction => {
+    interaction.start = new Date();
     if (interaction.isAutocomplete()) {
         let options = await autocomplete(interaction);
 
@@ -182,7 +183,11 @@ discordClient.on('interactionCreate', async interaction => {
         await command.default.execute(interaction);
     } catch (error) {
         console.error(`Error executing /${interaction.commandName} command on shard ${discordClient.shard.ids[0]}`, error);
+        console.error(`Command duration:`, new Date() - interaction.start, 'ms');
         if (error.message === 'Unknown Message') {
+            return;
+        }
+        if (error.message === 'Unknown interaction') {
             return;
         }
         const message = {

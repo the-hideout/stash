@@ -260,14 +260,18 @@ const getShardReply = async(shardId, message) => {
 
 const messageUser = async (userId, message, messageValues, shardId = 0) => {
     return getShardReply(shardId, {data: 'messageUser', userId: userId, message: message, messageValues: messageValues}).catch(error => {
-        if (shardingManager.shards.has(shardId+1)) return messageUser(userId, message, messageValues, shardId+1);
+        if (shardingManager.shards.has(shardId+1)) {
+            return messageUser(userId, message, messageValues, shardId+1);
+        }
         return Promise.reject(error);
     });
 };
 
 function messageChannel(guildId, channelId, message, messageValues, shardId = 0) {
     return getShardReply(shardId, {data: 'messageChannel', guildId: guildId, channelId: channelId, message: message, messageValues: messageValues}).catch(error => {
-        if (shardingManager.shards.has(shardId+1)) return messageChannel(guildId, channelId, message, messageValues, shardId+1);
+        if (shardingManager.shards.has(shardId+1)) {
+            return messageChannel(guildId, channelId, message, messageValues, shardId+1);
+        }
         return Promise.reject(error);
     });
 }
