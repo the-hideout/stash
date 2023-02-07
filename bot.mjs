@@ -140,9 +140,9 @@ discordClient.on('guildCreate', async guild => {
 
     try {
         const owner = await guild.fetchOwner();
-        owner.send(`Thank you so much for adding the Stash bot to your Discord!\n\rTo get more information on how the bot works, try \`/help\` to get started.`);
+        await owner.send(`Thank you so much for adding the Stash bot to your Discord!\n\rTo get more information on how the bot works, try \`/help\` to get started.`);
     } catch (error) {
-        console.error(error);
+        console.error('Error sending welcome message', error);
     }
 });
 
