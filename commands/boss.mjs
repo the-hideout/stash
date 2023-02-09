@@ -4,53 +4,42 @@ import gameData from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 import { getTiers } from '../modules/loot-tier.mjs';
 
-const baseImageUrl = 'https://assets.tarkov.dev';
-
 const bossDetails = [
     {
         "name": "cultist-priest",
         "details": "Sneaky bois. Cultists lurk in the shadows in groups of 3-5, waiting for a player to approach. They silently approach their enemies and stab them using either normal knives or, in case of the priests, the poisoned Cultist knife. If fired upon, the Cultists will return fire using firearms and grenades. After they attack a player with their knife, they may choose to run off into the woods again and return to the shadows.",
-        "image": `${baseImageUrl}/cultist-priest.jpg`,
     },
     {
         "name": "death-knight",
         "details": "The leader of 'The Goons'. Can spawn on many different maps.",
-        "image": `${baseImageUrl}/death-knight.jpg`,
     },
     {
         "name": "glukhar",
         "details": "Glukhar and his many guards are extremely hostile. It's very unlikely to find success while fighting in any open areas. Small hallways and closed rooms are preferable. Glukhar and his guards are very accurate. Glukhar and his guards will stay near each other at all times and his guards will follow him to wherever he goes.",
-        "image": `${baseImageUrl}/glukhar.jpg`,
     },
     {
         "name": "killa",
         "details": "The true Giga Chad of Tarkov. Killa uses a light machine gun or other automatic weapon to suppress the enemy, while lurking from cover to cover, getting closer to his target for the final push. During the assault he moves in a zig-zag pattern, uses smoke and fragmentation grenades, and relentlessly suppresses enemies with automatic fire. He will follow his target large distances out of his patrol route, so be sure to run very far to get away from him if he has locked onto you.",
-        "image": `${baseImageUrl}/killa.jpg`,
     },
     {
         "name": "reshala",
         "details": "He will normally try to stay at the back of the fight and hidden from the player's view. Additionally, he never wears armor. Be careful as a player scav, as if you are at lower scav karma levels Reshala or his guards may shoot you without provocation or will shoot you if you come to close to Reshala. His guards are sometimes known to give warnings to player scavs with low karma before becoming hostile.",
-        "image": `${baseImageUrl}/reshala.jpg`,
     },
     {
         "name": "sanitar",
         "details": "When engaged in combat, he will fight alongside his fellow scavs and guards, but may often break away to heal or inject himself. He has plenty of meds, so a prolonged engagement is possible.",
-        "image": `${baseImageUrl}/sanitar.jpg`,
     },
     {
         "name": "shturman",
         "details": "Shturman and his followers will engage the player at a long range protecting the sawmill area of the woods. They prefer to keep their distance, as they are not suited for close quarters combat.",
-        "image": `${baseImageUrl}/shturman.jpg`,
     },
     {
         "name": "tagilla",
         "details": "He is batshit insane and will attempt to hammer you down. However, if you are in a position that he cannot path-find to, such as the rafters, he will use his secondary weapon (usually a shotgun) to kill you from a distance. He's active immediately at the start of raid. The boss can set ambushes, open suppressive fire, and breach if needed.",
-        "image": `${baseImageUrl}/tagilla.jpg`,
     },
     {
         "name": "zryachiy",
         "details": "Lightkeeper's cultist sniper.",
-        "image": `${baseImageUrl}/zryachiy.jpg`,
     }
 ];
 
@@ -144,12 +133,12 @@ const defaultFunction = {
             loot.push(item);
         }
         loot = loot.map(item => item.name).join(', ');
+        embed.setThumbnail(boss.imagePortraitLink);
 
         for (const bossData of bossDetails) {
             if (bossData.name === bossName) {
                 details = bossData.details;
                 //loot = boss.loot?.map(lootItem => items.find(i => i.id === lootItem.id)?.name).filter(Boolean).join(', ');
-                embed.setThumbnail(bossData.image);
                 break;
             }
         }

@@ -244,6 +244,7 @@ export async function updateBosses() {
         bosses {
             name
             normalizedName
+            imagePortraitLink
             health {
                 max
             }
