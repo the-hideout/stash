@@ -841,7 +841,7 @@ export async function updateAll(rejectOnError = false) {
     ]);
 }*/
 
-if (process.env.NODE_ENV !== 'ci') {
+if (process.env.NODE_ENV !== 'ci' && !process.env.IS_SHARD) {
     setInterval(updateAll, 1000 * 60 * updateIntervalMinutes).unref();
 }
 
