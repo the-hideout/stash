@@ -1,8 +1,5 @@
-import { v4 as uuidv4 } from "uuid";
-
 import gameData from "./game-data.mjs";
-
-let discordClient;
+import { getParentReply } from "./shard-messenger.mjs";
 
 const getFleaFactors = prog => {
     if (!prog) {
@@ -71,18 +68,6 @@ const optimalFleaPrice = async (progress, baseValue, lowerBound, upperBound) => 
     return highPrice;
 };
 
-const getParentReply = async(message) => {
-    message.uuid = uuidv4();
-    message.type = 'getReply';
-    return new Promise((resolve, reject) => {
-        process.once(message.uuid, response => {
-            if (response.error) return reject(response.error);
-            resolve(response.data);
-        });
-        discordClient.shard.send(message);
-    });
-};
-
 const getProgress = async (id) => {
     return getParentReply({data: 'userProgress', userId: id});
 };
@@ -137,7 +122,4 @@ export default {
     async setRestockAlertChannel(guildId, channelId, locale) {
         return getParentReply({data: 'guildTraderRestockAlertChannel', guildId: guildId, channelId: channelId, locale: locale});
     },
-    init(client) {
-        discordClient = client;
-    }
 }

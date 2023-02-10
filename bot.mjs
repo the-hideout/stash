@@ -5,13 +5,11 @@ import {
     Client,
     GatewayIntentBits,
     Collection,
-    EmbedBuilder,
 } from 'discord.js';
 
 import autocomplete from './modules/autocomplete.mjs';
-import progress from "./modules/progress-shard.mjs";
-import { updateAll, getTraders } from './modules/game-data.mjs';
-import { t } from './modules/translations.mjs';
+import { updateAll } from './modules/game-data.mjs';
+import { initShardMessenger, respondToParentMessage } from './modules/shard-messenger.mjs';
 
 if (process.env.NODE_ENV === 'production') {
     Sentry.init({
@@ -21,6 +19,8 @@ if (process.env.NODE_ENV === 'production') {
 } else {
     console.log(`Bypassing Sentry in ${process.env.NODE_ENV || 'dev'} environment`);
 }
+
+process.env.IS_SHARD = 'true';
 
 const discordClient = new Client({
     intents: [
@@ -50,84 +50,14 @@ console.timeEnd('Prefetch-game-data');
 discordClient.on('ready', () => {
     console.log(`Logged in as ${discordClient.user.tag} on shard ${discordClient.shard.ids[0]}`);
 
-    progress.init(discordClient);
+    initShardMessenger(discordClient);
 
     discordClient.user.setActivity('Tarkov.dev', {
         type: 'PLAYING',
     });
 
     process.on('message', async message => {
-        if (message.type === 'reportIssue') {
-            if (discordClient.guilds.cache.has(process.env.ISSUE_SERVER_ID)) {
-                const server = discordClient.guilds.cache.get(process.env.ISSUE_SERVER_ID);
-                const reportingChannel = server.channels.cache.get(process.env.ISSUE_CHANNEL_ID);
-        
-                if (reportingChannel) {
-                    const embed = new EmbedBuilder();
-                    embed.setTitle('New Issue Reported 🐞');
-                    embed.setDescription(`**Issue Description:**\n${message.details}`);    
-                    embed.setFooter({
-                        text: `This issue was reported by @${message.user} | ${message.reportLocation}`,
-                    });
-                    reportingChannel.send({
-                        embeds: [embed],
-                    })
-                }
-            }
-            return;
-        }
-        if (!message.uuid) return;
-        if (message.type === 'getReply') {
-            if (message.data === 'messageUser') {
-                const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], userId: message.userId, success: false}};
-                try {
-                    const user = await discordClient.users.fetch(message.userId);
-                    if (!user) {
-                        throw new Error('User not found');
-                    }
-                    if (typeof message.messageValues === 'object') {
-                        for (const field in message.messageValues) {
-                            if (field === 'trader') {
-                                const traders = await getTraders(message.messageValues?.lng);
-                                message.messageValues.trader = traders.find(tr => tr.id === message.messageValues.trader.id);
-                            }
-                        }
-                    }
-                    await user.send(t(message.message, message.messageValues));
-                    response.data.success = true;
-                } catch (error) {
-                    response.error = {message: error.message, stack: error.stack};
-                }
-                discordClient.shard.send(response);
-            }
-            if (message.data === 'messageChannel') {
-                const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], guildId: message.guildId, channelId: message.channelId, success: false}};
-                try {
-                    const channel = await discordClient.channels.fetch(message.channelId);
-                    if (!channel) {
-                        throw new Error('Channel not found');
-                    }
-                    if (!channel.isTextBased()) {
-                        throw new Error('Channel is not text-based');
-                    }
-                    if (typeof message.messageValues === 'object') {
-                        for (const field in message.messageValues) {
-                            if (field === 'trader') {
-                                const traders = await getTraders(message.messageValues.lng);
-                                message.messageValues.trader = traders.find(tr => tr.id === message.messageValues.trader.id);
-                            }
-                        }
-                    }
-                    await channel.send(t(message.message, message.messageValues));
-                    response.data.success = true;
-                } catch (error) {
-                    response.error = {message: error.message, stack: error.stack};
-                }
-                discordClient.shard.send(response);
-            }
-            return;
-        }
-        process.emit(message.uuid, message);
+        return respondToParentMessage(message);
     });
 });
 

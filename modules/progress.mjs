@@ -3,10 +3,11 @@ import path from 'path';
 import zlib from 'zlib';
 import moment from 'moment';
 import cloudflare from 'cloudflare';
-import { v4 as uuidv4 } from "uuid";
 
 import {getProgress} from "./tarkovtracker.js";
 import gameData from "./game-data.mjs";
+import { messageUser, messageChannel } from "./shard-messenger.mjs";
+import { getFixedT } from './translations.mjs';
 
 const saveToCloudflareIntervalMinutes = 60;
 let cf, cfAccount, cfNamespace = false;
@@ -246,36 +247,6 @@ const removeRestockAlert = async (id, traders, locale) => {
     return prog.alerts.restock;
 };
 
-const getShardReply = async(shardId, message) => {
-    message.uuid = uuidv4();
-    message.type = 'getReply';
-    return new Promise((resolve, reject) => {
-        shardingManager.shards.get(shardId).once(message.uuid, response => {
-            if (response.error) return reject(response.error);
-            resolve(response.data);
-        });
-        shardingManager.shards.get(shardId).send(message);
-    });
-};
-
-const messageUser = async (userId, message, messageValues, shardId = 0) => {
-    return getShardReply(shardId, {data: 'messageUser', userId: userId, message: message, messageValues: messageValues}).catch(error => {
-        if (shardingManager.shards.has(shardId+1)) {
-            return messageUser(userId, message, messageValues, shardId+1);
-        }
-        return Promise.reject(error);
-    });
-};
-
-function messageChannel(guildId, channelId, message, messageValues, shardId = 0) {
-    return getShardReply(shardId, {data: 'messageChannel', guildId: guildId, channelId: channelId, message: message, messageValues: messageValues}).catch(error => {
-        if (shardingManager.shards.has(shardId+1)) {
-            return messageChannel(guildId, channelId, message, messageValues, shardId+1);
-        }
-        return Promise.reject(error);
-    });
-}
-
 const startRestockAlerts = async () => {
     const setRestockTimers = async () => {
         const traders = await gameData.traders.getAll();
@@ -286,14 +257,16 @@ const startRestockAlerts = async () => {
                 restockTimers[trader.id] = trader.resetTime;
                 const alertTime = new Date(trader.resetTime) - new Date() - 1000 * 60 * restockAlertMinutes;
                 if (alertTime < 0) continue;
-                setTimeout(() => {
-                    const restockMessage = '🛒 {{trader.name}} restock in {{numMinutes}} minutes 🛒';
-                    const messageVars = {trader, numMinutes: restockAlertMinutes};
+                setTimeout(async () => {
+                    const restockMessage = '🛒 {{traderName}} restock in {{numMinutes}} minutes 🛒';
+                    const messageVars = {numMinutes: restockAlertMinutes};
                     for (const userId in userProgress) {
                         if (!userProgress[userId].alerts) continue;
                         if (userProgress[userId].alerts.restock.includes(trader.id)) {
-                            messageVars.lng = userProgress[userId].locale;
-                            messageUser(userId, restockMessage, messageVars).catch(error => {
+                            const locale = userProgress[userId].locale || 'en';
+                            const t = getFixedT(locale);
+                            messageVars.traderName = (await gameData.traders.get(trader.id, locale)).name;
+                            messageUser(userId, t(restockMessage, messageVars)).catch(error => {
                                 console.log(`Error sending ${trader.name} restock notification to user ${userId}: ${error.message}`);
                                 if (error.message === 'Cannot send messages to this user') {
                                     console.log(`Disabling restock alerts for user ${userId}`);
@@ -309,7 +282,9 @@ const startRestockAlerts = async () => {
                                 continue;
                             }
                             const locale = guildSettings.restockAlertLocale || 'en';
-                            messageChannel(guildId, guildSettings.restockAlertChannel, restockMessage, {...messageVars, lng: locale}).catch(error => {
+                            const t = getFixedT(locale);
+                            messageVars.traderName = (await gameData.traders.get(trader.id, locale)).name;
+                            messageChannel(guildId, guildSettings.restockAlertChannel, t(restockMessage, messageVars)).catch(error => {
                                 // only rejects if all shards fail to send the message
                                 console.log(`Error sending ${trader.name} restock notification to channel ${guildId} ${guildSettings.restockAlertChannel}: ${error.message}`);
                                 userProgress.guilds[guildId].restockAlertChannel = false;
@@ -428,9 +403,8 @@ export default {
     addRestockAlert: addRestockAlert,
     removeRestockAlert: removeRestockAlert,
     setGuildTraderRestockAlertChannel: setGuildTraderRestockAlertChannel,
-    async init(sharding_manager) {
+    async init() {
         if (process.env.NODE_ENV === 'ci') return;
-        shardingManager = sharding_manager;
         startRestockAlerts();
         try {
             fs.mkdirSync('./cache');
@@ -517,5 +491,5 @@ export default {
         process.on( 'SIGHUP', saveOnExit);
         progressLoaded = true;
     },
-    messageChannel
+    messageChannel,
 }

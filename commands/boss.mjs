@@ -134,6 +134,7 @@ const defaultFunction = {
         }
         loot = loot.map(item => item.name).join(', ');
         embed.setThumbnail(boss.imagePortraitLink);
+        embed.setURL(`https://tarkov.dev/boss/${boss.normalizedName}`);
 
         for (const bossData of bossDetails) {
             if (bossData.name === bossName) {
