@@ -79,7 +79,7 @@ function getAllChoice() {
 }
 
 export async function updateLanguages() {
-    const query = `{
+    const query = `query StashLanguages {
         __type(name: "LanguageCode") {
             enumValues {
                 name
@@ -98,7 +98,7 @@ export async function updateMaps() {
             ...MapFields
         }`);
     }
-    const query = `query {
+    const query = `query StashMaps {
         ${mapQueries.join('\n')}
     }
     fragment MapFields on Map {
@@ -247,7 +247,7 @@ export async function updateBosses() {
             ...BossName
         }`);
     }
-    const query = `query {
+    const query = `query StashBosses {
         bosses {
             name
             normalizedName
@@ -344,7 +344,7 @@ export async function updateTraders() {
             ...TraderFields
         }`);
     }
-    const query = `query {
+    const query = `query StashTraders {
         ${traderQueries.join('\n')}
     }
     fragment TraderFields on Trader {
@@ -404,7 +404,7 @@ export async function updateHideout() {
             ...HideoutStationFields
         }`);
     }
-    const query = `query {
+    const query = `query StashHideout {
         ${hideoutQueries.join('\n')}
     }
     fragment HideoutStationFields on HideoutStation {
@@ -462,7 +462,7 @@ export async function getFlea() {
 };
 
 export async function updateFlea() {
-    const query = `query {
+    const query = `query StashFleaMarket {
         fleaMarket {
             minPlayerLevel
             enabled
@@ -477,7 +477,7 @@ export async function updateFlea() {
 };
 
 export async function updateBarters() {
-    const query = `query {
+    const query = `query StashBarters {
         barters {
             id
             trader {
@@ -522,7 +522,7 @@ export async function getBarters() {
 }
 
 export async function updateCrafts() {
-    const query = `query {
+    const query = `query StashCrafts {
         crafts {
             id
             station {
@@ -564,34 +564,43 @@ export async function getCrafts() {
     return updateCrafts();
 }
 
-export async function updateItemNames(lang = 'en') {
-    lang = validateLanguage(lang);
-    const query = `query {
-        items(lang: ${lang}) {
-            id
-            name
-            shortName
+export async function updateItemNames() {
+    const nameQueries = [];
+    for (const langCode of gameData.languages) {
+        if (langCode === 'en') {
+            continue;
         }
+        nameQueries.push(`${langCode}: items(lang: ${langCode}) {
+            ...ItemNameFields
+        }`);
+    }
+    const query = `query StashItemNames {
+        ${nameQueries.join('\n')}
+    }
+    fragment ItemNameFields on Item {
+        id
+        name
+        shortName
     }`;
-    const response = await graphqlRequest({ graphql: query });
-    
-    gameData.itemNames[lang] = response.data.items.reduce((langData, item) => {
-        langData[item.id] = item;
-        return langData;
-    }, {});
-
-    return gameData.itemNames[lang];
+    const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+    for (const lang in response) {
+        gameData.itemNames[lang] = response[lang].reduce((langData, item) => {
+            langData[item.id] = item;
+            return langData;
+        }, {});
+    }
+    return gameData.itemNames;
 }
 
-export async function getItemNames(lang = 'en') {
+export async function getItemNames(lang) {
     if (gameData.itemNames[lang]) {
         return gameData.itemNames[lang];
     }
-    return updateItemNames(lang);
+    return Promise.reject(new Error(`No item names found for language ${lang}`));
 }
 
 export async function updateItems() {
-    const query = `query {
+    const query = `query StashItems {
         items {
             id
             name
@@ -733,6 +742,9 @@ export async function updateItems() {
     });
     gameData.items = response.data.items;
     await updateTiers(gameData.items);
+    await updateItemNames().catch(error => {
+        console.log(`Error updating item names: ${error.message}`);
+    });
 
     return gameData.items;
 }
@@ -794,16 +806,7 @@ export async function updateAll(rejectOnError = false) {
         updateBosses(),
         updateTraders(),
         updateHideout(),
-        updateItems().then(() => {
-            return Promise.all(gameData.languages.map(async langCode => {
-                if (langCode === 'en') {
-                    return Promise.resolve();
-                }
-                return updateItemNames(langCode).catch(error => {
-                    console.log(`Error updating ${langCode} item names: ${error.message}`);
-                });
-            }));
-        }),
+        updateItems(),
     ]).then(results => {
         const taskNames = [
             'barters',
