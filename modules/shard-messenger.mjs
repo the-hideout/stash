@@ -4,6 +4,8 @@ import {
 } from 'discord.js';
 
 import gameData from './game-data.mjs';
+import progress from './progress.mjs';
+import getPriceTier, {getTiers} from './loot-tier.mjs';
 
 let shardingManager;
 let discordClient;
@@ -48,6 +50,9 @@ export const messageChannel = async (guildId, channelId, message, messageValues,
 }
 
 export const respondToShardMessage = async (message, shard) => {
+    if (process.env.IS_SHARD) {
+        return Promise.reject(new Error('respondToShardMessage can only be called by the parent process'));
+    }
     //console.log(`ShardingManager received message from shard ${shard.id}`, message);
     if (message.type === 'getReply') {
         const response = {uuid: message.uuid};
@@ -96,6 +101,24 @@ export const respondToShardMessage = async (message, shard) => {
             if (message.data === 'guildTraderRestockAlertChannel') {
                 response.data = await progress.setGuildTraderRestockAlertChannel(message.guildId, message.channelId, message.locale);
             }
+            if (message.data === 'gameData') {
+                const functionPath = message.function.split('.');
+                let gameDataFunction = gameData;
+                for (const pathPart of functionPath) {
+                    gameDataFunction = gameDataFunction[pathPart];
+                }
+                if (Array.isArray(message.args)) {
+                    response.data = await gameDataFunction.apply(null, message.args);
+                } else {
+                    response.data = await gameDataFunction(message.args);
+                }
+            }
+            if (message.data === 'getPriceTier') {
+                response.data = await getPriceTier(message.price, message.noFlea);
+            }
+            if (message.data === 'getTiers') {
+                response.data = await getTiers();
+            }
         } catch (error) {
             response.data = null;
             response.error = {message: error.message, stack: error.stack};
@@ -133,7 +156,6 @@ export const respondToParentMessage = async (message) => {
     if (!message.uuid) return;
     if (message.type === 'getReply') {
         if (message.data === 'messageUser') {
-            const t = getFi
             const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], userId: message.userId, success: false}};
             try {
                 const user = await discordClient.users.fetch(message.userId);

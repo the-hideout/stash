@@ -73,7 +73,7 @@ const defaultFunction = {
         // Fetch all items
         const items = await gameData.items.getAll(interaction.locale);
 
-        const tiers = getTiers();
+        const tiers = await getTiers();
 
         // Construct the embed
         const embed = new EmbedBuilder();

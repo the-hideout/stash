@@ -491,5 +491,4 @@ export default {
         process.on( 'SIGHUP', saveOnExit);
         progressLoaded = true;
     },
-    messageChannel,
 }

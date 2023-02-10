@@ -1,4 +1,5 @@
 import colors from './colors.js';
+import { getParentReply } from './shard-messenger.mjs';
 
 const tiers = {
     legendary: 40000,
@@ -43,7 +44,10 @@ export async function updateTiers(items) {
     tiers.average = averageFloor;
 }
 
-function get_item_tier(price, noFlea) {
+function getPriceTier(price, noFlea) {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'getPriceTier', price, noFlea})
+    }
     let color, tier_msg;
     if (price >= tiers.legendary) {
         color = colors.yellow;
@@ -61,12 +65,14 @@ function get_item_tier(price, noFlea) {
         color = colors.red;
         tier_msg = "🔴 Poor";
     }
-
     return { color: color, msg: tier_msg };
 }
 
 export function getTiers() {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'getTiers'})
+    }
     return tiers;
 }
 
-export default get_item_tier;
+export default getPriceTier;

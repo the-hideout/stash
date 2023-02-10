@@ -8,7 +8,7 @@ import {
 } from 'discord.js';
 
 import autocomplete from './modules/autocomplete.mjs';
-import { updateAll } from './modules/game-data.mjs';
+//import { updateChoices } from './modules/game-data.mjs';
 import { initShardMessenger, respondToParentMessage } from './modules/shard-messenger.mjs';
 
 if (process.env.NODE_ENV === 'production') {
@@ -43,9 +43,9 @@ for (const file of commandFiles) {
     discordClient.commands.set(command.default.data.name, command);
 }
 
-console.time('Prefetch-game-data');
-await updateAll();
-console.timeEnd('Prefetch-game-data');
+//console.time('Prefetch-choice-data');
+//await updateChoices();
+//console.timeEnd('Prefetch-choice-data');
 
 discordClient.on('ready', () => {
     console.log(`Logged in as ${discordClient.user.tag} on shard ${discordClient.shard.ids[0]}`);

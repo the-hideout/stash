@@ -61,7 +61,9 @@ if (process.env.NODE_ENV === 'production') {
     console.log("Healthcheck disabled");
 }
 
+console.time('Prefetch-game-data');
 gameData.updateAll().then(() => {
+    console.timeEnd('Prefetch-game-data');
     const choiceTypes = [
         'traders',
         'maps',
