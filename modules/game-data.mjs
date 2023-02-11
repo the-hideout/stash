@@ -56,7 +56,7 @@ let bossChoices = [];
 let traderChoices = [];
 let hideoutChoices = [];
 
-const updateIntervalMinutes = 10;
+const updateIntervalMinutes = 5;
 
 const eventEmitter = new EventEmitter();
 
