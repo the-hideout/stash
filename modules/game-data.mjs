@@ -3,6 +3,7 @@ import got from 'got';
 import graphqlRequest from "./graphql-request.mjs";
 import { updateTiers } from './loot-tier.mjs';
 import { getDiscordLocale, getCommandLocalizations } from "./translations.mjs";
+import { getParentReply } from './shard-messenger.mjs';
 
 const gameData = {
     maps: {},
@@ -55,11 +56,14 @@ let bossChoices = [];
 let traderChoices = [];
 let hideoutChoices = [];
 
-const updateIntervalMinutes = 10;
+const updateIntervalMinutes = 5;
 
 const eventEmitter = new EventEmitter();
 
 function validateLanguage(langCode) {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'validateLanguage', args: langCode});
+    }
     if (!langCode || typeof langCode !== 'string') {
         return 'en';
     }
@@ -75,7 +79,7 @@ function getAllChoice() {
 }
 
 export async function updateLanguages() {
-    const query = `{
+    const query = `query StashLanguages {
         __type(name: "LanguageCode") {
             enumValues {
                 name
@@ -94,7 +98,7 @@ export async function updateMaps() {
             ...MapFields
         }`);
     }
-    const query = `query {
+    const query = `query StashMaps {
         ${mapQueries.join('\n')}
     }
     fragment MapFields on Map {
@@ -223,6 +227,9 @@ export async function updateMaps() {
 };
 
 export async function getMaps(lang = 'en') {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'maps.getAll', args: lang});
+    }
     lang = validateLanguage(lang);
     if (gameData.maps[lang]) {
         return gameData.maps[lang];
@@ -240,7 +247,7 @@ export async function updateBosses() {
             ...BossName
         }`);
     }
-    const query = `query {
+    const query = `query StashBosses {
         bosses {
             name
             normalizedName
@@ -311,6 +318,9 @@ export async function updateBosses() {
 };
 
 export async function getBosses(lang = 'en') {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'bosses.getAll', args: lang});
+    }
     lang = validateLanguage(lang);
     if (!gameData.bosses) {
         await updateBosses();
@@ -334,7 +344,7 @@ export async function updateTraders() {
             ...TraderFields
         }`);
     }
-    const query = `query {
+    const query = `query StashTraders {
         ${traderQueries.join('\n')}
     }
     fragment TraderFields on Trader {
@@ -377,6 +387,9 @@ export async function updateTraders() {
 };
 
 export async function getTraders(lang = 'en') {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'traders.getAll', args: lang});
+    }
     lang = validateLanguage(lang);
     if (gameData.traders[lang]) {
         return gameData.traders[lang];
@@ -391,7 +404,7 @@ export async function updateHideout() {
             ...HideoutStationFields
         }`);
     }
-    const query = `query {
+    const query = `query StashHideout {
         ${hideoutQueries.join('\n')}
     }
     fragment HideoutStationFields on HideoutStation {
@@ -431,6 +444,9 @@ export async function updateHideout() {
 };
 
 export async function getHideout(lang = 'en') {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'hideout.getAll', args: lang});
+    }
     lang = validateLanguage(lang);
     if (gameData.hideout[lang]) {
         return gameData.hideout[lang];
@@ -446,7 +462,7 @@ export async function getFlea() {
 };
 
 export async function updateFlea() {
-    const query = `query {
+    const query = `query StashFleaMarket {
         fleaMarket {
             minPlayerLevel
             enabled
@@ -461,7 +477,7 @@ export async function updateFlea() {
 };
 
 export async function updateBarters() {
-    const query = `query {
+    const query = `query StashBarters {
         barters {
             id
             trader {
@@ -496,6 +512,9 @@ export async function updateBarters() {
 }
 
 export async function getBarters() {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'barters.getAll'});
+    }
     if (gameData.barters) {
         return gameData.barters;
     }
@@ -503,7 +522,7 @@ export async function getBarters() {
 }
 
 export async function updateCrafts() {
-    const query = `query {
+    const query = `query StashCrafts {
         crafts {
             id
             station {
@@ -536,40 +555,52 @@ export async function updateCrafts() {
 }
 
 export async function getCrafts() {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'crafts.getAll'});
+    }
     if (gameData.crafts) {
         return gameData.crafts;
     }
     return updateCrafts();
 }
 
-export async function updateItemNames(lang = 'en') {
-    lang = validateLanguage(lang);
-    const query = `query {
-        items(lang: ${lang}) {
-            id
-            name
-            shortName
+export async function updateItemNames() {
+    const nameQueries = [];
+    for (const langCode of gameData.languages) {
+        if (langCode === 'en') {
+            continue;
         }
+        nameQueries.push(`${langCode}: items(lang: ${langCode}) {
+            ...ItemNameFields
+        }`);
+    }
+    const query = `query StashItemNames {
+        ${nameQueries.join('\n')}
+    }
+    fragment ItemNameFields on Item {
+        id
+        name
+        shortName
     }`;
-    const response = await graphqlRequest({ graphql: query });
-    
-    gameData.itemNames[lang] = response.data.items.reduce((langData, item) => {
-        langData[item.id] = item;
-        return langData;
-    }, {});
-
-    return gameData.itemNames[lang];
+    const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+    for (const lang in response) {
+        gameData.itemNames[lang] = response[lang].reduce((langData, item) => {
+            langData[item.id] = item;
+            return langData;
+        }, {});
+    }
+    return gameData.itemNames;
 }
 
-export async function getItemNames(lang = 'en') {
+export async function getItemNames(lang) {
     if (gameData.itemNames[lang]) {
         return gameData.itemNames[lang];
     }
-    return updateItemNames(lang);
+    return Promise.reject(new Error(`No item names found for language ${lang}`));
 }
 
 export async function updateItems() {
-    const query = `query {
+    const query = `query StashItems {
         items {
             id
             name
@@ -711,11 +742,17 @@ export async function updateItems() {
     });
     gameData.items = response.data.items;
     await updateTiers(gameData.items);
+    await updateItemNames().catch(error => {
+        console.log(`Error updating item names: ${error.message}`);
+    });
 
     return gameData.items;
 }
 
 export async function getItems(lang = 'en') {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'items.getAll', args: lang});
+    }
     lang = validateLanguage(lang);
     if (!gameData.items) {
         await updateItems();
@@ -736,12 +773,18 @@ export async function getItems(lang = 'en') {
 }
 
 export async function getAmmo(lang = 'en') {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'items.getAmmo', args: lang});
+    }
     return getItems(lang).then(items => {
         return items.filter(item => item.category.id === '5485a8684bdc2da71d8b4567');
     });
 }
 
 export async function getStims(lang = 'en') {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'items.getStims', args: lang});
+    }
     return getItems(lang).then(items => {
         return items.filter(item => item.category.id === '5448f3a64bdc2d60728b456a');
     });
@@ -763,16 +806,7 @@ export async function updateAll(rejectOnError = false) {
         updateBosses(),
         updateTraders(),
         updateHideout(),
-        updateItems().then(() => {
-            return Promise.all(Object.keys(gameData.itemNames).map(async langCode => {
-                if (langCode === 'en') {
-                    return Promise.resolve();
-                }
-                return updateItemNames(langCode).catch(error => {
-                    console.log(`Error updating ${langCode} item names: ${error.message}`);
-                });
-            }));
-        }),
+        updateItems(),
     ]).then(results => {
         const taskNames = [
             'barters',
@@ -801,7 +835,16 @@ export async function updateAll(rejectOnError = false) {
     eventEmitter.emit('updated');
 }
 
-if (process.env.NODE_ENV !== 'ci') {
+/*export async function updateChoices() {
+    return Promise.all([
+        updateMaps(),
+        updateBosses(),
+        updateTraders(),
+        updateHideout(),
+    ]);
+}*/
+
+if (process.env.NODE_ENV !== 'ci' && !process.env.IS_SHARD) {
     setInterval(updateAll, 1000 * 60 * updateIntervalMinutes).unref();
 }
 
@@ -810,23 +853,35 @@ export default {
         getAll: getMaps,
         update: updateMaps,
         choices: () => {
+            if (process.env.IS_SHARD) {
+                return [];
+            }
             return mapChoices;
         }
     },
     bosses: {
         getAll: getBosses,
         choices: () => {
+            if (process.env.IS_SHARD) {
+                return [];
+            }
             return bossChoices;
         }
     },
     traders: {
         getAll: getTraders,
         get: async (id, lang = 'en') => {
+            if (process.env.IS_SHARD) {
+                return getParentReply({data: 'gameData', function: 'traders.get', args: [id, lang]});
+            }
             const traders = await getTraders(lang);
             return traders.find(trader => trader.id === id);
         },
         update: updateTraders,
         choices: includeAllOption => {
+            if (process.env.IS_SHARD) {
+                return [];
+            }
             if (!includeAllOption) return traderChoices;
             return [
                 ...traderChoices,
@@ -837,11 +892,17 @@ export default {
     hideout: {
         getAll: getHideout,
         get: async (id, lang = 'en') => {
+            if (process.env.IS_SHARD) {
+                return getParentReply({data: 'gameData', function: 'hideout.get', args: [id, lang]});
+            }
             const stations = await getHideout(lang);
             return stations.find(station => station.id === id);
         },
         update: updateHideout,
         choices: includeAllOption => {
+            if (process.env.IS_SHARD) {
+                return [];
+            }
             if (!includeAllOption) return hideoutChoices;
             return [
                 ...hideoutChoices,
@@ -851,12 +912,21 @@ export default {
     },
     skills: {
         getAll: () => {
+            if (process.env.IS_SHARD) {
+                return getParentReply({data: 'gameData', function: 'skills.getAll'});
+            }
             return gameData.skills;
         },
         get: async id => {
+            if (process.env.IS_SHARD) {
+                return getParentReply({data: 'gameData', function: 'skills.get', args: id});
+            }
             return gameData.skills.find(skill => skill.id === id);
         },
         choices: includeAllOption => {
+            if (process.env.IS_SHARD) {
+                return [];
+            }
             const choices = gameData.skills.map(skill => {
                 return {name: skill.name, value: skill.id, name_localizations: getCommandLocalizations(skill.command_translation_key)};
             });
@@ -880,6 +950,9 @@ export default {
     items: {
         getAll: getItems,
         get: async (id, lang = 'en') => {
+            if (process.env.IS_SHARD) {
+                return getParentReply({data: 'gameData', function: 'items.get', args: [id, lang]});
+            }
             const items = await getItems(lang);
             return items.find(item => item.id === id);
         },
@@ -888,4 +961,5 @@ export default {
     },
     events: eventEmitter,
     updateAll: updateAll,
+    validateLanguage,
 };
