@@ -6,6 +6,7 @@ import { ShardingManager } from 'discord.js';
 
 import progress from './modules/progress.mjs';
 import gameData from './modules/game-data.mjs';
+import { initShardMessenger, respondToShardMessage } from './modules/shard-messenger.mjs';
 
 const manager = new ShardingManager('./bot.mjs', { token: process.env.DISCORD_API_TOKEN });
 let healthcheckJob = false;
@@ -16,72 +17,14 @@ const startingChoices = {};
 manager.on('shardCreate', shard => {
     console.log(`Created shard ${shard.id}`);
     shard.on('message', async message => {
-        //console.log(`ShardingManager received message from shard ${shard.id}`, message);
-        if (message.type === 'getReply') {
-            const response = {uuid: message.uuid};
-            try {
-                if (message.data === 'userProgress') {
-                    response.data = await progress.getProgress(message.userId);
-                }
-                if (message.data === 'defaultUserProgress') {
-                    response.data = await progress.getDefaultProgress();
-                }
-                if (message.data === 'safeUserProgress') {
-                    response.data = await progress.getSafeProgress(message.userId);
-                }
-                if (message.data === 'userTarkovTrackerUpdateTime') {
-                    response.data = await progress.getUpdateTime(message.userId);
-                }
-                if (message.data === 'setUserLevel') {
-                    await progress.setLevel(message.userId, message.level);
-                    response.data = message.level;
-                }
-                if (message.data === 'setUserTraderLevel') {
-                    await progress.setTrader(message.userId, message.traderId, message.level);
-                    response.data = message.level;
-                }
-                if (message.data === 'setUserHideoutLevel') {
-                    await progress.setHideout(message.userId, message.stationId, message.level);
-                    response.data = message.level;
-                }
-                if (message.data === 'setUserSkillLevel') {
-                    await progress.setSkill(message.userId, message.skillId, message.level);
-                    response.data = message.level;
-                }
-                if (message.data === 'userTraderRestockAlerts') {
-                    response.data = await progress.getRestockAlerts(message.userId);
-                }
-                if (message.data === 'addUserTraderRestockAlert') {
-                    response.data = await progress.addRestockAlert(message.userId, message.traders, message.locale);
-                }
-                if (message.data === 'removeUserTraderRestockAlert') {
-                    response.data = await progress.removeRestockAlert(message.userId, message.traders, message.locale);
-                }
-                if (message.data === 'setUserTarkovTrackerToken') {
-                    await progress.setToken(message.userId, message.token);
-                    response.data = message.token;
-                }
-                if (message.data === 'guildTraderRestockAlertChannel') {
-                    response.data = await progress.setGuildTraderRestockAlertChannel(message.guildId, message.channelId, message.locale);
-                }
-            } catch (error) {
-                response.data = null;
-                response.error = {message: error.message, stack: error.stack};
-            }
-            return shard.send(response);
-        }
-        if (message.type === 'reportIssue') {
-            manager.broadcast(message);
-        }
-        if (message.uuid) {
-            shard.emit(message.uuid, message);
-        }
+        return respondToShardMessage(message, shard);
     });
 });
 
 manager.spawn().then(shards => {
     console.log(`🟢 Systems now online with ${shards.size} shards`);
-    progress.init(manager);
+    initShardMessenger(manager);
+    progress.init();
     const shutdown = () => {
         if (shutdownSignalReceived) return;
         shutdownSignalReceived = true;
@@ -118,7 +61,9 @@ if (process.env.NODE_ENV === 'production') {
     console.log("Healthcheck disabled");
 }
 
+console.time('Prefetch-game-data');
 gameData.updateAll().then(() => {
+    console.timeEnd('Prefetch-game-data');
     const choiceTypes = [
         'traders',
         'maps',

@@ -160,7 +160,7 @@ const defaultFunction = {
             body += `• ${t('Sell to')}: \`${sellTo}\` ${t('for')} \`${tierPrice.toLocaleString(interaction.locale) + "₽"}\`\n`;
 
             // Calculate item tier
-            let tier = lootTier(tierPrice / (item.width * item.height), item.types.includes('noFlea'));
+            let tier = await lootTier(tierPrice / (item.width * item.height), item.types.includes('noFlea'));
             embed.setColor(tier.color);
             body += `• ${t('Item Tier')}: ${t(tier.msg)}\n`;
 
