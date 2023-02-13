@@ -73,7 +73,7 @@ const defaultFunction = {
         // Fetch all items
         const items = await gameData.items.getAll(interaction.locale);
 
-        const tiers = getTiers();
+        const tiers = await getTiers();
 
         // Construct the embed
         const embed = new EmbedBuilder();
@@ -134,6 +134,7 @@ const defaultFunction = {
         }
         loot = loot.map(item => item.name).join(', ');
         embed.setThumbnail(boss.imagePortraitLink);
+        embed.setURL(`https://tarkov.dev/boss/${boss.normalizedName}`);
 
         for (const bossData of bossDetails) {
             if (bossData.name === bossName) {
