@@ -38,7 +38,7 @@ const defaultProgress = {
 
 const tarkovTrackerUpdateIntervalMinutes = 1;
 
-const restockAlertMinutes = 3;
+const restockAlertMinutes = 2;
 
 let shardingManager;
 
