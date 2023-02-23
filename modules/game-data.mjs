@@ -351,6 +351,7 @@ export async function updateTraders() {
         id
         tarkovDataId
         name
+        normalizedName
         resetTime
         discount
         levels {
@@ -878,13 +879,27 @@ export default {
             return traders.find(trader => trader.id === id);
         },
         update: updateTraders,
-        choices: includeAllOption => {
+        choices: (includeAllOption, options) => {
             if (process.env.IS_SHARD) {
                 return [];
             }
-            if (!includeAllOption) return traderChoices;
+            options = {
+                whitelist: [],
+                blacklist: [],
+                ...options,
+            };
+            const traders = traderChoices.filter(t => {
+                if (options.blacklist.includes(t.name)) {
+                    return false;
+                }
+                if (options.whitelist.length === 0) {
+                    return true;
+                }
+                return options.whitelist.includes(t.name);
+            });
+            if (!includeAllOption) return traders;
             return [
-                ...traderChoices,
+                ...traders,
                 getAllChoice()
             ];
         }
