@@ -118,7 +118,7 @@ const defaultFunction = {
                 .setNameLocalizations(getCommandLocalizations('trader'))
                 .setDescriptionLocalizations(getCommandLocalizations('trader_desc'))
                 .setRequired(true)
-                .setChoices(...gameData.traders.choices(true, {blacklist: ['Fence', 'Lightkeeper']}))
+                .setChoices(...gameData.traders.choices({all: true, blacklist: ['Fence', 'Lightkeeper']}))
             )
             .addBooleanOption(option => option
                 .setName('send_alert')
