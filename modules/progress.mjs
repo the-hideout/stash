@@ -248,6 +248,7 @@ const removeRestockAlert = async (id, traders, locale) => {
 const startRestockAlerts = async () => {
     const setRestockTimers = async () => {
         const traders = await gameData.traders.getAll();
+        // traders to skip restock timers for
         const skipTraders = ['fence', 'lightkeeper'];
         for (const trader of traders) {
             const currentTimer = restockTimers[trader.id];
