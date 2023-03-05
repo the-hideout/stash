@@ -1,11 +1,18 @@
 {
   "name": "stash-discord-bot",
   "version": "1.0.0",
-  "description": "Discord bot",
+  "private": true,
+  "description": "The Tarkov.dev's Escape from Tarkov Discord bot",
   "main": "index.mjs",
   "engines": {
     "node": "18.*"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/the-hideout/stash.git"
+  },
+  "license": "GNU General Public License v3.0",
+  "homepage": "https://github.com/the-hideout/stash",
   "scripts": {
     "start": "node index.mjs",
     "dev": "cross-env NODE_ENV=development NEW_RELIC_ENABLED=false nodemon --ignore cache/ -r dotenv/config index.mjs",
