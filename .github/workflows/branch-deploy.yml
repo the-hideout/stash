@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: branch-deploy
         id: branch-deploy
-        uses: github/branch-deploy@e0b8fec9f3b1c48ea3dddeedca59af02e4d69a53 # pin@v4.3.0
+        uses: github/branch-deploy@v4.5.0
         with:
           admins: the-hideout/core-contributors
           admins_pat: ${{ secrets.BRANCH_DEPLOY_ADMINS_PAT }}
@@ -34,7 +34,7 @@ jobs:
 
       - name: Cache node modules
         if: steps.branch-deploy.outputs.continue == 'true'
-        uses: actions/cache@v3 # pin@v2
+        uses: actions/cache@v3.2.6
         env:
           cache-name: cache-node-modules
         with:
