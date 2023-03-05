@@ -26,7 +26,7 @@ jobs:
 
       - name: Checkout
         if: steps.branch-deploy.outputs.continue == 'true'
-        uses: actions/checkout@v3 # pin@v2
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # pin@v3.3.0
         with:
           ref: ${{ steps.branch-deploy.outputs.ref }}
 
