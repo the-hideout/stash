@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: branch-deploy
         id: branch-deploy
-        uses: github/branch-deploy@v4.5.0
+        uses: github/branch-deploy@0c7c257959c8dd8adf5a3ce27724f6e3711db08b # pin@v4.5.0
         with:
           admins: the-hideout/core-contributors
           admins_pat: ${{ secrets.BRANCH_DEPLOY_ADMINS_PAT }}
@@ -34,7 +34,7 @@ jobs:
 
       - name: cache node modules
         if: steps.branch-deploy.outputs.continue == 'true'
-        uses: actions/cache@v3.2.6
+        uses: actions/cache@69d9d449aced6a2ede0bc19182fadc3a0a42d2b0 # pin@v3.2.6
         env:
           cache-name: cache-node-modules
         with:
@@ -56,7 +56,7 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
         run: node deploy-commands.mjs
-        
+
       - name: deploy to railway
         if: steps.branch-deploy.outputs.continue == 'true'
         run: npm run deploy
