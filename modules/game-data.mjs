@@ -51,10 +51,15 @@ const mapKeys = {
     '59fc81d786f774390775787e': 'factory'
 };
 
-let mapChoices = [];
-let bossChoices = [];
-let traderChoices = [];
-let hideoutChoices = [];
+const choices = {
+    boss: [],
+    hideout: [],
+    map: [],
+    skill: gameData.skills.map(skill => {
+        return {name: skill.name, value: skill.id, name_localizations: getCommandLocalizations(skill.command_translation_key)};
+    }),
+    trader: [],
+};
 
 const updateIntervalMinutes = 5;
 
@@ -72,10 +77,6 @@ function validateLanguage(langCode) {
         return 'en';
     }
     return langCode;
-}
-
-function getAllChoice() {
-    return {name: 'All', value: 'all', name_localizations: getCommandLocalizations('all_desc')};
 }
 
 export async function updateLanguages() {
@@ -216,10 +217,10 @@ export async function updateMaps() {
             });
         }
     }
-    mapChoices = newMapChoices.sort((a, b) => {
+    choices.map = newMapChoices.sort((a, b) => {
         return a.name.localeCompare(b.name);
     });
-    bossChoices = bosses.sort((a, b) => {
+    choices.boss = bosses.sort((a, b) => {
         return a.name.localeCompare(b.name);
     });
 
@@ -351,6 +352,7 @@ export async function updateTraders() {
         id
         tarkovDataId
         name
+        normalizedName
         resetTime
         discount
         levels {
@@ -379,7 +381,7 @@ export async function updateTraders() {
             }, {}),
         });
     }
-    traderChoices = newTraderChoices.sort((a,b) => {
+    choices.trader = newTraderChoices.sort((a,b) => {
         return a.name.localeCompare(b.name);
     });
     eventEmitter.emit('updatedTraders');
@@ -436,7 +438,7 @@ export async function updateHideout() {
             }, {}),
         });
     }
-    hideoutChoices = newWideoutChoices.sort((a,b) => {
+    choices.hideout = newWideoutChoices.sort((a,b) => {
         return a.name.localeCompare(b.name);
     });
 
@@ -848,24 +850,44 @@ if (process.env.NODE_ENV !== 'ci' && !process.env.IS_SHARD) {
     setInterval(updateAll, 1000 * 60 * updateIntervalMinutes).unref();
 }
 
+const getChoices = (choiceType, options) => {
+    if (process.env.IS_SHARD) {
+        return [];
+    }
+    options = {
+        all: false,
+        whitelist: [],
+        blacklist: [],
+        ...options,
+    };
+    const filteredChoices = choices[choiceType].filter(c => {
+        if (options.blacklist.includes(c.name) || options.blacklist.includes(c.value)) {
+            return false;
+        }
+        if (options.whitelist.length === 0) {
+            return true;
+        }
+        return options.whitelist.includes(c.name) || options.whitelist.includes(c.value);
+    });
+    if (!options.all) return filteredChoices;
+    return [
+        ...filteredChoices,
+        {name: 'All', value: 'all', name_localizations: getCommandLocalizations('all_desc')},
+    ];
+};
+
 export default {
     maps: {
         getAll: getMaps,
         update: updateMaps,
-        choices: () => {
-            if (process.env.IS_SHARD) {
-                return [];
-            }
-            return mapChoices;
+        choices: (includeAllOption, options) => {
+            return getChoices('map', includeAllOption, options);
         }
     },
     bosses: {
         getAll: getBosses,
-        choices: () => {
-            if (process.env.IS_SHARD) {
-                return [];
-            }
-            return bossChoices;
+        choices: (includeAllOption, options) => {
+            return getChoices('boss', includeAllOption, options);
         }
     },
     traders: {
@@ -878,15 +900,8 @@ export default {
             return traders.find(trader => trader.id === id);
         },
         update: updateTraders,
-        choices: includeAllOption => {
-            if (process.env.IS_SHARD) {
-                return [];
-            }
-            if (!includeAllOption) return traderChoices;
-            return [
-                ...traderChoices,
-                getAllChoice()
-            ];
+        choices: (includeAllOption, options) => {
+            return getChoices('trader', includeAllOption, options);
         }
     },
     hideout: {
@@ -899,15 +914,8 @@ export default {
             return stations.find(station => station.id === id);
         },
         update: updateHideout,
-        choices: includeAllOption => {
-            if (process.env.IS_SHARD) {
-                return [];
-            }
-            if (!includeAllOption) return hideoutChoices;
-            return [
-                ...hideoutChoices,
-                getAllChoice()
-            ];
+        choices: (includeAllOption, options) => {
+            return getChoices('hideout', includeAllOption, options);
         }
     },
     skills: {
@@ -923,18 +931,8 @@ export default {
             }
             return gameData.skills.find(skill => skill.id === id);
         },
-        choices: includeAllOption => {
-            if (process.env.IS_SHARD) {
-                return [];
-            }
-            const choices = gameData.skills.map(skill => {
-                return {name: skill.name, value: skill.id, name_localizations: getCommandLocalizations(skill.command_translation_key)};
-            });
-            if (!includeAllOption) return choices;
-            return [
-                ...choices,
-                getAllChoice()
-            ];
+        choices: (includeAllOption, options) => {
+            return getChoices('skill', includeAllOption, options);
         }
     },
     flea: {

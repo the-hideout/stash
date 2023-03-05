@@ -231,7 +231,7 @@ const defaultFunction = {
                 .setNameLocalizations(getCommandLocalizations('trader'))
                 .setDescriptionLocalizations(getCommandLocalizations('trader_desc'))
                 .setRequired(true)
-                .setChoices(...gameData.traders.choices(true))
+                .setChoices(...gameData.traders.choices({all: true}))
             )
             .addIntegerOption(option => option
                 .setName('level')
@@ -258,7 +258,7 @@ const defaultFunction = {
                 .setNameLocalizations(getCommandLocalizations('station'))
                 .setDescriptionLocalizations(getCommandLocalizations('progress_hideout_station_select_desc'))
                 .setRequired(true)
-                .setChoices(...gameData.hideout.choices(true))
+                .setChoices(...gameData.hideout.choices({all: true}))
             )
             .addIntegerOption(option => option
                 .setName('level')
@@ -286,7 +286,7 @@ const defaultFunction = {
                 .setNameLocalizations(getCommandLocalizations('skill'))
                 .setDescriptionLocalizations(getCommandLocalizations('skill_desc'))
                 .setRequired(true)
-                .setChoices(...gameData.skills.choices(false))
+                .setChoices(...gameData.skills.choices())
             )
             .addIntegerOption(option => option
                 .setName('level')
