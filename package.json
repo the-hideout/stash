@@ -4,7 +4,7 @@
   "description": "Discord bot",
   "main": "index.mjs",
   "engines": {
-    "node": "16.*"
+    "node": "18.*"
   },
   "scripts": {
     "start": "node index.mjs",
