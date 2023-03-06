@@ -4,3 +4,4 @@ config-dev.json
 config.json
 cache/*.json
 *.log
+.vscode

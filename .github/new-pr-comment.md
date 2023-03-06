@@ -10,4 +10,4 @@ If you are new, please check out the deployment process below to understand how 
 
 4. 🎉 Merge!
 
-> Note: An example pull request demonstrating the deployment process is available [here](https://github.com/the-hideout/stash/pull/31)
+> If you need additional help with branch deployments, checkout the [usage guide](https://github.com/github/branch-deploy/blob/main/docs/usage.md)
