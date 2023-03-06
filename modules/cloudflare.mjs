@@ -6,19 +6,14 @@ const BASE_URL = 'https://api.cloudflare.com/client/v4/';
 
 const doRequest = async (method = 'GET', operation, key, value, extraHeaders) => {
     if (!process.env.CLOUDFLARE_TOKEN || !process.env.CLOUDFLARE_NAMESPACE) {
-        return {
-           result: null,
-           success: false,
-           errors: [`Cloudflare token and/or namespace not set; skipping ${method} ${key}`],
-           messages: []
-        };
+        return Promise.reject(new Error(`Cloudflare token and/or namespace not set; skipping ${method} ${key}`));
     }
     const requestOptions = {
         method: method,
         headers: {
             'authorization': `Bearer ${process.env.CLOUDFLARE_TOKEN}`,
         },
-        resolveBodyOnly: true,
+        throwHttpErrors: false,
     };
 
     if(extraHeaders){
@@ -40,7 +35,13 @@ const doRequest = async (method = 'GET', operation, key, value, extraHeaders) =>
         requestOptions.body = value;
     }
 
-    return got(`${BASE_URL}${fullCloudflarePath}`, requestOptions);
+    return got(`${BASE_URL}${fullCloudflarePath}`, requestOptions).then(response => {
+        if (response.statusCode !== 200 && response.statusCode !== 304) {
+            const json = JSON.parse(response.body);
+            return Promise.reject(new Error(json.errors.map(error => `${error.message} (${error.code})`).join('; ')));
+        }
+        return response.body;
+    });
 };
 
 export async function putValue(key, value) {
