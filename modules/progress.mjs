@@ -1,22 +1,17 @@
 import fs from 'fs';
 import path from 'path';
-import zlib from 'zlib';
 import moment from 'moment';
-import cloudflare from 'cloudflare';
 
 import {getProgress} from "./tarkovtracker.js";
 import gameData from "./game-data.mjs";
 import { messageUser, messageChannel } from "./shard-messenger.mjs";
 import { getFixedT } from './translations.mjs';
+import cloudflare from './cloudflare.mjs';
 
 const saveToCloudflareIntervalMinutes = 60;
-let cf, cfAccount, cfNamespace = false;
+let cf = false;
 if (process.env.CLOUDFLARE_TOKEN && process.env.CLOUDFLARE_ACCOUNT && process.env.CLOUDFLARE_NAMESPACE) {
-    cf = cloudflare({
-        token: process.env.CLOUDFLARE_TOKEN
-    });
-    cfAccount = process.env.CLOUDFLARE_ACCOUNT;
-    cfNamespace = process.env.CLOUDFLARE_NAMESPACE;
+    cf = true;
 } else {
     console.log('Missing env var(s) for cloudflare KV; using local storage.');
 }
@@ -321,9 +316,7 @@ const saveToCloudflare = () => {
         console.log(`Skipping Cloudflare save of progress in ${process.env.NODE_ENV} environment`);
         return;
     }
-    const encoding = 'base64';
-    const encoded = zlib.gzipSync(JSON.stringify(userProgress)).toString(encoding);
-    return cf.enterpriseZoneWorkersKV.add(cfAccount, cfNamespace, 'progress', encoded).then(response => {
+    return cloudflare.putValue('progress', userProgress).then(response => {
         if (shutdown) {
             console.log('Saved user progress to Cloudflare');
         }
@@ -417,9 +410,7 @@ export default {
         try {
             let savedUsers = {};
             if (cf) {
-                savedUsers = await cf.enterpriseZoneWorkersKV.read(cfAccount, cfNamespace, 'progress').then(response => {
-                    return zlib.gunzipSync(Buffer.from(response, 'base64')).toString();
-                }).catch(error => {
+                savedUsers = await cloudflare.getValue('progress').catch(error => {
                     console.log('Error reading user progress from CloudflareKV', error);
                     console.log('Reading progress from local storage');
                     return fs.readFileSync(usersJsonPath);
