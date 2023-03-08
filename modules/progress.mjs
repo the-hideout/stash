@@ -435,7 +435,7 @@ export default {
             for (const id in userProgress) {
                 if (id === 'guilds') continue;
                 const user = userProgress[id];
-                if (!user.traders) continue;
+                if (!user.traders) user.traders = {};
                 if (!user.traders[trader.id]) user.traders[trader.id] = 1;
             }
         }
