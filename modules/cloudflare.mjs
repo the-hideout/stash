@@ -48,7 +48,7 @@ export async function putValue(key, value) {
     if (typeof value === 'object'){
         value = JSON.stringify(value);
     }
-    value = zlib.gzipSync(JSON.stringify(value)).toString('base64');
+    value = zlib.gzipSync(value).toString('base64');
     return doRequest('PUT', 'values', key, value);
 }
 
