@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import got from 'got';
 
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const URL = 'https://tarkov-changes.com';
 const MAX_EMBED_LENGTH = 4096;
@@ -24,7 +25,8 @@ const defaultFunction = {
         .setDescriptionLocalizations(getCommandLocalizations('changes_desc')),
     async execute(interaction) {
         await interaction.deferReply();
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
         
         const data = await getChanges();
 

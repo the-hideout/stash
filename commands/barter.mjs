@@ -22,7 +22,8 @@ const defaultFunction = {
         }),
     async execute(interaction) {
         await interaction.deferReply();
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
@@ -35,9 +36,9 @@ const defaultFunction = {
         const matchedBarters = [];
 
         const [items, barters, traders] = await Promise.all([
-            gameData.items.getAll(interaction.locale),
+            gameData.items.getAll(locale),
             gameData.barters.getAll(),
-            gameData.traders.getAll(interaction.locale)
+            gameData.traders.getAll(locale)
         ]);
         const searchedItems = items.filter(item => item.name.toLowerCase().includes(searchString.toLowerCase()));
 
@@ -128,10 +129,10 @@ const defaultFunction = {
                 }
 
                 totalCost += itemCost * req.count;
-                embed.addFields({name: reqName, value: itemCost.toLocaleString(interaction.locale) + "₽ x " + req.count, inline: true});
+                embed.addFields({name: reqName, value: itemCost.toLocaleString(locale) + "₽ x " + req.count, inline: true});
             }
 
-            embed.addFields({name: t('Total'), value: totalCost.toLocaleString(interaction.locale) + "₽", inline: false});
+            embed.addFields({name: t('Total'), value: totalCost.toLocaleString(locale) + "₽", inline: false});
 
             embeds.push(embed);
 

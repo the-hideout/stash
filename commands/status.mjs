@@ -1,7 +1,9 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+
 import graphqlRequest from '../modules/graphql-request.mjs';
 import generalError from '../modules/general-error.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const statusCodes = [
     '🟢 OK',
@@ -25,7 +27,8 @@ const defaultFunction = {
         .setDescriptionLocalizations(getCommandLocalizations('status_desc')),
     async execute(interaction) {
         await interaction.deferReply();
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
         const embed = new EmbedBuilder();
         let currentStatus;
 

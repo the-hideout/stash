@@ -1,5 +1,8 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
+import progress from '../modules/progress-shard.mjs';
+import { getFixedT, comT, getCommandLocalizations, getTranslationChoices } from '../modules/translations.mjs';
+
 function userIsAuthorized(interaction) {
     return !!process.env.ADMIN_ID && process.env.ADMIN_ID.split(',').includes(interaction.user.id)
 }
@@ -98,6 +101,21 @@ const subCommands = {
         
         return interaction.editReply(response).catch(console.error);
     },
+    language: async interaction => {
+        await interaction.deferReply({ephemeral: true});
+        const t = getFixedT(interaction.locale);
+
+        let locale = interaction.options.getString('locale') || 'none';
+        if (locale === 'none') {
+            locale = false;
+        }
+
+        await progress.setServerLanguage(interaction.guildId, locale);
+
+        return interaction.editReply({
+            content: `✅ ${t('Server language set to {{languageCode}}.', {languageCode: locale || comT('none_desc')})}`
+        });
+    },
 };
 
 const defaultFunction = {
@@ -125,6 +143,20 @@ const defaultFunction = {
                 .setName('server_id')
                 .setDescription('Server ID')
                 .setRequired(true)
+            )
+        )
+        .addSubcommand(subcommand => subcommand
+            .setName('language')
+            .setDescription('Force the bot to respond in one language on this server')
+            .setNameLocalizations(getCommandLocalizations('language'))
+            .setDescriptionLocalizations(getCommandLocalizations('stash_language_desc'))
+            .addStringOption(option => option
+                .setName('locale')
+                .setDescription('Language to use')
+                .setNameLocalizations(getCommandLocalizations('locale'))
+                .setDescriptionLocalizations(getCommandLocalizations('stash_language_locale_desc'))
+                .setRequired(true)
+                .setChoices(...getTranslationChoices({none: true}))
             )
         ),
     async execute(interaction) {

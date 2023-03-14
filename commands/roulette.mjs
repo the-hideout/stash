@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import fs from 'fs';
 
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const rouletteData = JSON.parse(fs.readFileSync('data/roulette.json'));
 
@@ -12,7 +13,8 @@ const defaultFunction = {
         .setNameLocalizations(getCommandLocalizations('roulette'))
         .setDescriptionLocalizations(getCommandLocalizations('roulette_desc')),
     async execute(interaction) {
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
 
         const draw = rouletteData[Math.floor(Math.random()*rouletteData.length)];
 

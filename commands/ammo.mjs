@@ -3,6 +3,7 @@ import asciiTable from 'ascii-table';
 
 import { getAmmo } from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const ammoLabels = {
     Caliber12g: '12/70',
@@ -46,7 +47,8 @@ const defaultFunction = {
         ),
     async execute(interaction) {
         await interaction.deferReply();
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
@@ -75,7 +77,7 @@ const defaultFunction = {
         table.removeBorder();
         table.addRow(tableHeaders);
 
-        let ammos = await getAmmo(interaction.locale);
+        let ammos = await getAmmo(locale);
         let caliber = false;
         for (const ammo of ammos) {
             if (ammo.name.toLowerCase().replace(/\./g, '').includes(searchString.toLowerCase().replace(/\./g, ''))) {

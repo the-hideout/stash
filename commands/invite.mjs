@@ -1,6 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const BOT_INVITE_LINK = "https://discord.com/api/oauth2/authorize?client_id=955521336904667227&permissions=309237664832&scope=bot%20applications.commands";
 
@@ -12,7 +13,8 @@ const defaultFunction = {
         .setDescriptionLocalizations(getCommandLocalizations('invite_desc')),
 
     async execute(interaction) {
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
         const embed = new EmbedBuilder();
         embed.setTitle(`${t('Stash Invite Link')} 🔗`);
         embed.setAuthor({

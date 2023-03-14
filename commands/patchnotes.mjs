@@ -4,6 +4,7 @@ import * as cheerio from 'cheerio';
 import TurndownService from 'turndown';
 
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const MAX_EMBED_LENGTH = 4096;
 const URL = 'https://www.escapefromtarkov.com/news?page=1&filter=2';
@@ -42,7 +43,8 @@ const defaultFunction = {
         .setDescriptionLocalizations(getCommandLocalizations('patchnotes_desc')),
     async execute(interaction) {
         await interaction.deferReply();
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
         
         const notes = await getPatchNotes();
 

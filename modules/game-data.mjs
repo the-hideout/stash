@@ -583,6 +583,58 @@ export async function updateItemNames() {
         id
         name
         shortName
+        properties {
+            ...on ItemPropertiesAmmo {
+                caliber
+                penetrationPower
+                damage
+                armorDamage
+                fragmentationChance
+                initialSpeed
+            }
+            ...on ItemPropertiesStim {
+                cures
+                stimEffects {
+                    type
+                    chance
+                    delay
+                    duration
+                    value
+                    percent
+                    skillName
+                }
+            }
+            ...on ItemPropertiesWeapon {
+                defaultPreset {
+                    iconLink
+                    width
+                    height
+                    traderPrices {
+                        price
+                        priceRUB
+                        currency
+                        trader {
+                            id
+                            name
+                        }
+                    }
+                    sellFor {
+                        price
+                        currency
+                        priceRUB
+                        vendor {
+                            name
+                            normalizedName
+                            ...on TraderOffer {
+                                trader {
+                                    id
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }`;
     const response = await graphqlRequest({ graphql: query }).then(response => response.data);
     for (const lang in response) {
