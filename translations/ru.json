@@ -213,6 +213,7 @@
         "skill": "навык",
         "skill_desc": "Навык",
         "stash_language_desc": "Force the bot to respond in one language on this server",
+        "stash_language_locale_desc": "The language to use on this server",
         "station": "станция",
         "status": "статус",
         "status_desc": "Дает вам текущий статус сервера",

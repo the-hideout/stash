@@ -212,6 +212,7 @@
         "skill": "skill",
         "skill_desc": "Skill",
         "stash_language_desc": "Force the bot to respond in one language on this server",
+        "stash_language_locale_desc": "The language to use on this server",
         "station": "station",
         "status": "status",
         "status_desc": "Zeigt den aktuellen Serverstatus an",
