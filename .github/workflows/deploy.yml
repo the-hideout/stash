@@ -23,18 +23,17 @@ jobs:
         if: ${{ steps.deployment-check.outputs.continue == 'true' }} # only run if the Action returned 'true' for the 'continue' output
         uses: actions/checkout@v3.5.0
 
-      - name: cache node modules
-        if: ${{ steps.deployment-check.outputs.continue == 'true' }}
-        uses: actions/cache@69d9d449aced6a2ede0bc19182fadc3a0a42d2b0 # pin@v3.2.6
-        env:
-          cache-name: cache-node-modules
+      # check the node version from the .node-version file
+      - name: fetch node version
+        id: node-version
+        run: |
+          version=$(cat .node-version)
+          echo "version=${version}" >> $GITHUB_OUTPUT
+
+      - uses: actions/setup-node@v3.6.0
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+          node-version: ${{ steps.node-version.outputs.version }}
+          cache: 'npm'
 
       - name: install dependencies
         if: ${{ steps.deployment-check.outputs.continue == 'true' }}
