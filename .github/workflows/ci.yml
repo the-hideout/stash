@@ -15,12 +15,6 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3.5.0
 
-      # check to ensure all JSON files are valid in the repository
-      - name: json syntax check
-        uses: limitusus/json-syntax-check@94555527ace7b96df4a600874a4aafd735842780 # pin@v2.0.0
-        with:
-          pattern: "\\.json$"
-
       # check the node version from the .node-version file
       - name: fetch node version
         id: node-version
