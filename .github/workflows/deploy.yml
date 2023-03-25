@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: deployment check
-        uses: github/branch-deploy@v5.1.0
+        uses: github/branch-deploy@v5.1.1
         id: deployment-check
         with:
           merge_deploy_mode: "true" # tells the Action to use the merge commit workflow strategy
@@ -21,7 +21,7 @@ jobs:
 
       - name: checkout
         if: ${{ steps.deployment-check.outputs.continue == 'true' }} # only run if the Action returned 'true' for the 'continue' output
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # pin@v3.3.0
+        uses: actions/checkout@v3.5.0
 
       - name: cache node modules
         if: ${{ steps.deployment-check.outputs.continue == 'true' }}
