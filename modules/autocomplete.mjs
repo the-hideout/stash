@@ -1,4 +1,5 @@
 import gameData from "./game-data.mjs";
+import progress from '../modules/progress-shard.mjs';
 
 const caches = {
     default: async lang => {
@@ -37,7 +38,8 @@ async function autocomplete(interaction) {
     }
 
     const cacheFunction = caches[interaction.commandName] || caches.default;
-    const nameCache = await cacheFunction(interaction.locale);
+    const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+    const nameCache = await cacheFunction(locale);
 
     if (interaction.commandName === 'ammo') {
         return nameCache.filter(name => name.toLowerCase().replace(/\./g, '').includes(searchString.toLowerCase().replace(/\./g, '')));

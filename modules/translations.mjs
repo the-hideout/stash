@@ -66,13 +66,21 @@ export function getCommandLocalizations(key) {
     return localization;
 }
 
-export function getTranslationChoices() {
-    return Object.keys(translationResources).map(langCode => {
+export function getTranslationChoices(options) {
+    const choices = Object.keys(translationResources).map(langCode => {
         return {
             name: langCode,
             value: langCode,
         };
     });
+    if (options && options.none) {
+        choices.push({
+            name: 'None',
+            value: 'none',
+            name_localizations: getCommandLocalizations('none_desc')
+        });
+    }
+    return choices;
 }
 
 export default {

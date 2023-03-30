@@ -310,6 +310,33 @@ function setGuildTraderRestockAlertChannel(guildId, channelId, locale) {
     return userProgress.guilds[guildId];
 }
 
+function setGuildLanguage(guildId, locale) {
+    if (!userProgress.guilds) {
+        userProgress.guilds = {};
+    }
+    if (!userProgress.guilds[guildId]) {
+        userProgress.guilds[guildId] = {
+            restockAlertChannel: false,
+            forceLanguage: false,
+        };
+    }
+    userProgress.guilds[guildId].forceLanguage = locale;
+    return userProgress.guilds[guildId];
+}
+
+function getGuildLanguage(guildId) {
+    if (!userProgress.guilds) {
+        userProgress.guilds = {};
+    }
+    if (!userProgress.guilds[guildId]) {
+        userProgress.guilds[guildId] = {
+            restockAlertChannel: false,
+            forceLanguage: false,
+        };
+    }
+    return userProgress.guilds[guildId].forceLanguage;
+}
+
 const saveToCloudflare = () => {
     if (!cf) return;
     if (process.env.NODE_ENV !== 'production') {
@@ -397,6 +424,8 @@ export default {
     addRestockAlert: addRestockAlert,
     removeRestockAlert: removeRestockAlert,
     setGuildTraderRestockAlertChannel: setGuildTraderRestockAlertChannel,
+    setGuildLanguage: setGuildLanguage,
+    getGuildLanguage: getGuildLanguage,
     async init() {
         if (process.env.NODE_ENV === 'ci') return;
         startRestockAlerts();

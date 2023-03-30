@@ -3,6 +3,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import gameData from '../modules/game-data.mjs';
 import realTimeToTarkovTime from '../modules/time.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
@@ -21,10 +22,11 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
         const mapId = interaction.options.getString('map');
 
-        const mapData = await gameData.maps.getAll(interaction.locale);
+        const mapData = await gameData.maps.getAll(locale);
         const embed = new EmbedBuilder();
 
         const selectedMapData = mapData.find(mapObject => mapObject.id === mapId);

@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import { formatHMS } from '../modules/utils.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
@@ -10,7 +11,8 @@ const defaultFunction = {
         .setNameLocalizations(getCommandLocalizations('uptime'))
         .setDescriptionLocalizations(getCommandLocalizations('uptime_desc')),
     async execute(interaction) {
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
         const embed = new EmbedBuilder();
         embed.setTitle(`${('Stash Uptime')} ⌛`);
 

@@ -3,6 +3,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import gameData from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 import { getTiers } from '../modules/loot-tier.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const bossDetails = [
     {
@@ -60,18 +61,19 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
 
         // Get the boss name from the command interaction
         const bossName = interaction.options.getString('boss');
 
-        const bosses = await gameData.bosses.getAll(interaction.locale);
+        const bosses = await gameData.bosses.getAll(locale);
 
         // Fetch all current map/boss data
-        const maps = await gameData.maps.getAll(interaction.locale);
+        const maps = await gameData.maps.getAll(locale);
 
         // Fetch all items
-        const items = await gameData.items.getAll(interaction.locale);
+        const items = await gameData.items.getAll(locale);
 
         const tiers = await getTiers();
 

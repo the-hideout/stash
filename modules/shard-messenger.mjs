@@ -101,6 +101,12 @@ export const respondToShardMessage = async (message, shard) => {
             if (message.data === 'guildTraderRestockAlertChannel') {
                 response.data = await progress.setGuildTraderRestockAlertChannel(message.guildId, message.channelId, message.locale);
             }
+            if (message.data === 'setGuildLanguage') {
+                response.data = await progress.setGuildLanguage(message.guildId, message.locale);
+            }
+            if (message.data === 'getGuildLanguage') {
+                response.data = await progress.getGuildLanguage(message.guildId);
+            }
             if (message.data === 'gameData') {
                 const functionPath = message.function.split('.');
                 let gameDataFunction = gameData;

@@ -3,6 +3,7 @@ import fs from 'fs';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import { getFixedT, getCommandLocalizations, comT } from '../modules/translations.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const nameLocalizations = {
     'es-ES': comT('help', {lng: 'es-ES'}),
@@ -77,7 +78,8 @@ const defaultFunction = {
         ),
 
     async execute(interaction) {
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
         const embed = new EmbedBuilder();
         const helpCommand = interaction.options.getString('command');
 
@@ -87,8 +89,8 @@ const defaultFunction = {
                 [${t('Come visit us in our server.')}](https://discord.gg/XPAsKGHSzH)
                 ${t('You can learn more about the bot\'s commands by entering:')}`);
             embed.addFields({ 
-                name: `/${comT('help', {lng: interaction.locale})} [${comT('command', {lng: interaction.locale})}]`,
-                value: `${t('Where [command] is one of the following commands:')} \n`+Object.keys(commands).map(comm => comT(comm, {lng: interaction.locale})).join('\n')
+                name: `/${comT('help', {lng: locale})} [${comT('command', {lng: locale})}]`,
+                value: `${t('Where [command] is one of the following commands:')} \n`+Object.keys(commands).map(comm => comT(comm, {lng: locale})).join('\n')
             });
 
             return interaction.reply({ embeds: [embed] });
@@ -96,7 +98,7 @@ const defaultFunction = {
 
         const cmd = commands[helpCommand];
 
-        embed.setTitle(t('Help for /') + comT(helpCommand, {lng: interaction.locale}));
+        embed.setTitle(t('Help for /') + comT(helpCommand, {lng: locale}));
 
         if (!cmd.hasSubcommands) {
             // no subcommands
@@ -110,11 +112,11 @@ const defaultFunction = {
                 }
             }
             if (examples.length > 0) {
-                exampleString = `\n\n${t('Examples')}: \n ${examples.map(ex => comT(ex, {lng: interaction.locale})).join('\n')}`;
+                exampleString = `\n\n${t('Examples')}: \n ${examples.map(ex => comT(ex, {lng: locale})).join('\n')}`;
             }
-            embed.addFields({name: buildSyntax(cmd, interaction.locale), value: comT(`${helpCommand}_desc`, {lng: interaction.locale})+exampleString});
+            embed.addFields({name: buildSyntax(cmd, locale), value: comT(`${helpCommand}_desc`, {lng: locale})+exampleString});
         } else {
-            embed.setDescription(comT(`${helpCommand}_desc`, {lng: interaction.locale}));
+            embed.setDescription(comT(`${helpCommand}_desc`, {lng: locale}));
             for (const subCommand of cmd.options) {
                 let exampleString = '';
                 let examples = [];
@@ -126,11 +128,11 @@ const defaultFunction = {
                     }
                 }
                 if (examples.length > 0) {
-                    exampleString = `\n\n${t('Examples')}: \n ${examples.map(ex => comT(ex, {lng: interaction.locale})).join('\n')}`;
+                    exampleString = `\n\n${t('Examples')}: \n ${examples.map(ex => comT(ex, {lng: locale})).join('\n')}`;
                 }
-                const syntaxes = buildSyntax(cmd, interaction.locale);
+                const syntaxes = buildSyntax(cmd, locale);
                 const syntax = syntaxes[subCommand.name];
-                embed.addFields({name: syntax, value: comT(`${helpCommand}_${subCommand.name}_desc`, {lng: interaction.locale})+exampleString});
+                embed.addFields({name: syntax, value: comT(`${helpCommand}_${subCommand.name}_desc`, {lng: locale})+exampleString});
             }
         }
 

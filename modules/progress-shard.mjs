@@ -122,4 +122,10 @@ export default {
     async setRestockAlertChannel(guildId, channelId, locale) {
         return getParentReply({data: 'guildTraderRestockAlertChannel', guildId: guildId, channelId: channelId, locale: locale});
     },
+    async setServerLanguage(guildId, locale) {
+        return getParentReply({data: 'setGuildLanguage', guildId: guildId, locale: locale});
+    },
+    async getServerLanguage(guildId) {
+        return getParentReply({data: 'getGuildLanguage', guildId: guildId});
+    },
 }

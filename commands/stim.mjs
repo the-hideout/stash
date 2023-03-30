@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 import { getStims } from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const MAX_ITEMS = 2;
 
@@ -21,12 +22,13 @@ const defaultFunction = {
         }),
 
     async execute(interaction) {
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
         await interaction.deferReply();
         // Get the search string from the user invoked command
         let searchString = interaction.options.getString('name');
 
-        const stims = await getStims(interaction.locale);
+        const stims = await getStims(locale);
 
         const matchedStims = stims.filter(item => item.name.toLowerCase().includes(searchString.toLowerCase()));
 
@@ -65,7 +67,7 @@ const defaultFunction = {
             }
             for (const effect of item.properties.stimEffects) {
                 let title = effect.type;
-                if (title === 'Skill') title = `${title}: ${effect.skillName}`;
+                if (effect.skillName) title = `${title}: ${effect.skillName}`;
                 const lines = [];
                 if (effect.value !== 0) {
                     let sign = '+';

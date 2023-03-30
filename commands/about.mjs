@@ -7,6 +7,7 @@ import {
 import got from 'got';
 
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
@@ -16,7 +17,8 @@ const defaultFunction = {
         .setDescriptionLocalizations(getCommandLocalizations('about_desc')),
     async execute(interaction) {
         await interaction.deferReply();
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
         const embed = new EmbedBuilder();
         let data;
 

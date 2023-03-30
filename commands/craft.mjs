@@ -23,7 +23,8 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
-        const t = getFixedT(interaction.locale);
+        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const t = getFixedT(locale);
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
@@ -36,9 +37,9 @@ const defaultFunction = {
         const matchedCrafts = [];
 
         const [items, crafts, stations] = await Promise.all([
-            gameData.items.getAll(interaction.locale),
+            gameData.items.getAll(locale),
             gameData.crafts.getAll(),
-            gameData.hideout.getAll(interaction.locale),
+            gameData.hideout.getAll(locale),
         ]);
 
         const searchedItems = items.filter(item => item.name.toLowerCase().includes(searchString.toLowerCase()));
@@ -121,7 +122,7 @@ const defaultFunction = {
                 }
                 if (isTool) {
                     toolCost += itemCost * req.count;
-                    toolsEmbed.addFields({name: reqItem.name, value: itemCost.toLocaleString(interaction.locale) + "₽ x " + req.count, inline: true});
+                    toolsEmbed.addFields({name: reqItem.name, value: itemCost.toLocaleString(locale) + "₽ x " + req.count, inline: true});
                     if(!toolsEmbed.thumbnail) {
                         toolsEmbed.setThumbnail(reqItem.iconLink);
                     }
@@ -136,13 +137,13 @@ const defaultFunction = {
                 }
                 totalCost += itemCost * quantity;
                 //totalCost += req.item.avg24hPrice * req.count;
-                embed.addFields({name: reqItem.name, value: itemCost.toLocaleString(interaction.locale) + '₽ x ' + quantity, inline: true});
+                embed.addFields({name: reqItem.name, value: itemCost.toLocaleString(locale) + '₽ x ' + quantity, inline: true});
             }
-            embed.addFields({name: t('Total'), value: totalCost.toLocaleString(interaction.locale) + '₽', inline: false});
+            embed.addFields({name: t('Total'), value: totalCost.toLocaleString(locale) + '₽', inline: false});
 
             embeds.push(embed);
             if (toolsEmbed.data.fields?.length > 0) {
-                toolsEmbed.addFields({name: t('Total'), value: toolCost.toLocaleString(interaction.locale) + '₽', inline: false});
+                toolsEmbed.addFields({name: t('Total'), value: toolCost.toLocaleString(locale) + '₽', inline: false});
                 embeds.push(toolsEmbed);
             }
 
