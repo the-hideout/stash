@@ -21,10 +21,10 @@ jobs:
 
       # validate JSON and YAML files
       - name: json-yaml-validate
-        uses: GrantBirki/json-yaml-validate@v1.2.0
+        uses: GrantBirki/json-yaml-validate@v1.3.0
         with:
           comment: "true"
-          json_exclude_regex: ".*\\.example\\.json"
+          exclude_file: ".github/config/exclude.txt"
 
       # check the node version from the .node-version file
       - name: fetch node version
