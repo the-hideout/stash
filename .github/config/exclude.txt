@@ -1,0 +1,4 @@
+# exclude file for the GrantBirki/json-yaml-validate Action's CI step
+
+config.example.json
+config-dev.example.json
