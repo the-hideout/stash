@@ -22,20 +22,20 @@
   "type": "module",
   "dependencies": {
     "@discordjs/rest": "^1.5.0",
-    "@sentry/node": "^7.41.0",
+    "@sentry/node": "^7.46.0",
     "@sentry/tracing": "^7.41.0",
     "ascii-table": "^0.0.9",
     "cheerio": "^1.0.0-rc.12",
     "cron": "^2.2.0",
     "cross-env": "^7.0.3",
-    "discord-api-types": "^0.37.35",
+    "discord-api-types": "^0.37.37",
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
     "got": "^12.6.0",
     "i18next": "^22.4.10",
     "moment": "^2.29.4",
     "nodemon": "^2.0.21",
-    "turndown": "^7.1.1",
+    "turndown": "^7.1.2",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
