@@ -35,7 +35,7 @@
     "i18next": "^22.4.10",
     "moment": "^2.29.4",
     "nodemon": "^2.0.21",
-    "turndown": "^7.1.1",
+    "turndown": "^7.1.2",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
