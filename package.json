@@ -22,7 +22,7 @@
   "type": "module",
   "dependencies": {
     "@discordjs/rest": "^1.5.0",
-    "@sentry/node": "^7.46.0",
+    "@sentry/node": "^7.47.0",
     "@sentry/tracing": "^7.47.0",
     "ascii-table": "^0.0.9",
     "cheerio": "^1.0.0-rc.12",
