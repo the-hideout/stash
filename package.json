@@ -1,6 +1,6 @@
 {
   "name": "stash-discord-bot",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "private": true,
   "description": "The Tarkov.dev's Escape from Tarkov Discord bot",
   "main": "index.mjs",
