@@ -5,3 +5,4 @@ config.json
 cache/*.json
 *.log
 .vscode
+tmp/
