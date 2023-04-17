@@ -26,16 +26,9 @@ jobs:
           comment: "true"
           exclude_file: ".github/config/exclude.txt"
 
-      # check the node version from the .node-version file
-      - name: fetch node version
-        id: node-version
-        run: |
-          version=$(cat .node-version)
-          echo "version=${version}" >> $GITHUB_OUTPUT
-
       - uses: actions/setup-node@v3.6.0
         with:
-          node-version: ${{ steps.node-version.outputs.version }}
+          node-version-file: .node-version
           cache: 'npm'
 
       - name: Install
