@@ -16,9 +16,9 @@ jobs:
     steps:
       # Comment on new PR requests with deployment instructions
       - name: checkout
-        uses: actions/checkout@v3.5.0
+        uses: actions/checkout@v3.5.2
       - name: comment
-        uses: GrantBirki/comment@1e9986de26cf23e6c4350276234c91705c540fef # pin@v2.0.3
+        uses: GrantBirki/comment@60344bb4027deed85442d23f562f2257291f9b5e # pin@v2.0.4
         continue-on-error: true
         with:
           file: .github/new-pr-comment.md
