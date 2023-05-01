@@ -51,7 +51,7 @@ jobs:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
       - name: create sentry release
-        uses: getsentry/action-release@586b62368d564f25d694ce05fcb9cf53de65ac4f # pin@v1.3.1
+        uses: getsentry/action-release@4744f6a65149f441c5f396d5b0877307c0db52c7 # pin@v1.4.1
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: tarkov-dev
