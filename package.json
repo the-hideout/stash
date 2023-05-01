@@ -23,7 +23,7 @@
   "dependencies": {
     "@discordjs/rest": "^1.5.0",
     "@sentry/node": "^7.47.0",
-    "@sentry/tracing": "^7.47.0",
+    "@sentry/tracing": "^7.50.0",
     "ascii-table": "^0.0.9",
     "cheerio": "^1.0.0-rc.12",
     "cron": "^2.3.0",
@@ -32,13 +32,13 @@
     "discord.js": "^14.9.0",
     "dotenv": "^16.0.3",
     "got": "^12.6.0",
-    "i18next": "^22.4.14",
+    "i18next": "^22.4.15",
     "moment": "^2.29.4",
     "nodemon": "^2.0.22",
     "turndown": "^7.1.2",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@railway/cli": "^3.0.22"
+    "@railway/cli": "^3.3.1"
   }
 }
