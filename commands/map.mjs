@@ -26,7 +26,10 @@ const defaultFunction = {
         const t = getFixedT(locale);
         const mapId = interaction.options.getString('map');
 
-        const mapData = await gameData.maps.getAll(locale);
+        const [mapData, itemData] = await Promise.all([
+            gameData.maps.getAll(locale),
+            gameData.items.getAll(locale),
+        ]);
         const embed = new EmbedBuilder();
 
         const selectedMapData = mapData.find(mapObject => mapObject.id === mapId);
@@ -89,6 +92,17 @@ const defaultFunction = {
             { name: `${t('Players')} 👥`, value: displayPlayers, inline: true},
             { name: `${t('Time')} 🕑`, value: displayTime, inline: true},
         );
+        if (selectedMapData.accessKeys.length > 0) {
+            console.log(selectedMapData.accessKeys)
+            const itemNames = itemData.filter(item => selectedMapData.accessKeys.some(access => access.id === item.id)).map(item => item.name);
+            let accessLabel = t('Access item(s)');
+            if (selectedMapData.accessKeysMinPlayerLevel > 0) {
+                accessLabel = t('Access item(s) for level >= {{playerLevel}}', {playerLevel: selectedMapData.accessKeysMinPlayerLevel});
+            }
+            embed.addFields(
+                { name: `${accessLabel} 🔑`, value: itemNames.join('\n') || t('N/A'), inline: true}
+            );  
+        }
         if (bossArray.length > 0) {
             embed.addFields(
                 { name: `${t('Bosses')} 💀`, value: bossArray.join('\n') || t('N/A'), inline: true}

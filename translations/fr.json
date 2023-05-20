@@ -10,6 +10,8 @@
         "{{thingName}} set to {{level}}.": "{{thingName}} mise au niveau {{level}}.",
         "A Dmg": "A Dmg",
         "About": "À propos",
+        "Access item(s)": "Access item(s)",
+        "Access item(s) for level >= {{playerLevel}}": "Access item(s) for level >= {{playerLevel}}",
         "additional results not shown.": "Les résultats additionels ne sont pas montrés.",
         "All hideout stations set to {{level}}.": "Toutes les stations du refuge mises au niveau {{level}}.",
         "All traders set to {{level}}.": "Tous les marchands mis au niveau {{level}}.",

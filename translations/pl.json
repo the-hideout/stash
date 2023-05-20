@@ -10,6 +10,8 @@
         "{{thingName}} set to {{level}}.": "{{thingName}} ustawiono na {{level}}.",
         "A Dmg": "Obr pan",
         "About": "O",
+        "Access item(s)": "Access item(s)",
+        "Access item(s) for level >= {{playerLevel}}": "Access item(s) for level >= {{playerLevel}}",
         "additional results not shown.": "dodatkowe wyniki nie pokazane.",
         "All hideout stations set to {{level}}.": "Wszystkie stacje w kryjówce ustawiono na {{level}}.",
         "All traders set to {{level}}.": "Wszycy handlarze ustawieni na {{level}}.",

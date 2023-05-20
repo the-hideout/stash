@@ -132,6 +132,10 @@ export async function updateMaps() {
             spawnTimeRandom
             spawnTrigger
         }
+        accessKeys {
+            id
+        }
+        accessKeysMinPlayerLevel
     }`;
     const [response, mapImages] = await Promise.all([
         graphqlRequest({ graphql: query }).then(response => response.data),
