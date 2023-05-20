@@ -93,7 +93,6 @@ const defaultFunction = {
             { name: `${t('Time')} 🕑`, value: displayTime, inline: true},
         );
         if (selectedMapData.accessKeys.length > 0) {
-            console.log(selectedMapData.accessKeys)
             const itemNames = itemData.filter(item => selectedMapData.accessKeys.some(access => access.id === item.id)).map(item => item.name);
             let accessLabel = t('Access item(s)');
             if (selectedMapData.accessKeysMinPlayerLevel > 0) {
