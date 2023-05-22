@@ -10,6 +10,8 @@
         "{{thingName}} set to {{level}}.": "{{thingName}} auf {{level}} gesetzt.",
         "A Dmg": "A Dmg",
         "About": "Über",
+        "Access item(s)": "Access item(s)",
+        "Access item(s) for level >= {{playerLevel}}": "Access item(s) for level >= {{playerLevel}}",
         "additional results not shown.": "weitere Resultate nicht angezeigt.",
         "All hideout stations set to {{level}}.": "Alle Unterschlupf Ausbaumöglichkeiten auf {{level}} gesetzt.",
         "All traders set to {{level}}.": "Alle Händler auf {{level}} gesetzt.",

@@ -10,6 +10,8 @@
         "{{thingName}} set to {{level}}.": "{{thingName}} установлен на {{level}} уровень.",
         "A Dmg": "Урон",
         "About": "О",
+        "Access item(s)": "Access item(s)",
+        "Access item(s) for level >= {{playerLevel}}": "Access item(s) for level >= {{playerLevel}}",
         "additional results not shown.": "дополнительные результаты не показаны.",
         "All hideout stations set to {{level}}.": "Все постройки убежища настроены на {{level}}.",
         "All traders set to {{level}}.": "Все продавцы настроены на {{level}} уровень.",
