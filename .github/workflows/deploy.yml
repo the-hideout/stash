@@ -22,8 +22,8 @@ jobs:
           merge_deploy_mode: "true" # tells the Action to use the merge commit workflow strategy
           environment: production
 
+      # always run checkout because the 'release (sentry)' step needs the code
       - name: checkout
-        if: ${{ steps.deployment-check.outputs.continue == 'true' }} # only run if the Action returned 'true' for the 'continue' output
         uses: actions/checkout@v3.5.2
 
       - uses: actions/setup-node@v3.6.0
