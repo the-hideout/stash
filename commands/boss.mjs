@@ -148,7 +148,9 @@ const defaultFunction = {
         let description = `💡 **${t('About')}:**\n`;
         description += `${details}\n\n`;
         description += `• 💚 **${t('Health')}:** ${health}\n`;
-        description += `• 💎 **${t('Special Loot')}:** ${loot}\n`;
+        if (loot) {
+            description += `• 💎 **${t('Special Loot')}:** ${loot}\n`;
+        }
 
         embed.setDescription(description);
 
