@@ -39,6 +39,6 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@railway/cli": "^3.3.1"
+    "@railway/cli": "^3.4.0"
   }
 }
