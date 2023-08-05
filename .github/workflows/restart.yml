@@ -1,0 +1,32 @@
+name: restart
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *' # runs every 6 hours at minute 0
+
+permissions:
+  contents: read
+
+jobs:
+  restart:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3.5.3
+
+      - uses: actions/setup-node@v3.6.0
+        with:
+          node-version-file: .node-version
+          cache: 'npm'
+
+      - name: install dependencies
+        run: npm install
+
+      # This command effectively restarts the app
+      - name: deploy to railway
+        run: npm run deploy
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
