@@ -21,7 +21,7 @@
   },
   "type": "module",
   "dependencies": {
-    "@discordjs/rest": "^1.7.1",
+    "@discordjs/rest": "^2.0.0",
     "@sentry/node": "^7.50.0",
     "@sentry/tracing": "^7.61.0",
     "ascii-table": "^0.0.9",
