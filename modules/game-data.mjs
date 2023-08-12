@@ -284,10 +284,10 @@ export async function updateBosses() {
     gameData.bosses = response.bosses.map(boss => {
         return {
             ...boss,
-            health: boss.health.reduce((total, healthPart) => {
+            health: boss.health ? boss.health.reduce((total, healthPart) => {
                 total += healthPart.max;
                 return total;
-            },0),
+            },0) : 0,
         }
     });
 
