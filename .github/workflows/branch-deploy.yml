@@ -21,15 +21,16 @@ jobs:
     steps:
       - name: branch-deploy
         id: branch-deploy
-        uses: github/branch-deploy@v7.3.0
+        uses: github/branch-deploy@v7.4.0
         with:
           admins: the-hideout/core-contributors
           admins_pat: ${{ secrets.BRANCH_DEPLOY_ADMINS_PAT }}
           environment_targets: production
+          sticky_locks: "true"
 
       - name: checkout
         if: steps.branch-deploy.outputs.continue == 'true'
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3.6.0
         with:
           ref: ${{ steps.branch-deploy.outputs.ref }}
 
