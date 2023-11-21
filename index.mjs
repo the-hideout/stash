@@ -7,6 +7,7 @@ import { ShardingManager } from 'discord.js';
 import progress from './modules/progress.mjs';
 import gameData from './modules/game-data.mjs';
 import { initShardMessenger, respondToShardMessage } from './modules/shard-messenger.mjs';
+import sendWebhook from './modules/webhook.mjs';
 
 const manager = new ShardingManager('./bot.mjs', { token: process.env.DISCORD_API_TOKEN });
 let healthcheckJob = false;
@@ -105,3 +106,6 @@ gameData.updateAll().then(() => {
     });
 });
 
+process.on('uncaughtException', (error) => {
+    sendWebhook({title: 'Uncaught Exception in Stash Bot', message: error.stack});
+}); 
