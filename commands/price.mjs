@@ -14,14 +14,14 @@ const defaultFunction = {
         .setDescription('Get an item\'s flea and trader value')
         .setNameLocalizations(getCommandLocalizations('price'))
         .setDescriptionLocalizations(getCommandLocalizations('price_desc'))
-        .addStringOption(option => {
-            return option.setName('name')
-                .setDescription('Item name to search for')
-                .setNameLocalizations(getCommandLocalizations('name'))
-                .setDescriptionLocalizations(getCommandLocalizations('name_search_desc'))
-                .setAutocomplete(true)
-                .setRequired(true);
-        }),
+        .addStringOption(option => option
+            .setName('name')
+            .setDescription('Item name to search for')
+            .setNameLocalizations(getCommandLocalizations('name'))
+            .setDescriptionLocalizations(getCommandLocalizations('name_search_desc'))
+            .setAutocomplete(true)
+            .setRequired(true)
+        ),
 
     async execute(interaction) {
         await interaction.deferReply();

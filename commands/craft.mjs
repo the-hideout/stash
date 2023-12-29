@@ -12,14 +12,14 @@ const defaultFunction = {
         .setDescription('Find crafts with a specific item')
         .setNameLocalizations(getCommandLocalizations('craft'))
         .setDescriptionLocalizations(getCommandLocalizations('craft_desc'))
-        .addStringOption(option => {
-            return option.setName('name')
-                .setDescription('Item name to search for')
-                .setNameLocalizations(getCommandLocalizations('name'))
-                .setDescriptionLocalizations(getCommandLocalizations('name_search_desc'))
-                .setAutocomplete(true)
-                .setRequired(true);
-        }),
+        .addStringOption(option => option
+            .setName('name')
+            .setDescription('Item name to search for')
+            .setNameLocalizations(getCommandLocalizations('name'))
+            .setDescriptionLocalizations(getCommandLocalizations('name_search_desc'))
+            .setAutocomplete(true)
+            .setRequired(true)
+        ),
 
     async execute(interaction) {
         await interaction.deferReply();
