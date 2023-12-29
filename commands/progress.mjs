@@ -100,7 +100,24 @@ const subCommands = {
     hideout: async interaction => {
         await interaction.deferReply({ephemeral: true});
         const t = getFixedT(interaction.locale);
-        const stationId = interaction.options.getString('station');
+        const stations = await gameData.hideout.getAll(interaction.locale);
+        let stationId; 
+        const stationName = interaction.options.getString('station').toLowerCase();
+        for (const station of stations) {
+            if (stationName === 'all') {
+                stationId = stationName;
+                break;
+            }
+            if (station.name.toLowerCase() === stationName) {
+                stationId = station.id;
+                break;
+            }
+        }
+        if (!stationId) {
+            return interaction.editReply({
+                content: `❌ ${t('No matching hideout station found.')}`
+            });
+        }
         const level = interaction.options.getInteger('level');
         const prog = await progress.getProgress(interaction.user.id);
         let ttWarn = '';
@@ -108,7 +125,6 @@ const subCommands = {
             ttWarn = '\n'+t('Note: Progress synced via [TarkovTracker](https://tarkovtracker.io/settings/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.');
         }
         if (stationId === 'all') {
-            const stations = await gameData.hideout.getAll();
             for (const station of stations) {
                 let lvl = level;
                 let maxValue = station.levels[station.levels.length-1].level;
@@ -258,7 +274,7 @@ const defaultFunction = {
                 .setNameLocalizations(getCommandLocalizations('station'))
                 .setDescriptionLocalizations(getCommandLocalizations('progress_hideout_station_select_desc'))
                 .setRequired(true)
-                .setChoices(...gameData.hideout.choices({all: true}))
+                .setAutocomplete(true)
             )
             .addIntegerOption(option => option
                 .setName('level')

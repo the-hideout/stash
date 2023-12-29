@@ -1,5 +1,6 @@
 import gameData from "./game-data.mjs";
 import progress from '../modules/progress-shard.mjs';
+import { getCommandLocalizations } from "./translations.mjs";
 
 const caches = {
     default: async lang => {
@@ -26,8 +27,19 @@ const caches = {
     },
     stim: async lang => {
         return gameData.items.getStims(lang).then(items => items.map(item => item.name).sort());
+    },
+    hideout: async lang => {
+        const stations = await gameData.hideout.getAll(lang).then(stations => stations.reduce((all, current) => {
+            all.push(current.name);
+            return all;
+        }, []).sort());
+        const allOption = allLocalizations[lang] || allLocalizations['en-US'];
+        stations.push(allOption);
+        return stations;
     }
 };
+
+const allLocalizations = getCommandLocalizations('all_desc');
 
 async function autocomplete(interaction) {
     let searchString;
@@ -36,12 +48,16 @@ async function autocomplete(interaction) {
     } catch (getError) {
         console.error(getError);
     }
-
-    const cacheFunction = caches[interaction.commandName] || caches.default;
+    let cacheKey = interaction.commandName;
+    if (cacheKey === 'progress' && interaction.options.getSubcommand() === 'hideout') {
+        cacheKey = interaction.options.getSubcommand();
+        searchString = interaction.options.getString('station');
+    }
+    const cacheFunction = caches[cacheKey] || caches.default;
     const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
     const nameCache = await cacheFunction(locale);
 
-    if (interaction.commandName === 'ammo') {
+    if (cacheKey === 'ammo') {
         return nameCache.filter(name => name.toLowerCase().replace(/\./g, '').includes(searchString.toLowerCase().replace(/\./g, '')));
     }
 
