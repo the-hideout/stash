@@ -23,7 +23,7 @@
   "dependencies": {
     "@discordjs/rest": "^2.2.0",
     "@sentry/node": "^7.81.1",
-    "@sentry/tracing": "^7.81.1",
+    "@sentry/tracing": "^7.91.0",
     "ascii-table": "^0.0.9",
     "cheerio": "^1.0.0-rc.12",
     "cron": "^2.4.0",
