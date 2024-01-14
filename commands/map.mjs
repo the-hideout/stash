@@ -53,12 +53,12 @@ const defaultFunction = {
             displayPlayers = selectedMapData.players;
         }
 
-        let mapUrl = false; `https://tarkov.dev/map/${selectedMapData.key}`;
-        if (selectedMapData.key) {
+        let mapUrl = `https://tarkov.dev/map/${selectedMapData.normalizedName}`;
+        /*if (selectedMapData.key) {
             mapUrl = `https://tarkov.dev/map/${selectedMapData.key}`;
         } else if (selectedMapData.wiki) {
             mapUrl = selectedMapData.wiki;
-        }
+        }*/
 
         const bosses = {};
         for (const boss of selectedMapData.bosses) {

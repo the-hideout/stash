@@ -158,7 +158,11 @@ export async function updateMaps() {
                 if (mapImage.normalizedName !== testKey) 
                     continue;
                 
-                let map = mapImage.maps[0];
+                const map = mapImage.maps.find(m => m.projection === '2D');
+
+                if (!map) {
+                    continue;
+                }
 
                 mapData.key = map.key;
                 mapData.source = map.source;
