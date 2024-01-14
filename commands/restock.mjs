@@ -12,7 +12,7 @@ const subCommands = {
         const t = getFixedT(interaction.locale);
         try {
             //let prog = progress.getProgress(interaction.user.id);
-            const traders = await gameData.traders.choices({all: true, blacklist: ['Fence', 'Lightkeeper', 'BTR Driver']});
+            const traders = (await gameData.traders.getAll()).filter(trader => trader.normalizedName !== 'lightkeeper' && trader.normalizedName !== 'btr-driver');
             const embed = new EmbedBuilder();
             embed.setTitle(`${t('Trader restocks')} 🛒`);
             //embed.setDescription(``);
@@ -37,7 +37,7 @@ const subCommands = {
     alert: async interaction => {
         await interaction.deferReply({ephemeral: true});
         const t = getFixedT(interaction.locale);
-        const traders = await gameData.traders.choices({all: true, blacklist: ['Fence', 'Lightkeeper', 'BTR Driver']});
+        const traders = await gameData.traders.getAll();
         let traderId = interaction.options.getString('trader');
         const sendAlert = interaction.options.getBoolean('send_alert');
         let forWho = t('all traders');
@@ -118,7 +118,7 @@ const defaultFunction = {
                 .setNameLocalizations(getCommandLocalizations('trader'))
                 .setDescriptionLocalizations(getCommandLocalizations('trader_desc'))
                 .setRequired(true)
-                .setChoices(...gameData.traders.choices({all: true, blacklist: ['Fence', 'Lightkeeper']}))
+                .setChoices(...gameData.traders.choices({all: true, blacklist: ['Fence', 'Lightkeeper', 'BTR Driver']}))
             )
             .addBooleanOption(option => option
                 .setName('send_alert')
@@ -133,7 +133,7 @@ const defaultFunction = {
             .setDescription('Announce trader restocks in a Discord channel')
             .setNameLocalizations(getCommandLocalizations('channel'))
             .setDescriptionLocalizations(getCommandLocalizations('restock_channel_desc'))
-            .addChannelOption(option => 
+            .addChannelOption(option =>
                 option.setName('channel')
                 .setDescription('The channel on this server in which to make announcements')
                 .setNameLocalizations(getCommandLocalizations('channel'))
