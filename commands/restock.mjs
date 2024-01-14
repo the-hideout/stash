@@ -12,7 +12,7 @@ const subCommands = {
         const t = getFixedT(interaction.locale);
         try {
             //let prog = progress.getProgress(interaction.user.id);
-            const traders = await gameData.traders.getAll();
+            const traders = await gameData.traders.choices({all: true, blacklist: ['Fence', 'Lightkeeper', 'BTR Driver']});
             const embed = new EmbedBuilder();
             embed.setTitle(`${t('Trader restocks')} 🛒`);
             //embed.setDescription(``);
@@ -37,7 +37,7 @@ const subCommands = {
     alert: async interaction => {
         await interaction.deferReply({ephemeral: true});
         const t = getFixedT(interaction.locale);
-        const traders = await gameData.traders.getAll();
+        const traders = await gameData.traders.choices({all: true, blacklist: ['Fence', 'Lightkeeper', 'BTR Driver']});
         let traderId = interaction.options.getString('trader');
         const sendAlert = interaction.options.getBoolean('send_alert');
         let forWho = t('all traders');
