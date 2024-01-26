@@ -102,6 +102,8 @@
         "Spawn Locations": "Spawn Locations",
         "Special Loot": "Special Loot",
         "Stash - An Escape from Tarkov Discord bot!": "Stash - An Escape from Tarkov Discord bot!",
+        "Stash bot does not have access to #{{channelName}}.": "Stash bot does not have access to #{{channelName}}.",
+        "Stash bot does not have permission to send messages in #{{channelName}}.": "Stash bot does not have permission to send messages in #{{channelName}}.",
         "Stash Invite Link": "Stash Invite Link",
         "Stash Uptime": "Stash Uptime",
         "TarkovTracker account unlinked.": "TarkovTracker account unlinked.",
