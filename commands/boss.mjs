@@ -107,7 +107,7 @@ const defaultFunction = {
         });
 
         let loot = Object.values(allLoot).filter(item => {
-            if (item.types.includes('noFlea')) {
+            if (item.types.includes('noFlea') && !item.types.includes('ammoBox') && !item.types.includes('ammo') && !item.normalizedName.includes('christmas-tree-ornament')) {
                 return true;
             }
         });
