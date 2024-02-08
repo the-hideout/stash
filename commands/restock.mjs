@@ -87,6 +87,18 @@ const subCommands = {
                 content: `✅ ${t('Restock alert channel disabled for this server.')}`
             });
         }
+        const botMember = channel.members.find(user => user.id === interaction.client.user.id);
+        if (!botMember) {
+            return interaction.editReply({
+                content: `❌ ${t('Stash bot does not have access to #{{channelName}}.', {channelName: channel.name})}`,
+            });
+        }
+        const hasSendMessagesPermission = botMember.permissionsIn(channel) & PermissionFlagsBits.SendMessages;
+        if (!hasSendMessagesPermission) {
+            return interaction.editReply({
+                content: `❌ ${t('Stash bot does not have permission to send messages in #{{channelName}}.', {channelName: channel.name})}`,
+            });
+        }
         const locale = interaction.options.getString('locale') || 'en';
         await progress.setRestockAlertChannel(interaction.guildId, channel?.id, locale);
         return interaction.editReply({
