@@ -17,7 +17,7 @@
     "start": "node index.mjs",
     "dev": "cross-env NODE_ENV=development NEW_RELIC_ENABLED=false nodemon --ignore cache/ -r dotenv/config index.mjs",
     "dev-commands": "cross-env NODE_ENV=ci node deploy-commands-dev.mjs",
-    "deploy": "railway up"
+    "deploy": "railway up --service stash"
   },
   "type": "module",
   "dependencies": {
