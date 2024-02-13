@@ -15,6 +15,7 @@ const gameData = {
     crafts: false,
     items: false,
     itemNames: {},
+    tasks: {},
     flea: false,
     skills: [
         {
@@ -852,6 +853,52 @@ export async function getStims(lang = 'en') {
     });
 }
 
+export async function updateTasks() {
+    const taskQueries = [];
+    for (const langCode of gameData.languages) {
+        taskQueries.push(`${langCode}: tasks(lang: ${langCode}) {
+            ...TaskFields
+        }`);
+    }
+    const query = `query StashTasks {
+        ${taskQueries.join('\n')}
+    }
+    fragment TaskFields on Task {
+        id
+        name
+        normalizedName
+        taskImageLink
+        objectives {
+            id
+            description
+        }
+        trader {
+            id
+        }
+        minPlayerLevel
+        wikiLink
+    }`;
+    const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+
+    for (const lang in response) {
+        gameData.tasks[lang] = response[lang];
+    }
+
+    eventEmitter.emit('updatedTasks');
+    return gameData.tasks;
+};
+
+export async function getTasks(lang = 'en') {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'tasks.getAll', args: lang});
+    }
+    lang = validateLanguage(lang);
+    if (gameData.tasks[lang]) {
+        return gameData.tasks[lang];
+    }
+    return updateTasks().then(ts => ts[lang]);
+};
+
 export async function updateAll(rejectOnError = false) {
     try {
         await updateLanguages();
@@ -869,6 +916,7 @@ export async function updateAll(rejectOnError = false) {
         updateTraders(),
         updateHideout(),
         updateItems(),
+        updateTasks(),
     ]).then(results => {
         const taskNames = [
             'barters',
@@ -878,6 +926,7 @@ export async function updateAll(rejectOnError = false) {
             'traders',
             'hideout',
             'items',
+            'tasks',
         ];
         let reject = false;
         results.forEach((result, index) => {
@@ -1016,6 +1065,16 @@ export default {
         },
         getAmmo: getAmmo,
         getStims: getStims,
+    },
+    tasks: {
+        getAll: getTasks,
+        get: async (id, lang = 'en') => {
+            if (process.env.IS_SHARD) {
+                return getParentReply({data: 'gameData', function: 'tasks.get', args: [id, lang]});
+            }
+            const tasks = await getTasks(lang);
+            return tasks.find(task => task.id === id);
+        },
     },
     events: eventEmitter,
     updateAll: updateAll,
