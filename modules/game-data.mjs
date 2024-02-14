@@ -423,6 +423,8 @@ export async function updateHideout() {
         id
         tarkovDataId
         name
+        normalizedName
+        imageLink
         levels {
             id
             tarkovDataId

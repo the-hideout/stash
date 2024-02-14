@@ -81,13 +81,19 @@ const defaultFunction = {
                 title += " (" + craft.rewardItems[0].count + ")";
             }
 
+            embed.setTitle(title);
+            embed.setURL(rewardItem.link);
+
             const measuredTime = new Date(null);
             let timeDiscount = prog.skills['crafting']*0.0075*craft.duration;
             measuredTime.setSeconds(craft.duration - timeDiscount);
             const locked = prog.hideout[craft.station.id] < craft.level ? '🔒' : '';
-            title += `\n${stations.find(st => st.id === craft.station.id).name} ${t('level')} ${craft.level} (${measuredTime.toISOString().substr(11, 8)})${locked}`;
-            embed.setTitle(title);
-            embed.setURL(`${rewardItem.link}#${i}`);
+            const station = stations.find(st => st.id === craft.station.id);
+            embed.setAuthor({
+                name: `${station.name} ${t('level')} ${craft.level} (${measuredTime.toISOString().substr(11, 8)})${locked}`,
+                iconURL: station.imageLink,
+                url: `https://tarkov.dev/hideout-profit/?all=true&station=${station.normalizedName}&search=${encodeURIComponent(rewardItem.name)}`,
+            });
 
             if (rewardItem.iconLink) {
                 embed.setThumbnail(rewardItem.iconLink);
