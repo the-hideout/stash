@@ -55,19 +55,24 @@ const defaultFunction = {
         if (task.taskImageLink) {
             embed.setImage(task.taskImageLink);
         }
+        embed.setAuthor({
+            name: trader.name,
+            iconURL: trader.imageLink,
+            url: `https://tarkov.dev/trader/${trader.normalizedName}`,
+        });
         embed.setURL(`https://tarkov.dev/task/${task.normalizedName}`);
+        const descriptionParts = [`[${t('Wiki Link')}](${task.wikiLink})`];
+        if (task.minPlayerLevel) {
+            descriptionParts.push(`${t('Minimum Level')}: ${task.minPlayerLevel}`);
+        }
+        embed.setDescription(descriptionParts.join('\n'));
+        
         embed.addFields(
-            { name: t('Trader'), value: trader.name, inline: true },
-            { name: t('Minimum Level'), value: task.minPlayerLevel ? `${task.minPlayerLevel}` : '1', inline: true },
             { name: t('Objectives'), value: task.objectives.map(obj => obj.description).join('\n'), inline: false },
         );
 
-        const wikiEmbed = new EmbedBuilder();
-        wikiEmbed.setTitle('Wiki Link');
-        wikiEmbed.setURL(task.wikiLink);
-
         return interaction.editReply({
-            embeds: [embed, wikiEmbed],
+            embeds: [embed],
         });
     },
     examples: [

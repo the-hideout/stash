@@ -364,6 +364,7 @@ export async function updateTraders() {
         normalizedName
         resetTime
         discount
+        imageLink
         levels {
             id
             level
