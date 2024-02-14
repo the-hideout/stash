@@ -80,13 +80,13 @@ const defaultFunction = {
 
             //title += `\r\n ${traders.find(tr => tr.id === barter.trader.id).name} ${t('LL')}${barter.level}${locked}`;
             embed.setTitle(title);
-            embed.setURL(`${rewardItem.link}#${i}`);
+            embed.setURL(rewardItem.link);
             const locked = prog.traders[barter.trader.id] < barter.level ? '🔒' : '';
             const trader = traders.find(tr => tr.id === barter.trader.id);
             embed.setAuthor({
                 name: `${trader.name} ${t('LL')}${barter.level}${locked}`,
                 iconURL: trader.imageLink,
-                url: `https://tarkov.dev/barters`,
+                url: `https://tarkov.dev/trader/${trader.normalizedName}`,
             });
 
             if (rewardItem.iconLink) {
