@@ -878,6 +878,15 @@ export async function updateTasks() {
         }
         minPlayerLevel
         wikiLink
+        experience
+        finishRewards {
+            traderStanding {
+                trader {
+                    id
+                }
+                standing
+            }
+        }
     }`;
     const response = await graphqlRequest({ graphql: query }).then(response => response.data);
 

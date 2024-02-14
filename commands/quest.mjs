@@ -71,6 +71,15 @@ const defaultFunction = {
             { name: t('Objectives'), value: task.objectives.map(obj => obj.description).join('\n'), inline: false },
         );
 
+        const footerParts = [`${task.experience} EXP`];
+        for (const repReward of task.finishRewards.traderStanding) {
+            const repTrader = traders.find(t => t.id === repReward.trader.id);
+            const sign = repReward.standing >= 0 ? '+' : '';
+            footerParts.push(`${repTrader.name} ${sign}${repReward.standing}`);
+        }
+
+        embed.setFooter({ text: footerParts.join(' | ') });
+
         return interaction.editReply({
             embeds: [embed],
         });
