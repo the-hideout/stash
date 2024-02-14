@@ -872,6 +872,39 @@ export async function updateTasks() {
         objectives {
             id
             description
+            __typename
+            ...on TaskObjectiveBasic {
+                requiredKeys {
+                    id
+                }
+            }
+            ...on TaskObjectiveItem {
+                count
+                requiredKeys {
+                    id
+                }
+            }
+            ...on TaskObjectivePlayerLevel {
+                playerLevel
+            }
+            ...on TaskObjectiveShoot {
+                count
+            }
+            ...on TaskObjectiveSkill {
+                skillLevel {
+                    name
+                    level
+                }
+            }
+            ...on TaskObjectiveTraderLevel {
+                trader {
+                    id
+                }
+                level
+            }
+            ...on TaskObjectiveUseItem {
+                count
+            }
         }
         trader {
             id

@@ -68,7 +68,7 @@ const defaultFunction = {
         embed.setDescription(descriptionParts.join('\n'));
         
         embed.addFields(
-            { name: t('Objectives'), value: task.objectives.map(obj => obj.description).join('\n'), inline: false },
+            { name: t('Objectives'), value: task.objectives.map(obj => `${obj.description}${obj.count > 1 ? ` (x${obj.count})` : ''}`).join('\n'), inline: false },
         );
 
         const footerParts = [`${task.experience} EXP`];
