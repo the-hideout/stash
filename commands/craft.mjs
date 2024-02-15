@@ -90,7 +90,7 @@ const defaultFunction = {
             const locked = prog.hideout[craft.station.id] < craft.level ? '🔒' : '';
             const station = stations.find(st => st.id === craft.station.id);
             embed.setAuthor({
-                name: `${station.name} ${t('level')} ${craft.level} (${measuredTime.toISOString().substr(11, 8)})${locked}`,
+                name: `${station.name} ${t('level')} ${craft.level} (${measuredTime.toISOString().substring(11, 19)})${locked}`,
                 iconURL: station.imageLink,
                 url: `https://tarkov.dev/hideout-profit/?all=true&station=${station.normalizedName}&search=${encodeURIComponent(rewardItem.name)}`,
             });
