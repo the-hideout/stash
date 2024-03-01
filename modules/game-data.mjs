@@ -15,6 +15,7 @@ const gameData = {
     crafts: false,
     items: false,
     itemNames: {},
+    tasks: {},
     flea: false,
     skills: [
         {
@@ -363,6 +364,7 @@ export async function updateTraders() {
         normalizedName
         resetTime
         discount
+        imageLink
         levels {
             id
             level
@@ -421,6 +423,8 @@ export async function updateHideout() {
         id
         tarkovDataId
         name
+        normalizedName
+        imageLink
         levels {
             id
             tarkovDataId
@@ -852,6 +856,94 @@ export async function getStims(lang = 'en') {
     });
 }
 
+export async function updateTasks() {
+    const taskQueries = [];
+    for (const langCode of gameData.languages) {
+        taskQueries.push(`${langCode}: tasks(lang: ${langCode}) {
+            ...TaskFields
+        }`);
+    }
+    const query = `query StashTasks {
+        ${taskQueries.join('\n')}
+    }
+    fragment TaskFields on Task {
+        id
+        name
+        normalizedName
+        taskImageLink
+        objectives {
+            id
+            description
+            __typename
+            ...on TaskObjectiveBasic {
+                requiredKeys {
+                    id
+                }
+            }
+            ...on TaskObjectiveItem {
+                count
+                requiredKeys {
+                    id
+                }
+            }
+            ...on TaskObjectivePlayerLevel {
+                playerLevel
+            }
+            ...on TaskObjectiveShoot {
+                count
+            }
+            ...on TaskObjectiveSkill {
+                skillLevel {
+                    name
+                    level
+                }
+            }
+            ...on TaskObjectiveTraderLevel {
+                trader {
+                    id
+                }
+                level
+            }
+            ...on TaskObjectiveUseItem {
+                count
+            }
+        }
+        trader {
+            id
+        }
+        minPlayerLevel
+        wikiLink
+        experience
+        finishRewards {
+            traderStanding {
+                trader {
+                    id
+                }
+                standing
+            }
+        }
+    }`;
+    const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+
+    for (const lang in response) {
+        gameData.tasks[lang] = response[lang];
+    }
+
+    eventEmitter.emit('updatedTasks');
+    return gameData.tasks;
+};
+
+export async function getTasks(lang = 'en') {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'tasks.getAll', args: lang});
+    }
+    lang = validateLanguage(lang);
+    if (gameData.tasks[lang]) {
+        return gameData.tasks[lang];
+    }
+    return updateTasks().then(ts => ts[lang]);
+};
+
 export async function updateAll(rejectOnError = false) {
     try {
         await updateLanguages();
@@ -869,6 +961,7 @@ export async function updateAll(rejectOnError = false) {
         updateTraders(),
         updateHideout(),
         updateItems(),
+        updateTasks(),
     ]).then(results => {
         const taskNames = [
             'barters',
@@ -878,6 +971,7 @@ export async function updateAll(rejectOnError = false) {
             'traders',
             'hideout',
             'items',
+            'tasks',
         ];
         let reject = false;
         results.forEach((result, index) => {
@@ -1016,6 +1110,16 @@ export default {
         },
         getAmmo: getAmmo,
         getStims: getStims,
+    },
+    tasks: {
+        getAll: getTasks,
+        get: async (id, lang = 'en') => {
+            if (process.env.IS_SHARD) {
+                return getParentReply({data: 'gameData', function: 'tasks.get', args: [id, lang]});
+            }
+            const tasks = await getTasks(lang);
+            return tasks.find(task => task.id === id);
+        },
     },
     events: eventEmitter,
     updateAll: updateAll,
