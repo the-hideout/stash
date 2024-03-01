@@ -36,7 +36,10 @@ const caches = {
         const allOption = allLocalizations[lang] || allLocalizations['en-US'];
         stations.push(allOption);
         return stations;
-    }
+    },
+    quest: async lang => {
+        return gameData.tasks.getAll(lang).then(tasks => tasks.map(t => t.name).sort());
+    },
 };
 
 const allLocalizations = getCommandLocalizations('all_desc');
