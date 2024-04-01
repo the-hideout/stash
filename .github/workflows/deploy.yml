@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: deployment check
-        uses: github/branch-deploy@v9.1.0
+        uses: github/branch-deploy@v9.1.1
         id: deployment-check
         with:
           merge_deploy_mode: "true" # tells the Action to use the merge commit workflow strategy
@@ -24,7 +24,7 @@ jobs:
 
       # always run checkout because the 'release (sentry)' step needs the code
       - name: checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.2
 
       - uses: actions/setup-node@v4.0.2
         if: ${{ steps.deployment-check.outputs.continue == 'true' }}
