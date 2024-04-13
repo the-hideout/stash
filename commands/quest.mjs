@@ -85,8 +85,8 @@ const defaultFunction = {
         });
     },
     examples: [
-        '/$t(map) Woods',
-        '/$t(map) customs'
+        '/$t(quest) Debut',
+        '/$t(quest) Supplier'
     ]
 };
 

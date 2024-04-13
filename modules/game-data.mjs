@@ -16,6 +16,7 @@ const gameData = {
     items: false,
     itemNames: {},
     tasks: {},
+    playerLevels: [],
     flea: false,
     skills: [
         {
@@ -944,6 +945,29 @@ export async function getTasks(lang = 'en') {
     return updateTasks().then(ts => ts[lang]);
 };
 
+export async function updatePlayerLevels() {
+    const query = `query StashPlayerLevels {
+        playerLevels {
+            level
+            exp
+        }
+    }`;
+    gameData.playerLevels = await graphqlRequest({ graphql: query }).then(response => response.data.playerLevels);
+
+    eventEmitter.emit('updatedTasks');
+    return gameData.playerLevels;
+};
+
+export async function getPlayerLevels() {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'playerLevels.getAll'});
+    }
+    if (gameData.playerLevels.length) {
+        return gameData.playerLevels;
+    }
+    return updatePlayerLevels();
+};
+
 export async function updateAll(rejectOnError = false) {
     try {
         await updateLanguages();
@@ -962,6 +986,7 @@ export async function updateAll(rejectOnError = false) {
         updateHideout(),
         updateItems(),
         updateTasks(),
+        updatePlayerLevels(),
     ]).then(results => {
         const taskNames = [
             'barters',
@@ -972,6 +997,7 @@ export async function updateAll(rejectOnError = false) {
             'hideout',
             'items',
             'tasks',
+            'playerLevels',
         ];
         let reject = false;
         results.forEach((result, index) => {
@@ -1120,6 +1146,9 @@ export default {
             const tasks = await getTasks(lang);
             return tasks.find(task => task.id === id);
         },
+    },
+    playerLevels: {
+        getAll: getPlayerLevels,
     },
     events: eventEmitter,
     updateAll: updateAll,
