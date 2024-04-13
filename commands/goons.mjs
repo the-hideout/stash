@@ -52,7 +52,7 @@ const defaultFunction = {
 			.addComponents(confirm, cancel);
 
         const buttonResponse = await interaction.editReply({
-            content: t(`Are you sure you want to report the Goons on {{mapName}}? You will also submit your discord id# and ip address to guard against false reports.`, {mapName: selectedMap.name}),
+            content: t(`Are you sure you want to report the Goons on {{mapName}}? You will also submit your discord id# to guard against false reports.`, {mapName: selectedMap.name}),
             components: [row],
         });
 

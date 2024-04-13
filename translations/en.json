@@ -18,7 +18,7 @@
         "all traders": "all traders",
         "Ammo Table": "Ammo Table",
         "An error has occurred": "An error has occurred",
-        "Are you sure you want to report the Goons on {{mapName}}? You will also submit your discord id# and ip address to guard against false reports.": "Are you sure you want to report the Goons on {{mapName}}? You will also submit your discord id# and ip address to guard against false reports.",
+        "Are you sure you want to report the Goons on {{mapName}}? You will also submit your discord id# to guard against false reports.": "Are you sure you want to report the Goons on {{mapName}}? You will also submit your discord id# to guard against false reports.",
         "Available Commands": "Available Commands",
         "Barter": "Barter",
         "Bosses": "Bosses",
