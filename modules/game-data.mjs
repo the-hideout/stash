@@ -56,6 +56,7 @@ const choices = {
     boss: [],
     hideout: [],
     map: [],
+    goonsMaps: [],
     skill: gameData.skills.map(skill => {
         return {name: skill.name, value: skill.id, name_localizations: getCommandLocalizations(skill.command_translation_key)};
     }),
@@ -107,6 +108,7 @@ export async function updateMaps() {
         id
         tarkovDataId
         name
+        nameId
         normalizedName
         wiki
         description
@@ -232,6 +234,7 @@ export async function updateMaps() {
     choices.boss = bosses.sort((a, b) => {
         return a.name.localeCompare(b.name);
     });
+    choices.goonsMaps = choices.map.filter(c => gameData.maps.en.some(m => m.id === c.value && m.bosses.some(b => b.normalizedName === 'death-knight')));
 
     return gameData.maps;
 };
@@ -1030,13 +1033,16 @@ const getChoices = (choiceType, options) => {
     ];
 };
 
-export default {
+const gameDataExport = {
     maps: {
         getAll: getMaps,
         update: updateMaps,
         choices: (includeAllOption, options) => {
             return getChoices('map', includeAllOption, options);
-        }
+        },
+        choicesGoons: (includeAllOption, options) => {
+            return getChoices('goonsMaps', includeAllOption, options);
+        },
     },
     bosses: {
         getAll: getBosses,
@@ -1125,3 +1131,5 @@ export default {
     updateAll: updateAll,
     validateLanguage,
 };
+
+export default gameDataExport;

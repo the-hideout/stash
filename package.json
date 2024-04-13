@@ -15,7 +15,7 @@
   "homepage": "https://github.com/the-hideout/stash",
   "scripts": {
     "start": "node index.mjs",
-    "dev": "cross-env NODE_ENV=development NEW_RELIC_ENABLED=false nodemon --ignore cache/ -r dotenv/config index.mjs",
+    "dev": "cross-env NODE_ENV=development nodemon --ignore cache/ -r dotenv/config index.mjs",
     "dev-commands": "cross-env NODE_ENV=ci node deploy-commands-dev.mjs",
     "deploy": "railway up --service stash"
   },
