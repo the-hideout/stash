@@ -131,7 +131,7 @@ export const respondToShardMessage = async (message, shard) => {
         }
         return shard.send(response);
     }
-    if (message.type === 'reportIssue') {
+    if (message.type === 'reportIssue' || message.type === 'commandError') {
         shardingManager.broadcast(message);
     }
     if (message.uuid) {
@@ -151,6 +151,25 @@ export const respondToParentMessage = async (message) => {
                 embed.setDescription(`**Issue Description:**\n${message.details}`);    
                 embed.setFooter({
                     text: `This issue was reported by @${message.user} | ${message.reportLocation}`,
+                });
+                reportingChannel.send({
+                    embeds: [embed],
+                })
+            }
+        }
+        return;
+    }
+    if (message.type === 'commandError') {
+        if (discordClient.guilds.cache.has(process.env.ISSUE_SERVER_ID)) {
+            const server = discordClient.guilds.cache.get(process.env.ISSUE_SERVER_ID);
+            const reportingChannel = server.channels.cache.get(process.env.ISSUE_CHANNEL_ID);
+    
+            if (reportingChannel) {
+                const embed = new EmbedBuilder();
+                embed.setTitle(`Error running /${message.command} command on shard ${message.shard}`);
+                embed.setDescription(message.error);    
+                embed.setFooter({
+                    text: `Command invoked by @${message.user} | ${message.location}`,
                 });
                 reportingChannel.send({
                     embeds: [embed],

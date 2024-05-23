@@ -129,5 +129,13 @@ discordClient.on('interactionCreate', async interaction => {
         } else {
             await interaction.reply(message);
         }
+        discordClient.shard.send({
+            type: 'commandError', 
+            command: interaction.commandName,
+            shard: discordClient.shard.ids[0],
+            error: error.stack,
+            user: interaction.member.user.username,
+            location: interaction.member.guild ? `Server: ${interaction.member.guild.name}` : 'DM',
+        });
     }
 });
