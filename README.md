@@ -94,6 +94,7 @@ Next, you will need to edit the `.env` file and add the appropriate values as se
 DISCORD_API_TOKEN=<value_here>
 ADMIN_ID=<value_here>
 NODE_ENV=development
+WEBHOOK_URL=<discord webhook url for issue reporting and errors>
 ```
 
 The `DISCORD_API_TOKEN` can be found here:

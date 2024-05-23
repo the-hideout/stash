@@ -1,6 +1,7 @@
-import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import sendWebhook from '../modules/webhook.mjs';
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
@@ -19,14 +20,13 @@ const defaultFunction = {
 
     async execute(interaction) {
         const t = getFixedT(interaction.locale);
-        const { client, member } = interaction;
+        const { member } = interaction;
         const details = interaction.options.getString("message");
     
-        client.shard.send({
-            type: 'reportIssue', 
-            details: details,
-            user: member.user.username,
-            reportLocation: member.guild ? `Server: ${member.guild.name}` : 'Reported in a DM',
+        sendWebhook({
+            title: 'New Issue Reported 🐞',
+            message: `**Issue Description:**\n${details}`,
+            footer: `This issue was reported by @${member.user.username} | ${member.guild ? `Server: ${member.guild.name}` : 'Reported in a DM'}`,
         });
         return interaction.reply({
             content: t("Thanks for reporting, we're on it!"),
