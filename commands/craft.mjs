@@ -101,7 +101,7 @@ const defaultFunction = {
 
             for (const req of craft.requiredItems) {
                 const reqItem = items.find(it => it.id === req.item.id);
-                let itemCost = reqItem.avg24hPrice;
+                let itemCost = reqItem.avg24hPrice || 0;
 
                 if (reqItem.lastLowPrice > itemCost && reqItem.lastLowPrice > 0) {
                     itemCost = reqItem.lastLowPrice;

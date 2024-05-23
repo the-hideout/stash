@@ -95,7 +95,7 @@ const defaultFunction = {
 
             for (const req of barter.requiredItems) {
                 const reqItem = items.find(i => i.id === req.item.id);
-                let itemCost = reqItem.avg24hPrice;
+                let itemCost = reqItem.avg24hPrice || 0;
 
                 if (reqItem.lastLowPrice > itemCost && reqItem.lastLowPrice > 0) {
                     itemCost = reqItem.lastLowPrice;
