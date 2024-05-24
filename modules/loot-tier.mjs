@@ -13,7 +13,7 @@ export async function updateTiers(items) {
     // get prices per slot
     const prices = [];
     for (const item of items) {
-        let price = item.avg24hPrice;
+        let price = item.avg24hPrice || 0;
         if (item.lastLowPrice < price && item.lastLowPrice > 0) price = item.lastLowPrice
         for (const traderPrice of item.sellFor) {
             if (traderPrice.vendor.normalizedName === 'flea-market') continue;

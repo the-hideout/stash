@@ -83,7 +83,7 @@ const defaultFunction = {
                 }
             }
 
-            let tierPrice = item.avg24hPrice;
+            let tierPrice = item.avg24hPrice || 0;
             let tierFee = 0;
             let sellTo = t('Flea Market');
             if (item.avg24hPrice > 0) {
@@ -158,7 +158,9 @@ const defaultFunction = {
                 embed.addFields({name: bestTraderName + ` ${t('Value')}`, value: traderVal, inline: true});
             }
 
-            body += `• ${t('Sell to')}: \`${sellTo}\` ${t('for')} \`${tierPrice.toLocaleString(locale) + "₽"}\`\n`;
+            if (tierPrice > 0) {
+                body += `• ${t('Sell to')}: \`${sellTo}\` ${t('for')} \`${tierPrice.toLocaleString(locale) + "₽"}\`\n`;
+            }
 
             // Calculate item tier
             let tier = await lootTier(tierPrice / (item.width * item.height), item.types.includes('noFlea'));
@@ -192,7 +194,7 @@ const defaultFunction = {
 
                 for (const req of barter.requiredItems) {
                     const reqItem = items.find(it => it.id === req.item.id);
-                    let itemCost = reqItem.avg24hPrice;
+                    let itemCost = reqItem.avg24hPrice || 0;
 
                     if (reqItem.lastLowPrice > itemCost && reqItem.lastLowPrice > 0) {
                         itemCost = reqItem.lastLowPrice;
@@ -245,7 +247,7 @@ const defaultFunction = {
 
                 for (const req of craft.requiredItems) {
                     const reqItem = items.find(it => it.id === req.item.id);
-                    let itemCost = reqItem.avg24hPrice;
+                    let itemCost = reqItem.avg24hPrice || 0;
 
                     if (reqItem.lastLowPrice > itemCost && reqItem.lastLowPrice > 0) {
                         itemCost = reqItem.lastLowPrice;

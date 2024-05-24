@@ -10,6 +10,7 @@ import {
 import autocomplete from './modules/autocomplete.mjs';
 //import { updateChoices } from './modules/game-data.mjs';
 import { initShardMessenger, respondToParentMessage } from './modules/shard-messenger.mjs';
+import sendWebhook from './modules/webhook.mjs';
 
 if (process.env.NODE_ENV === 'production') {
     Sentry.init({
@@ -129,5 +130,18 @@ discordClient.on('interactionCreate', async interaction => {
         } else {
             await interaction.reply(message);
         }
+        sendWebhook({
+            title: `Error running /${interaction.commandName} command on shard ${discordClient.shard.ids[0]}`,
+            message: error.stack,
+            footer: `Command invoked by @${interaction.member.user.username} | ${interaction.member.guild ? `Server: ${interaction.member.guild.name}` : 'DM'}`,
+        });
     }
 });
+
+process.on('uncaughtException', async (error) => {
+    try {
+        sendWebhook({title: `Uncaught exception on shard ${discordClient.shard.ids[0]}` , message: error.stack});
+    } catch (error) {
+        console.log('Error sending uncaught exception webhook alert from shard', error.stack);
+    }
+}); 
