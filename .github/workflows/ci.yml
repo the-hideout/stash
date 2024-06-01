@@ -17,11 +17,11 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@v4.1.4
+        uses: actions/checkout@v4.1.6
 
       # validate JSON and YAML files
       - name: json-yaml-validate
-        uses: GrantBirki/json-yaml-validate@v2.7.1
+        uses: GrantBirki/json-yaml-validate@v3.0.0
         with:
           comment: "true"
           exclude_file: ".github/config/exclude.txt"
