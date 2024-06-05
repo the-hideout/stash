@@ -24,7 +24,7 @@ jobs:
 
       # always run checkout because the 'release (sentry)' step needs the code
       - name: checkout
-        uses: actions/checkout@v4.1.4
+        uses: actions/checkout@v4.1.6
 
       - uses: actions/setup-node@v4.0.2
         if: ${{ steps.deployment-check.outputs.continue == 'true' }}
