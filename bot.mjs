@@ -1,6 +1,4 @@
 import fs from 'fs';
-import * as Sentry from "@sentry/node";
-import "@sentry/tracing";
 import {
     Client,
     GatewayIntentBits,
@@ -11,15 +9,6 @@ import autocomplete from './modules/autocomplete.mjs';
 //import { updateChoices } from './modules/game-data.mjs';
 import { initShardMessenger, respondToParentMessage } from './modules/shard-messenger.mjs';
 import sendWebhook from './modules/webhook.mjs';
-
-if (process.env.NODE_ENV === 'production') {
-    Sentry.init({
-        dsn: "https://ed4cc8e31fd6417998db23fb37819bec@o1189140.ingest.sentry.io/6312417",
-        tracesSampleRate: 1.0,
-    });
-} else {
-    console.log(`Bypassing Sentry in ${process.env.NODE_ENV || 'dev'} environment`);
-}
 
 process.env.IS_SHARD = 'true';
 

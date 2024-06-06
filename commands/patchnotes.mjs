@@ -46,7 +46,17 @@ const defaultFunction = {
         const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
         const t = getFixedT(locale);
         
-        const notes = await getPatchNotes();
+        let notes;
+        try {
+            notes = await getPatchNotes();
+        } catch (error) {
+            const embed = new EmbedBuilder();
+            embed.setURL('https://www.escapefromtarkov.com/news?page=1&filter=2');
+            embed.setTitle(`Patch Notes`);
+            //embed.setFooter({text: notes.date});
+            embed.setDescription(t('Due to technical issues, please visit the official EFT website to view the latest patch notes.'));
+            return interaction.editReply({ embeds: [embed] });
+        }
 
         var message;
         if (notes.notes.length >= MAX_EMBED_LENGTH) {
