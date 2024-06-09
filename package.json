@@ -22,8 +22,6 @@
   "type": "module",
   "dependencies": {
     "@discordjs/rest": "^2.3.0",
-    "@sentry/node": "^8.7.0",
-    "@sentry/tracing": "^7.114.0",
     "ascii-table": "^0.0.9",
     "cheerio": "^1.0.0-rc.12",
     "cron": "^2.4.0",
