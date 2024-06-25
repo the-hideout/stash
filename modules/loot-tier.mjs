@@ -1,15 +1,26 @@
 import colors from './colors.js';
 import { getParentReply } from './shard-messenger.mjs';
 
-const tiers = {
+const tiers = {};
+
+const tierDefaults = {
     legendary: 40000,
     great: 25000,
     average: 11000
 };
 
+const gameModes = [
+    'regular',
+    'pve',
+];
+
+for (const gameMode of gameModes) {
+    tiers[gameMode] = tierDefaults;
+}
+
 const arrayAverage = (array) => array.reduce((a, b) => a + b) / array.length;
 
-export async function updateTiers(items) {
+export async function updateTiers(items, gameMode = 'regular') {
     // get prices per slot
     const prices = [];
     for (const item of items) {
@@ -39,26 +50,26 @@ export async function updateTiers(items) {
     // the floor for the great tier is the price midpoint between legendary and average,
     // disregarding digits less than 1000
     let greatFloor = Math.floor((averageFloor + ((legendaryFloor - averageFloor) / 2)) / 1000) * 1000;
-    tiers.legendary = legendaryFloor;
-    tiers.great = greatFloor;
-    tiers.average = averageFloor;
+    tiers[gameMode].legendary = legendaryFloor;
+    tiers[gameMode].great = greatFloor;
+    tiers[gameMode].average = averageFloor;
 }
 
-function getPriceTier(price, noFlea) {
+function getPriceTier(price, noFlea, gameMode = 'regular') {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'getPriceTier', price, noFlea})
+        return getParentReply({data: 'getPriceTier', price, noFlea, gameMode})
     }
     let color, tier_msg;
-    if (price >= tiers.legendary) {
+    if (price >= tiers[gameMode].legendary) {
         color = colors.yellow;
         tier_msg = "⭐ Legendary ⭐";
     } else if (noFlea) {
         color = colors.purple;
         tier_msg = "🟣 Flea Banned";
-    } else if (price >= tiers.great) {
+    } else if (price >= tiers[gameMode].great) {
         color = colors.green;
         tier_msg = "🟢 Great";
-    } else if (price >= tiers.average) {
+    } else if (price >= tiers[gameMode].average) {
         color = colors.blue;
         tier_msg = "🔵 Average";
     } else {
@@ -68,11 +79,11 @@ function getPriceTier(price, noFlea) {
     return { color: color, msg: tier_msg };
 }
 
-export function getTiers() {
+export function getTiers(gameMode = 'regular') {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'getTiers'})
+        return getParentReply({data: 'getTiers', gameMode})
     }
-    return tiers;
+    return tiers[gameMode];
 }
 
 export default getPriceTier;

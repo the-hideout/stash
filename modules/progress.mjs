@@ -21,6 +21,15 @@ let progressLoaded = false;
 
 let userProgress = {};
 
+const gameModes = [
+    'regular',
+    'pve',
+];
+
+for (const gameMode of gameModes) {
+    restockTimers[gameMode] = {};
+}
+
 const usersJsonPath = path.join('./cache', 'users.json');
 
 const defaultProgress = {
@@ -48,9 +57,10 @@ const buildDefaultProgress = id => {
         traders: {},
         skills: {},
         alerts: {
-            restock: []
+            restock: {},
         },
         locale: 'en-US',
+        gameMode: 'regular',
     };
     for (const stationId in defaultProgress.hideout) {
         progress.hideout[stationId] = defaultProgress.hideout[stationId];
@@ -137,7 +147,13 @@ const getUserProgress = id => {
     if (!userProgress[id]) {
         userProgress[id] = buildDefaultProgress(id);
     }
-    if (!userProgress[id].alerts) userProgress[id].alerts = {restock : []};
+    if (!userProgress[id].alerts) userProgress[id].alerts = {restock : {}};
+    if (Array.isArray(userProgress[id].alerts.restock)) {
+        userProgress[id].alerts.restock = {
+            regular: userProgress[id].alerts.restock,
+            pve: [],
+        };
+    }
     return userProgress[id];
 };
 
@@ -215,79 +231,98 @@ const optimalFleaPrice = async (id, baseValue, lowerBound, upperBound) => {
     return highPrice;
 };
 
-const addRestockAlert = async (id, traders, locale) => {
+const addRestockAlert = async (id, traders, locale, gameMode) => {
     await loaded();
     if (typeof traders === 'string') traders = [traders];
     const prog = await getUserProgress(id);
     if (locale) {
         prog.locale = locale;
     }
-    const restockAlerts = prog.alerts.restock;
+    const restockAlerts = prog.alerts.restock[gameMode];
     for (const traderId of traders) {
         if (!restockAlerts.includes(traderId)) restockAlerts.push(traderId);
     }
     return prog.alerts.restock;
 };
 
-const removeRestockAlert = async (id, traders, locale) => {
+const removeRestockAlert = async (id, traders, locale, gameMode) => {
     await loaded();
     if (typeof traders === 'string') traders = [traders];
     const prog = await getUserProgress(id);
     if (locale) {
         prog.locale = locale;
     }
-    prog.alerts.restock = prog.alerts.restock.filter(traderId => !traders.includes(traderId));
-    return prog.alerts.restock;
+    prog.alerts.restock[gameMode] = prog.alerts.restock[gameMode].filter(traderId => !traders.includes(traderId));
+    return prog.alerts.restock[gameMode];
 };
 
 const startRestockAlerts = async () => {
     const setRestockTimers = async () => {
-        const traders = await gameData.traders.getAll();
-        // traders to skip restock timers for
-        const skipTraders = ['fence', 'lightkeeper', 'btr-driver'];
-        for (const trader of traders) {
-            const currentTimer = restockTimers[trader.id];
-            if (currentTimer != trader.resetTime) {
-                //console.log(`Setting new restock timer for ${trader.name} at ${trader.resetTime}`);
-                restockTimers[trader.id] = trader.resetTime;
-                const alertTime = new Date(trader.resetTime) - new Date() - 1000 * 60 * restockAlertMinutes;
-                if (alertTime < 0) continue;
-                if (skipTraders.includes(trader.normalizedName)) continue;
-                setTimeout(async () => {
-                    const restockMessage = '🛒 {{traderName}} restock in {{numMinutes}} minutes 🛒';
-                    const messageVars = {numMinutes: restockAlertMinutes};
-                    for (const userId in userProgress) {
-                        if (!userProgress[userId].alerts) continue;
-                        if (userProgress[userId].alerts.restock.includes(trader.id)) {
-                            const locale = userProgress[userId].locale || 'en';
-                            const t = getFixedT(locale);
-                            messageVars.traderName = (await gameData.traders.get(trader.id, locale)).name;
-                            messageUser(userId, t(restockMessage, messageVars)).catch(error => {
-                                console.log(`Error sending ${trader.name} restock notification to user ${userId}: ${error.message}`);
-                                if (error.message === 'Cannot send messages to this user') {
-                                    console.log(`Disabling restock alerts for user ${userId}`);
-                                    userProgress[userId].alerts.restock = [];
-                                }
-                            });
-                        }
-                    }
-                    if (userProgress.guilds) {
-                        for (const guildId in userProgress.guilds) {
-                            const guildSettings = userProgress.guilds[guildId];
-                            if (!guildSettings.restockAlertChannel) {
-                                continue;
+        for (const gameMode of gameModes) {
+            const traders = await gameData.traders.getAll({gameMode});
+            // traders to skip restock timers for
+            const skipTraders = ['fence', 'lightkeeper', 'btr-driver'];
+            for (const trader of traders) {
+                const currentTimer = restockTimers[gameMode][trader.id];
+                if (currentTimer != trader.resetTime) {
+                    //console.log(`Setting new restock timer for ${trader.name} at ${trader.resetTime}`);
+                    restockTimers[gameMode][trader.id] = trader.resetTime;
+                    const alertTime = new Date(trader.resetTime) - new Date() - 1000 * 60 * restockAlertMinutes;
+                    if (alertTime < 0) continue;
+                    if (skipTraders.includes(trader.normalizedName)) continue;
+                    setTimeout(async () => {
+                        const restockMessage = '🛒 {{traderName}} restock in {{numMinutes}} minutes 🛒 ({{gameMode}})';
+                        const messageVars = {numMinutes: restockAlertMinutes};
+                        for (const userId in userProgress) {
+                            if (!userProgress[userId].alerts) continue;
+                            if (Array.isArray(userProgress[userId].alerts.restock)) {
+                                userProgress[userId].alerts.restock = {
+                                    regular: userProgress[userId].alerts.restock,
+                                    pve: [],
+                                };
                             }
-                            const locale = guildSettings.restockAlertLocale || 'en';
-                            const t = getFixedT(locale);
-                            messageVars.traderName = (await gameData.traders.get(trader.id, locale)).name;
-                            messageChannel(guildId, guildSettings.restockAlertChannel, t(restockMessage, messageVars)).catch(error => {
-                                // only rejects if all shards fail to send the message
-                                console.log(`Error sending ${trader.name} restock notification to channel ${guildId} ${guildSettings.restockAlertChannel}: ${error.message}`);
-                                userProgress.guilds[guildId].restockAlertChannel = false;
-                            });
+                            if (!userProgress[userId].alerts.restock[gameMode]) continue;
+                            if (userProgress[userId].alerts.restock[gameMode].includes(trader.id)) {
+                                const locale = userProgress[userId].locale || 'en';
+                                const t = getFixedT(locale);
+                                const commandT = getFixedT(locale, 'command');
+                                messageVars.gameMode = commandT(`game_mode_${gameMode}`);
+                                messageVars.traderName = (await gameData.traders.get(trader.id, {lang: locale})).name;
+                                messageUser(userId, t(restockMessage, messageVars)).catch(error => {
+                                    console.log(`Error sending ${trader.name} restock notification to user ${userId}: ${error.message}`);
+                                    if (error.message === 'Cannot send messages to this user') {
+                                        console.log(`Disabling restock alerts for user ${userId}`);
+                                        userProgress[userId].alerts.restock = [];
+                                    }
+                                });
+                            }
                         }
-                    }
-                }, alertTime).unref();
+                        if (userProgress.guilds) {
+                            for (const guildId in userProgress.guilds) {
+                                const guildSettings = userProgress.guilds[guildId];
+                                if (typeof guildSettings.restockAlertChannel !== 'object') {
+                                    guildSettings.restockAlertChannel = {
+                                        regular: guildSettings.restockAlertChannel,
+                                        pve: false,
+                                    };
+                                }
+                                if (!guildSettings.restockAlertChannel[gameMode]) {
+                                    continue;
+                                }
+                                const locale = guildSettings.restockAlertLocale || 'en';
+                                const t = getFixedT(locale);
+                                const commandT = getFixedT(locale, 'command');
+                                messageVars.gameMode = commandT(`game_mode_${gameMode}`);
+                                messageVars.traderName = (await gameData.traders.get(trader.id, {lang: locale})).name;
+                                messageChannel(guildId, guildSettings.restockAlertChannel[gameMode], t(restockMessage, messageVars)).catch(error => {
+                                    // only rejects if all shards fail to send the message
+                                    console.log(`Error sending ${trader.name} restock notification to channel ${guildId} ${guildSettings.restockAlertChannel}: ${error.message}`);
+                                    userProgress.guilds[guildId].restockAlertChannel[gameMode] = false;
+                                });
+                            }
+                        }
+                    }, alertTime).unref();
+                }
             }
         }
     };
@@ -296,16 +331,25 @@ const startRestockAlerts = async () => {
     setRestockTimers();
 };
 
-function setGuildTraderRestockAlertChannel(guildId, channelId, locale) {
+function setGuildTraderRestockAlertChannel(guildId, channelId, locale, gameMode = 'regular') {
     if (!userProgress.guilds) {
         userProgress.guilds = {};
     }
     if (!userProgress.guilds[guildId]) {
         userProgress.guilds[guildId] = {
-            restockAlertChannel: false,
+            restockAlertChannel: {
+                regular: [],
+                pve: [],
+            },
         };
     }
-    userProgress.guilds[guildId].restockAlertChannel = channelId;
+    if (typeof userProgress.guilds[guildId].restockAlertChannel !== 'object') {
+        userProgress.guilds[guildId].restockAlertChannel = {
+            regular: userProgress.guilds[guildId].restockAlertChannel,
+            pve: [],
+        };
+    }
+    userProgress.guilds[guildId].restockAlertChannel[gameMode] = channelId;
     userProgress.guilds[guildId].restockAlertLocale = locale;
     return userProgress.guilds[guildId];
 }
@@ -316,7 +360,10 @@ function setGuildLanguage(guildId, locale) {
     }
     if (!userProgress.guilds[guildId]) {
         userProgress.guilds[guildId] = {
-            restockAlertChannel: false,
+            restockAlertChannel: {
+                regular: [],
+                pve: [],
+            },
             forceLanguage: false,
         };
     }
@@ -330,7 +377,10 @@ function getGuildLanguage(guildId) {
     }
     if (!userProgress.guilds[guildId]) {
         userProgress.guilds[guildId] = {
-            restockAlertChannel: false,
+            restockAlertChannel: {
+                regular: [],
+                pve: [],
+            },
             forceLanguage: false,
         };
     }
@@ -416,13 +466,23 @@ export default {
     getOptimalFleaPrice(id, baseValue) {
         return optimalFleaPrice(id, baseValue);
     },
-    async getRestockAlerts(id) {
+    async getRestockAlerts(id, gameMode) {
         const prog = getSafeProgress(id);
-        if (!prog.alerts) prog.alerts = {restock: []};
+        if (!prog.alerts) prog.alerts = {restock: {regular: [], pve: []}};
         return prog.alerts.restock;
     },
     addRestockAlert: addRestockAlert,
     removeRestockAlert: removeRestockAlert,
+    getGameMode: async (id) => {
+        await loaded();
+        const prog = getUserProgress(id);
+        return prog?.gameMode || 'regular';
+    },
+    setGameMode: async (id, gameMode) => {
+        await loaded();
+        const prog = getUserProgress(id);
+        return prog.gameMode = gameMode;
+    },
     setGuildTraderRestockAlertChannel: setGuildTraderRestockAlertChannel,
     setGuildLanguage: setGuildLanguage,
     getGuildLanguage: getGuildLanguage,
