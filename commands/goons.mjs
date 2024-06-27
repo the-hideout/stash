@@ -22,8 +22,8 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply({ephemeral: true});
-        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
-        const t = getFixedT(locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
         const mapId = interaction.options.getString('map');
 
         if (!mapId) {
@@ -35,7 +35,7 @@ const defaultFunction = {
             });
         }
 
-        const mapData = await gameData.maps.getAll(locale);
+        const mapData = await gameData.maps.getAll(lang);
         const selectedMap = mapData.find(m => m.id === mapId);
 
         const confirm = new ButtonBuilder()
@@ -77,6 +77,7 @@ const defaultFunction = {
                     map: selectedMap.nameId,
                     timestamp: new Date().getTime(),
                     accountId: parseInt(interaction.user.id.slice(-10)),
+                    gameMode: gameMode,
                 },
             }).json();
 
