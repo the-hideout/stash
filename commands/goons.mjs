@@ -1,5 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import got from 'got';
+import moment from 'moment/min/moment-with-locales.js';
 
 import gameData from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
@@ -24,14 +25,40 @@ const defaultFunction = {
         await interaction.deferReply({ephemeral: true});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
         const mapId = interaction.options.getString('map');
 
         if (!mapId) {
-            const locationEmbed = new EmbedBuilder();
-            locationEmbed.setTitle('Coming soon(?)');
-            locationEmbed.setDescription('Once we start getting a sufficient number of reports, we will be able to provide location');
+            const [maps, bosses, reports] = await Promise.all([
+                gameData.maps.getAll({lang, gameMode}),
+                gameData.bosses.getAll({lang, gameMode}),
+                gameData.goonReports.get({gameMode})
+            ]);
+            const reportsEmbed = new EmbedBuilder();
+            const goons = bosses.find(b => b.normalizedName === 'death-knight');
+            if (goons) {
+                reportsEmbed.setThumbnail(goons.imagePortraitLink);
+            }
+            const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+            let embedTitle = t('No Recent Goons Reports');
+            let embedDescription = t('When users submit reports, they will appear here');
+            if (reports.length > 1) {
+                embedTitle = t('Latest Goon Reports');
+                embedDescription = `\`${reports.map(report => {
+                    const map = maps.find(m => m.id === report.map.id);
+                    if (!map) {
+                        return false;
+                    }
+                    const reportDate = new Date(parseInt(report.timestamp));
+                    moment.locale(lang);
+                    return `${map.name}: ${moment(reportDate).fromNow()}`;
+                }).filter(Boolean).join('\n')}\``;
+            }
+            reportsEmbed.setTitle(embedTitle);
+            reportsEmbed.setDescription(embedDescription);
+            reportsEmbed.setFooter({ text: gameModeLabel});
             return interaction.editReply({
-                embeds: [locationEmbed],
+                embeds: [reportsEmbed],
             });
         }
 

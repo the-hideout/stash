@@ -37,6 +37,7 @@ const gameData = {
     itemNames: {},
     tasks: {},
     flea: {},
+    goonReports: {},
     skills: [
         {
             id: 'hideoutManagement',
@@ -504,7 +505,7 @@ export async function getFlea(options = defaultOptions) {
 export async function updateFlea() {
     for (const gameMode of gameModes) {
         const query = `query StashFleaMarket {
-            fleaMarket {
+            fleaMarket(gameMode: ${gameMode}) {
                 minPlayerLevel
                 enabled
                 sellOfferFeeRate
@@ -962,6 +963,31 @@ export async function getTasks(options = defaultOptions) {
     return updateTasks().then(ts => ts[gameMode][lang]);
 };
 
+export async function updateGoonReports() {
+    for (const gameMode of gameModes) {
+        const query = `query StashGoonReports {
+            goonReports(gameMode: ${gameMode}) {
+                map {
+                    id
+                }
+                timestamp
+            }
+        }`;
+        const response = await graphqlRequest({ graphql: query });
+        gameData.goonReports[gameMode] = response.data.goonReports;
+    }
+    
+    return gameData.goonReports;
+}
+
+export async function getGoonReports(options = defaultOptions) {
+    const { gameMode } = mergeOptions(options);
+    if (gameData.goonReports[gameMode]) {
+        return gameData.goonReports[gameMode];
+    }
+    return updateGoonReports().then(goonReports => goonReports[gameMode]);
+}
+
 export async function updateAll(rejectOnError = false) {
     try {
         await updateLanguages();
@@ -980,6 +1006,7 @@ export async function updateAll(rejectOnError = false) {
         updateHideout(),
         updateItems(),
         updateTasks(),
+        updateGoonReports(),
     ]).then(results => {
         const taskNames = [
             'barters',
@@ -990,6 +1017,7 @@ export async function updateAll(rejectOnError = false) {
             'hideout',
             'items',
             'tasks',
+            'goonReports',
         ];
         let reject = false;
         results.forEach((result, index) => {
@@ -1113,6 +1141,15 @@ const gameDataExport = {
     flea: {
         get: getFlea,
         update: updateFlea
+    },
+    goonReports: {
+        get: async (options) => {
+            if (process.env.IS_SHARD) {
+                return getParentReply({data: 'gameData', function: 'goonReports.get', args: [options]});
+            }
+            return getGoonReports(options);
+        },
+        update: updateGoonReports,
     },
     gameModes: {
         choices: () => {
