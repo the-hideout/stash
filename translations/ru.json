@@ -5,7 +5,7 @@
         "🟢 Great": "🟢 Лучший",
         "⭐ Legendary ⭐": "⭐ Легендарный ⭐",
         "🔴 Poor": "🔴 Плохой",
-        "🛒 {{traderName}} restock in {{numMinutes}} minutes 🛒": "🛒 {{traderName}} пополнит запасы через {{numMinutes}} минуты 🛒",
+        "🛒 {{traderName}} restock in {{numMinutes}} minutes 🛒 ({{gameMode}})": "🛒 {{traderName}} пополнит запасы через {{numMinutes}} минуты 🛒 ({{gameMode}})",
         "❌ ERROR ❌": "❌ ERROR ❌",
         "{{thingName}} set to {{level}}.": "{{thingName}} установлен на {{level}} уровень.",
         "A Dmg": "Урон",

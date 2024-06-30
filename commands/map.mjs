@@ -22,13 +22,15 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
-        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
-        const t = getFixedT(locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
         const mapId = interaction.options.getString('map');
 
         const [mapData, itemData] = await Promise.all([
-            gameData.maps.getAll(locale),
-            gameData.items.getAll(locale),
+            gameData.maps.getAll({lang, gameMode}),
+            gameData.items.getAll({lang, gameMode}),
         ]);
         const embed = new EmbedBuilder();
 
@@ -113,7 +115,9 @@ const defaultFunction = {
 
         // If the map was made by a contributor, give them credit
         if (selectedMapData.source) {
-            embed.setFooter({ text: t('Map made by {{author}}', {author: selectedMapData.source})});
+            embed.setFooter({ text: `${t('Map made by {{author}}', {author: selectedMapData.source})} | ${gameModeLabel}`});
+        } else {
+            embed.setFooter({ text: gameModeLabel});
         }
 
         return interaction.editReply({

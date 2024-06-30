@@ -9,22 +9,25 @@ import { getFixedT, getCommandLocalizations, getTranslationChoices } from '../mo
 const subCommands = {
     show: async interaction => {
         await interaction.deferReply({ephemeral: true});
-        const t = getFixedT(interaction.locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
         try {
             //let prog = progress.getProgress(interaction.user.id);
-            const traders = (await gameData.traders.getAll()).filter(trader => trader.normalizedName !== 'lightkeeper' && trader.normalizedName !== 'btr-driver');
+            const traders = (await gameData.traders.getAll({lang, gameMode})).filter(trader => trader.normalizedName !== 'lightkeeper' && trader.normalizedName !== 'btr-driver');
             const embed = new EmbedBuilder();
             embed.setTitle(`${t('Trader restocks')} 🛒`);
             //embed.setDescription(``);
-            moment.locale(interaction.locale);
+            moment.locale(lang);
             for (const trader of traders) {
                 embed.addFields({name: trader.name, value: moment(trader.resetTime).fromNow(), inline: true});
             }
-            const alertsFor = await progress.getRestockAlerts(interaction.user.id);
+            const alertsFor = await progress.getRestockAlerts(interaction.user.id, gameMode);
             if (alertsFor.length > 0) {
                 embed.setFooter({text: `${t('You have restock alerts set for')}: ${alertsFor.map(traderId => {
                     return traders.find(trader => trader.id === traderId).name;
-                })}`});
+                })} | ${gameModeLabel}`});
             }
 
             return interaction.editReply({
@@ -36,8 +39,11 @@ const subCommands = {
     },
     alert: async interaction => {
         await interaction.deferReply({ephemeral: true});
-        const t = getFixedT(interaction.locale);
-        const traders = await gameData.traders.getAll();
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+        const traders = await gameData.traders.getAll({lang, gameMode});
         let traderId = interaction.options.getString('trader');
         const sendAlert = interaction.options.getBoolean('send_alert');
         let forWho = t('all traders');
@@ -50,10 +56,10 @@ const subCommands = {
         let alertsFor = [];
         let action = 'enabled';
         if (sendAlert) {
-            alertsFor = await progress.addRestockAlert(interaction.user.id, traderId, interaction.locale);
+            alertsFor = await progress.addRestockAlert(interaction.user.id, traderId, interaction.locale, gameMode);
         } else {
             action = 'disabled';
-            alertsFor = await progress.removeRestockAlert(interaction.user.id, traderId, interaction.locale);
+            alertsFor = await progress.removeRestockAlert(interaction.user.id, traderId, interaction.locale, gameMode);
         }
         let allAlerts = '';
         if ((sendAlert && alertsFor.length > 1 && alertsFor.length !== traders.length) || (!sendAlert && alertsFor.length > 0)) {
@@ -62,47 +68,63 @@ const subCommands = {
             }).join(', ');
         }
 
+        const embed = new EmbedBuilder();
+        embed.setDescription(`✅ ${t(`Restock alert ${action} for {{traderName}}.`, {traderName: forWho})}${allAlerts}`);
+        embed.setFooter({text: gameModeLabel});
         return interaction.editReply({
-            content: `✅ ${t(`Restock alert ${action} for {{traderName}}.`, {traderName: forWho})}${allAlerts}`
+            embeds: [embed],
         });
     },
     channel: async interaction => {
         await interaction.deferReply({ephemeral: true});
-        const t = getFixedT(interaction.locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+
+        const embed = new EmbedBuilder();
+        embed.setFooter({text: gameModeLabel});
+
         if (interaction.channel.type === ChannelType.DM || interaction.channel.type === ChannelType.GroupDM) {
+            embed.setDescription(`❌ ${t('You must invoke this command in the server with the channel in which you want restock alerts.')}`);
             return interaction.editReply({
-                content: `❌ ${t('You must invoke this command in the server with the channel in which you want restock alerts.')}`
+                embeds: [embed],
             });
         }
         const isAdmin = interaction.memberPermissions?.has(PermissionFlagsBits.Administrator);
         if (!isAdmin) {
+            embed.setDescription(`❌ ${t('You must be an administrator to set channel restock alerts.')}`);
             return interaction.editReply({
-                content: `❌ ${t('You must be an administrator to set channel restock alerts.')}`
+                embeds: [embed],
             });
         }
         const channel = interaction.options.getChannel('channel');
         if (!channel) {
-            await progress.setRestockAlertChannel(interaction.guildId, false);
+            await progress.setRestockAlertChannel(interaction.guildId, false, undefined, gameMode);
+            embed.setDescription(`✅ ${t('Restock alert channel disabled for this server.')}`);
             return interaction.editReply({
-                content: `✅ ${t('Restock alert channel disabled for this server.')}`
+                embeds: [embed],
             });
         }
         const botMember = channel.members.find(user => user.id === interaction.client.user.id);
         if (!botMember) {
+            embed.setDescription(`❌ ${t('Stash bot does not have access to #{{channelName}}.', {channelName: channel.name})}`);
             return interaction.editReply({
-                content: `❌ ${t('Stash bot does not have access to #{{channelName}}.', {channelName: channel.name})}`,
+                embeds: [embed],
             });
         }
         const hasSendMessagesPermission = botMember.permissionsIn(channel) & PermissionFlagsBits.SendMessages;
         if (!hasSendMessagesPermission) {
+            embed.setDescription(`❌ ${t('Stash bot does not have permission to send messages in #{{channelName}}.', {channelName: channel.name})}`);
             return interaction.editReply({
-                content: `❌ ${t('Stash bot does not have permission to send messages in #{{channelName}}.', {channelName: channel.name})}`,
+                embeds: [embed],
             });
         }
         const locale = interaction.options.getString('locale') || 'en';
-        await progress.setRestockAlertChannel(interaction.guildId, channel?.id, locale);
+        await progress.setRestockAlertChannel(interaction.guildId, channel?.id, locale, gameMode);
+        embed.setDescription(`✅ ${t('Restock alert channel set to #{{channelName}}.', {channelName: channel.name})}`);
         return interaction.editReply({
-            content: `✅ ${t('Restock alert channel set to #{{channelName}}.', {channelName: channel.name})}`
+            embeds: [embed],
         });
     },
 };

@@ -23,8 +23,8 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
-        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
-        const t = getFixedT(locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
@@ -34,12 +34,15 @@ const defaultFunction = {
             });
         }
 
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+
         const matchedCrafts = [];
 
         const [items, crafts, stations] = await Promise.all([
-            gameData.items.getAll(locale),
-            gameData.crafts.getAll(),
-            gameData.hideout.getAll(locale),
+            gameData.items.getAll({lang, gameMode}),
+            gameData.crafts.getAll({gameMode}),
+            gameData.hideout.getAll({lang, gameMode}),
         ]);
 
         const searchedItems = items.filter(item => item.name.toLowerCase().includes(searchString.toLowerCase()));
@@ -56,8 +59,13 @@ const defaultFunction = {
         }
 
         if (matchedCrafts.length === 0) {
+            const embed = new EmbedBuilder();
+            embed.setDescription(t(`Found no results for "{{searchString}}"`, {
+                searchString: searchString
+            }));
+            embed.setFooter({text: gameModeLabel});
             return interaction.editReply({
-                content: t('Found no results for "{{searchString}}"', {searchString: searchString}),
+                embeds: [embed],
                 ephemeral: true,
             });
         }
@@ -128,7 +136,7 @@ const defaultFunction = {
                 }
                 if (isTool) {
                     toolCost += itemCost * req.count;
-                    toolsEmbed.addFields({name: reqItem.name, value: itemCost.toLocaleString(locale) + "₽ x " + req.count, inline: true});
+                    toolsEmbed.addFields({name: reqItem.name, value: itemCost.toLocaleString(lang) + "₽ x " + req.count, inline: true});
                     if(!toolsEmbed.thumbnail) {
                         toolsEmbed.setThumbnail(reqItem.iconLink);
                     }
@@ -143,13 +151,13 @@ const defaultFunction = {
                 }
                 totalCost += itemCost * quantity;
                 //totalCost += req.item.avg24hPrice * req.count;
-                embed.addFields({name: reqItem.name, value: itemCost.toLocaleString(locale) + '₽ x ' + quantity, inline: true});
+                embed.addFields({name: reqItem.name, value: itemCost.toLocaleString(lang) + '₽ x ' + quantity, inline: true});
             }
-            embed.addFields({name: t('Total'), value: totalCost.toLocaleString(locale) + '₽', inline: false});
+            embed.addFields({name: t('Total'), value: totalCost.toLocaleString(lang) + '₽', inline: false});
 
             embeds.push(embed);
             if (toolsEmbed.data.fields?.length > 0) {
-                toolsEmbed.addFields({name: t('Total'), value: toolCost.toLocaleString(locale) + '₽', inline: false});
+                toolsEmbed.addFields({name: t('Total'), value: toolCost.toLocaleString(lang) + '₽', inline: false});
                 embeds.push(toolsEmbed);
             }
 
@@ -173,7 +181,7 @@ const defaultFunction = {
                 const bitemname = `[${rewardItem.name}](${rewardItem.link}) (${station.name} level ${craft.level})`;
 
                 if (bitemname.length + 4 + otheritems.length > 2048) {
-                    ending.setFooter({text: `${matchedCrafts.length-i} ${t('additional results not shown.')}`,});
+                    ending.setFooter({text: `${matchedCrafts.length-i} ${t('additional results not shown.')} | ${gameModeLabel}`,});
 
                     break;
                 }
@@ -182,6 +190,8 @@ const defaultFunction = {
             ending.setDescription(otheritems);
 
             embeds.push(ending);
+        } else {
+            embeds[embeds.length-1].setFooter({text: gameModeLabel});
         }
 
         return interaction.editReply({ embeds: embeds });
