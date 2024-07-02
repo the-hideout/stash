@@ -60,8 +60,8 @@ export const respondToShardMessage = async (message, shard) => {
             if (message.data === 'defaultUserProgress') {
                 response.data = await progress.getDefaultProgress();
             }
-            if (message.data === 'safeUserProgress') {
-                response.data = await progress.getSafeProgress(message.userId);
+            if (message.data === 'userProgressOrDefault') {
+                response.data = await progress.getProgressOrDefault(message.userId);
             }
             if (message.data === 'userTarkovTrackerUpdateTime') {
                 response.data = await progress.getUpdateTime(message.userId);

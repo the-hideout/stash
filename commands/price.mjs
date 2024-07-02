@@ -74,7 +74,7 @@ const defaultFunction = {
             moment.locale(locale);
             embed.setFooter({text: `🕑 ${t('Last Updated')}: ${moment(item.updated).fromNow()}`});
 
-            const prog = await progress.getSafeProgress(interaction.user.id);
+            const prog = await progress.getProgressOrDefault(interaction.user.id);
 
             embed.setThumbnail(item.iconLink);
 

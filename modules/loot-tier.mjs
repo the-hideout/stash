@@ -1,5 +1,6 @@
 import colors from './colors.js';
 import { getParentReply } from './shard-messenger.mjs';
+import gameModes from './game-modes.mjs';
 
 const tiers = {};
 
@@ -8,11 +9,6 @@ const tierDefaults = {
     great: 25000,
     average: 11000
 };
-
-const gameModes = [
-    'regular',
-    'pve',
-];
 
 for (const gameMode of gameModes) {
     tiers[gameMode] = tierDefaults;

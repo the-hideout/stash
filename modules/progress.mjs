@@ -7,6 +7,7 @@ import gameData from "./game-data.mjs";
 import { messageUser, messageChannel } from "./shard-messenger.mjs";
 import { getFixedT } from './translations.mjs';
 import cloudflare from './cloudflare.mjs';
+import gameModes from './game-modes.mjs';
 
 const saveToCloudflareIntervalMinutes = 60;
 let cf = false;
@@ -21,11 +22,6 @@ let progressLoaded = false;
 
 let userProgress = {};
 
-const gameModes = [
-    'regular',
-    'pve',
-];
-
 for (const gameMode of gameModes) {
     restockTimers[gameMode] = {};
 }
@@ -37,6 +33,7 @@ const defaultProgress = {
     hideout: {},
     traders: {},
     skills: {},
+    gameMode: 'regular',
     locale: 'en-US',
 };
 
@@ -44,9 +41,8 @@ const tarkovTrackerUpdateIntervalMinutes = 1;
 
 const restockAlertMinutes = 2;
 
-const buildDefaultProgress = id => {
-    const progress = {
-        id: id,
+const getDefaultGameModeProgress = () => {
+    const prog = {
         tarkovTracker: {
             lastUpdateStatus: 'n/a',
             lastUpdate: 0,
@@ -56,22 +52,42 @@ const buildDefaultProgress = id => {
         hideout: {},
         traders: {},
         skills: {},
+    };
+    for (const stationId in defaultProgress.hideout) {
+        prog.hideout[stationId] = defaultProgress.hideout[stationId];
+    }
+    for (const traderId in defaultProgress.traders) {
+        prog.traders[traderId] = defaultProgress.traders[traderId];
+    }
+    for (const skillId in defaultProgress.skills) {
+        prog.skills[skillId] = defaultProgress.skills[skillId];
+    }
+    return prog;
+};
+
+const buildDefaultProgress = id => {
+    const progress = {
+        id,
+        locale: defaultProgress.locale,
+        gameMode: defaultProgress.gameMode,
         alerts: {
             restock: {},
         },
-        locale: 'en-US',
-        gameMode: 'regular',
     };
-    for (const stationId in defaultProgress.hideout) {
-        progress.hideout[stationId] = defaultProgress.hideout[stationId];
-    }
-    for (const traderId in defaultProgress.traders) {
-        progress.traders[traderId] = defaultProgress.traders[traderId];
-    }
-    for (const skillId in defaultProgress.skills) {
-        progress.skills[skillId] = defaultProgress.skills[skillId];
+    const gameModes = ['regular', 'pve'];
+    for (const gameMode of gameModes) {
+        progress[gameMode] = getDefaultGameModeProgress();
+        progress.alerts[gameMode] = [];
     }
     return progress;
+};
+
+const mergeGameModeProgress = (fullProgress) => {
+    const merged = {
+        ...fullProgress,
+        ...fullProgress[fullProgress.gameMode],
+    };
+    return merged;
 };
 
 const loaded = async () => {
@@ -88,16 +104,17 @@ const loaded = async () => {
 
 const getUsersForUpdate = () => {
     return Object.values(userProgress).filter(prog => {
-        if (!prog.tarkovTracker) {
+        const gameMode = prog.gameMode ?? 'regular';
+        if (!prog[gameMode]?.tarkovTracker) {
             return false;
         }
-        if (prog.tarkovTracker.token && !prog.tarkovTracker.token.match(/^[a-zA-Z0-9]{22}$/)) {
-            prog.tarkovTracker.token = false;
-            prog.tarkovTracker.lastUpdateStatus = 'invalid';
+        if (prog[gameMode].tarkovTracker.token && !prog[gameMode].tarkovTracker.token.match(/^[a-zA-Z0-9]{22}$/)) {
+            prog[gameMode].tarkovTracker.token = false;
+            prog[gameMode].tarkovTracker.lastUpdateStatus = 'invalid';
         }
-        return prog.tarkovTracker.token !== false;
+        return prog[gameMode].tarkovTracker.token !== false;
     }).sort((a, b) => {
-        return a.tarkovTracker.lastUpdate - b.tarkovTracker.lastUpdate;
+        return a[a.gameMode ?? 'regular'].tarkovTracker.lastUpdate - b[b.gameMode ?? 'regular'].tarkovTracker.lastUpdate;
     });
 };
 
@@ -106,32 +123,31 @@ const updateTarkovTracker = async () => {
     const hideout = await gameData.hideout.getAll();
     for (let i = 0; i < 25 && i < users.length; i++) {
         const user = users[i];
+        const gameMode = user.gameMode ?? 'regular';
         try {
-            const ttprog = await getProgress(user.tarkovTracker.token);
+            const ttprog = await getProgress(user[gameMode].tarkovTracker.token);
             //userProgress[user.id].level = ttprog.level;
-            userProgress[user.id].hideout = {};
+            user[gameMode].hideout = {};
             for (const module of ttprog.hideoutModulesProgress) {
                 if (!module.complete) continue;
                 for (const station of hideout) {
                     for (const level of station.levels) {
-                        if (level.id == module.id) {
-                            if (!userProgress[user.id].hideout[station.id] || userProgress[user.id].hideout[station.id] < level.level) {
-                                userProgress[user.id].hideout[station.id] = level.level;
-                            }
+                        if (level.id === module.id) {
+                            user[gameMode].hideout[station.id] = level.level;
                         }
                     }
                 }
             }
-            user.tarkovTracker.lastUpdate = Date.now();
-            user.tarkovTracker.lastUpdateStatus = 'ok';
+            user[gameMode].tarkovTracker.lastUpdate = Date.now();
+            user[gameMode].tarkovTracker.lastUpdateStatus = 'ok';
         } catch (error) {
             if (error.message.includes('Unauthorized')) {
-                user.tarkovTracker.token = false;
-                user.tarkovTracker.lastUpdateStatus = 'invalid';
+                user[gameMode].tarkovTracker.token = false;
+                user[gameMode].tarkovTracker.lastUpdateStatus = 'invalid';
                 console.log(`User ${user.id} had an invalid TarkovTracker token`);
             } else {
-                user.tarkovTracker.lastUpdateStatus = error.message;
-                console.log(`Error updating TarkovTracker progress for user ${user.id} with token ${user.tarkovTracker.token}`, error.message);
+                user[gameMode].tarkovTracker.lastUpdateStatus = error.message;
+                console.log(`Error updating TarkovTracker progress for user ${user.id} with token ${user[gameMode].tarkovTracker.token}`, error.message);
             }
         }
     }
@@ -143,7 +159,7 @@ const saveUserProgress = () => {
     fs.writeFileSync(usersJsonPath, JSON.stringify(userProgress, null, 4));
 };
 
-const getUserProgress = id => {
+const getUserProgress = async id => {
     if (!userProgress[id]) {
         userProgress[id] = buildDefaultProgress(id);
     }
@@ -157,20 +173,13 @@ const getUserProgress = id => {
     return userProgress[id];
 };
 
-const getSafeProgress = async id => {
-    await loaded();
-    if (userProgress[id]) return userProgress[id];
-    return defaultProgress;
-};
-
 const getFleaFactors = id => {
     let prog = userProgress[id];
     if (!prog) {
-        prog = defaultProgress;
-    } else {
-        if (!prog.hideout['5d484fdf654e7600691aadf8']) prog.hideout['5d484fdf654e7600691aadf8'] = 0;
-        if (!prog.skills['hideoutManagement']) prog.skills['hideoutManagement'] = 0;
+        prog = buildDefaultProgress();
     }
+    const gameMode = prog.gameMode ?? 'regular';
+    prog = prog[gameMode];
     return {
         intel: prog.hideout['5d484fdf654e7600691aadf8'],
         management: prog.skills['hideoutManagement']
@@ -231,10 +240,11 @@ const optimalFleaPrice = async (id, baseValue, lowerBound, upperBound) => {
     return highPrice;
 };
 
-const addRestockAlert = async (id, traders, locale, gameMode) => {
+const addRestockAlert = async (id, traders, locale) => {
     await loaded();
     if (typeof traders === 'string') traders = [traders];
     const prog = await getUserProgress(id);
+    const gameMode = prog.gameMode ?? 'regular';
     if (locale) {
         prog.locale = locale;
     }
@@ -245,10 +255,11 @@ const addRestockAlert = async (id, traders, locale, gameMode) => {
     return prog.alerts.restock;
 };
 
-const removeRestockAlert = async (id, traders, locale, gameMode) => {
+const removeRestockAlert = async (id, traders, locale) => {
     await loaded();
     if (typeof traders === 'string') traders = [traders];
     const prog = await getUserProgress(id);
+    const gameMode = prog.gameMode ?? 'regular';
     if (locale) {
         prog.locale = locale;
     }
@@ -403,23 +414,28 @@ const saveToCloudflare = () => {
     });
 };
 
-export default {
+const settings = {
     async hasToken(id) {
         await loaded();
         if (!userProgress[id]) return false;
-        return userProgress[id].tarkovTracker.token != false;
+        const gameMode = userProgress[id].gameMode ?? 'regular';
+        return !!userProgress[id][gameMode]?.tarkovTracker?.token;
     },
     async setToken(id, token) {
         await loaded();
         if (!userProgress[id]) {
             userProgress[id] = buildDefaultProgress(id);
         }
-        userProgress[id].tarkovTracker.token = token;
-        if (!token) userProgress[id].tarkovTracker.lastUpdateStatus = 'n/a';
+        const gameMode = userProgress[id].gameMode ?? 'regular';
+        userProgress[id][gameMode].tarkovTracker.token = token;
+        if (!token) userProgress[id][gameMode].tarkovTracker.lastUpdateStatus = 'n/a';
     },
     async getUpdateTime(id) {
         await loaded();
-        if (!userProgress[id] || !userProgress[id].tarkovTracker.token) throw new Error('Your TarkovTracker account is not linked');
+        const gameMode = userProgress[id]?.gameMode ?? 'regular';
+        if (!userProgress[id] || !userProgress[id][gameMode]?.tarkovTracker?.token) {
+            throw new Error('Your TarkovTracker account is not linked');
+        }
         const users = getUsersForUpdate();
         for (let i = 0; i < users.length; i++) {
             let user = users[i];
@@ -429,32 +445,42 @@ export default {
     },
     async getProgress(id) {
         await loaded();
-        return userProgress[id];
+        if (!userProgress[id]) {
+            return false;
+        }
+        return mergeGameModeProgress(userProgress[id]);
     },
     async getDefaultProgress() {
         await loaded();
-        return defaultProgress;
+        return mergeGameModeProgress(buildDefaultProgress());
     },
-    getSafeProgress: getSafeProgress,
+    async getProgressOrDefault(id) {
+        await loaded();
+        return mergeGameModeProgress(userProgress[id] ?? settings.getDefaultProgress());
+    },
     async setLevel(id, level) {
         await loaded();
-        const prog = getUserProgress(id);
-        prog.level = level;
+        const prog = await getUserProgress(id);
+        const gameMode = prog.gameMode ?? 'regular';
+        prog[gameMode].level = level;
     },
     async setTrader(id, traderId, level) {
         await loaded();
-        const prog = getUserProgress(id);
-        prog.traders[traderId] = level;
+        const prog = await getUserProgress(id);
+        const gameMode = prog.gameMode ?? 'regular';
+        prog[gameMode].traders[traderId] = level;
     },
     async setHideout(id, stationId, level) {
         await loaded();
-        const prog = getUserProgress(id);
-        prog.hideout[stationId] = level;
+        const prog = await getUserProgress(id);
+        const gameMode = prog.gameMode ?? 'regular';
+        prog[gameMode].hideout[stationId] = level;
     },
     async setSkill(id, skillId, level) {
         await loaded();
-        const prog = getUserProgress(id);
-        prog.skills[skillId] = level;
+        const prog = await getUserProgress(id);
+        const gameMode = prog.gameMode ?? 'regular';
+        prog[gameMode].skills[skillId] = level;
     },
     async getFleaFeeFactors(id) {
         await loaded();
@@ -466,21 +492,22 @@ export default {
     getOptimalFleaPrice(id, baseValue) {
         return optimalFleaPrice(id, baseValue);
     },
-    async getRestockAlerts(id, gameMode) {
-        const prog = getSafeProgress(id);
+    async getRestockAlerts(id) {
+        const prog = settings.getProgressOrDefault(id);
+        const gameMode = prog.gameMode ?? 'regular';
         if (!prog.alerts) prog.alerts = {restock: {regular: [], pve: []}};
-        return prog.alerts.restock;
+        return prog.alerts.restock[gameMode];
     },
     addRestockAlert: addRestockAlert,
     removeRestockAlert: removeRestockAlert,
     getGameMode: async (id) => {
         await loaded();
-        const prog = getUserProgress(id);
+        const prog = await getUserProgress(id);
         return prog?.gameMode || 'regular';
     },
     setGameMode: async (id, gameMode) => {
         await loaded();
-        const prog = getUserProgress(id);
+        const prog = await getUserProgress(id);
         return prog.gameMode = gameMode;
     },
     setGuildTraderRestockAlertChannel: setGuildTraderRestockAlertChannel,
@@ -515,37 +542,65 @@ export default {
                 console.log(`Error reading ${usersJsonPath}`, error);
             }
         }
-        const flea = await gameData.flea.get();
+        const [flea, traders, hideout] = await Promise.all([
+            gameData.flea.get(),
+            gameData.traders.getAll(),
+            gameData.hideout.getAll(),
+        ]);
         defaultProgress.level = flea.minPlayerLevel;
-        const traders = await gameData.traders.getAll();
         for (const trader of traders) {
             const maxLevel = trader.levels[trader.levels.length-1].level;
             defaultProgress.traders[trader.id] = maxLevel;
-            for (const id in userProgress) {
-                if (id === 'guilds') continue;
-                const user = userProgress[id];
-                if (!user.traders[trader.id]) user.traders[trader.id] = 1;
-            }
         }
         const skills = gameData.skills.getAll();
         for (const skill of skills) {
             defaultProgress.skills[skill.id] = 0;
-            for (const id in userProgress) {
-                if (id === 'guilds') continue;
-                const user = userProgress[id];
-                if (!user.skills[skill.id]) user.skills[skill.id] = 0;
-            }
         }
-        const hideout = await gameData.hideout.getAll();
         for (const station of hideout) {
             const maxLevel = station.levels[station.levels.length-1].level;
             defaultProgress.hideout[station.id] = maxLevel;
-            /*for (const id in userProgress) {
-                const user = userProgress[id];
-                if (typeof user.hideout[station.id] === 'undefined') {
-                    user.hideout[station.id] = 0;
+        }
+
+        // upgrade progress to multiple game modes
+        for (const id in userProgress) {
+            if (id === 'guilds') continue;
+            const prog = userProgress[id];
+            if (!prog.regular) {
+                prog.regular = {
+                    tarkovTracker: prog.tarkovTracker,
+                    level: prog.level,
+                    hideout: prog.hideout,
+                    traders: prog.traders,
+                    skills: prog.skills,
+                };
+                delete prog.tarkovTracker;
+                delete prog.level;
+                delete prog.hideout;
+                delete prog.traders;
+                delete prog.skills;
+                prog.alerts = {
+                    restock: {
+                        regular: prog.alerts?.restock || [],
+                        pve: [],
+                    },
+                };
+                prog.gameMode = 'regular';
+            }
+            for (const gameMode of gameModes) {
+                if (!prog[gameMode]) {
+                    prog[gameMode] = getDefaultGameModeProgress();
+                    continue;
                 }
-            }*/
+                for (const trader of traders) {
+                    if (!prog[gameMode].traders[trader.id]) prog[gameMode].traders[trader.id] = 1;
+                }
+                for (const skill of skills) {
+                    if (!prog[gameMode].skills[skill.id]) prog[gameMode].skills[skill.id] = 0;
+                }
+                for (const station of hideout) {
+                    if (!prog[gameMode].hideout[station.id]) prog[gameMode].hideout[station.id] = 0;
+                }
+            }
         }
         setTimeout(updateTarkovTracker, 1000 * 60 * tarkovTrackerUpdateIntervalMinutes).unref();
         if (cf) {
@@ -573,3 +628,5 @@ export default {
         progressLoaded = true;
     },
 }
+
+export default settings;

@@ -4,11 +4,7 @@ import graphqlRequest from "./graphql-request.mjs";
 import { updateTiers } from './loot-tier.mjs';
 import { getDiscordLocale, getCommandLocalizations } from "./translations.mjs";
 import { getParentReply } from './shard-messenger.mjs';
-
-const gameModes = [
-    'regular',
-    'pve',
-];
+import gameModes from './game-modes.mjs';
 
 const defaultOptions = {
     lang: 'en',

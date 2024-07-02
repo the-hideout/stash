@@ -44,7 +44,7 @@ const defaultFunction = {
             let embedDescription = t('When users submit reports, they will appear here');
             if (reports.length > 1) {
                 embedTitle = t('Latest Goon Reports');
-                embedDescription = `\`${reports.map(report => {
+                embedDescription = `${reports.map(report => {
                     const map = maps.find(m => m.id === report.map.id);
                     if (!map) {
                         return false;
@@ -52,7 +52,7 @@ const defaultFunction = {
                     const reportDate = new Date(parseInt(report.timestamp));
                     moment.locale(lang);
                     return `${map.name}: ${moment(reportDate).fromNow()}`;
-                }).filter(Boolean).join('\n')}\``;
+                }).filter(Boolean).join('\n')}`;
             }
             reportsEmbed.setTitle(embedTitle);
             reportsEmbed.setDescription(embedDescription);

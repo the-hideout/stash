@@ -70,7 +70,7 @@ const defaultFunction = {
 
         let embeds = [];
 
-        const prog = await progress.getSafeProgress(interaction.user.id);
+        const prog = await progress.getProgressOrDefault(interaction.user.id);
 
         for (let i = 0; i < matchedBarters.length; i = i + 1) {
             const barter = barters.find(b => b.id === matchedBarters[i]);

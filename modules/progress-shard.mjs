@@ -1,9 +1,9 @@
 import gameData from "./game-data.mjs";
 import { getParentReply } from "./shard-messenger.mjs";
 
-const getFleaFactors = prog => {
+const getFleaFactors = async prog => {
     if (!prog) {
-        prog = defaultProgress;
+        prog = await getParentReply({data: 'defaultUserProgress'});
     } else {
         if (!prog.hideout['5d484fdf654e7600691aadf8']) prog.hideout['5d484fdf654e7600691aadf8'] = 0;
         if (!prog.skills['hideoutManagement']) prog.skills['hideoutManagement'] = 0;
@@ -21,7 +21,7 @@ const calcFleaFee = async (progress, price, baseValue, args) => {
         ...args
     };
     if (typeof options.intel === 'undefined') {
-        const prog = getFleaFactors(progress);
+        const prog = await getFleaFactors(progress);
         options.intel = prog.intel;
         options.management = prog.management;
     }
@@ -52,7 +52,7 @@ const optimalFleaPrice = async (progress, baseValue, lowerBound, upperBound) => 
     let highPrice = 0;
     let highProfit = 0;
     let highFee = 0;
-    const args = getFleaFactors(progress);
+    const args = await getFleaFactors(progress);
     for (let price = lowerBound; price <= upperBound; price += step) {
         const fee = await calcFleaFee(progress, price,baseValue, args);
         const profit = price - fee;
@@ -68,25 +68,19 @@ const optimalFleaPrice = async (progress, baseValue, lowerBound, upperBound) => 
     return highPrice;
 };
 
-const getProgress = async (id) => {
-    return getParentReply({data: 'userProgress', userId: id});
-};
-
-const getDefaultProgress = async () => {
-    return getParentReply({data: 'defaultUserProgress'});
-};
-
-const getSafeProgress = async(id) => {
-    return getParentReply({data: 'safeUserProgress', userId: id});
-};
-
 const progressShard = {
     async getUpdateTime(id) {
         return getParentReply({data: 'userTarkovTrackerUpdateTime', userId: id});
     },
-    getProgress: getProgress,
-    getDefaultProgress: getDefaultProgress,
-    getSafeProgress: getSafeProgress,
+    async getProgress(id) {
+        return getParentReply({data: 'userProgress', userId: id});
+    },
+    async getDefaultProgress() {
+        return getParentReply({data: 'defaultUserProgress'});
+    },
+    async getProgressOrDefault (id) {
+        return getParentReply({data: 'userProgressOrDefault', userId: id});
+    },
     async setToken(id, token) {
         return getParentReply({data: 'setUserTarkovTrackerToken', userId: id, token: token});
     },
@@ -103,11 +97,11 @@ const progressShard = {
         return getParentReply({data: 'setUserSkillLevel', userId: id, skillId: skillId, level: level});
     },
     async getFleaMarketFee(id, price, baseValue, args) {
-        const progress = await getSafeProgress(id);
+        const progress = await progressShard.getProgressOrDefault(id);
         return calcFleaFee(progress, price, baseValue, args);
     },
     async getOptimalFleaPrice(id, baseValue) {
-        const progress = await getSafeProgress(id);
+        const progress = await progressShard.getProgressOrDefault(id);
         return optimalFleaPrice(progress, baseValue);
     },
     async getRestockAlerts(id, gameMode) {

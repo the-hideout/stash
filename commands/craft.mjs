@@ -72,7 +72,7 @@ const defaultFunction = {
 
         let embeds = [];
 
-        const prog = await progress.getSafeProgress(interaction.user.id);
+        const prog = await progress.getProgressOrDefault(interaction.user.id);
 
         for (let i = 0; i < matchedCrafts.length; i = i + 1) {
             const craft = crafts.find(c => c.id === matchedCrafts[i]);
