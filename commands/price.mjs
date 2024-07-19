@@ -72,7 +72,7 @@ const defaultFunction = {
             embed.setTitle(item.name);
             embed.setURL(item.link);
             moment.locale(locale);
-            embed.setFooter({text: `🕑 ${t('Last Updated')}: ${moment(item.updated).fromNow()}`});
+            embed.setFooter({text: `🕑 ${t('Last Updated')}: ${moment(item.updated).fromNow()} | ${gameModeLabel}`});
 
             const prog = await progress.getProgressOrDefault(interaction.user.id);
 
@@ -311,6 +311,7 @@ const defaultFunction = {
                 const itemname = `[${matchedItems[i].name}](${matchedItems[i].link})`;
 
                 if (itemname.length + 2 + otheritems.length > 2048) {
+                    ending.
                     ending.setFooter({text: `${matchedItems.length-i} ${t('additional results not shown.')} | ${gameModeLabel}`});
 
                     break;
@@ -323,7 +324,7 @@ const defaultFunction = {
 
             embeds.push(ending);
         } else {
-            embeds[embeds.length-1].setFooter({text: gameModeLabel});
+            //embeds[embeds.length-1].setFooter({text: gameModeLabel});
         }
 
         return interaction.editReply({ embeds: embeds });
