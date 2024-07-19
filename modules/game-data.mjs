@@ -4,6 +4,22 @@ import graphqlRequest from "./graphql-request.mjs";
 import { updateTiers } from './loot-tier.mjs';
 import { getDiscordLocale, getCommandLocalizations } from "./translations.mjs";
 import { getParentReply } from './shard-messenger.mjs';
+import gameModes from './game-modes.mjs';
+
+const defaultOptions = {
+    lang: 'en',
+    gameMode: 'regular',
+};
+
+const mergeOptions = (options = {}) => {
+    if (typeof options === 'string') {
+        options = {lang: options};
+    }
+    return {
+        ...defaultOptions,
+        ...options,
+    };
+};
 
 const gameData = {
     maps: {},
@@ -11,12 +27,13 @@ const gameData = {
     bossNames: {},
     traders: {},
     hideout: {},
-    barters: false,
-    crafts: false,
-    items: false,
+    barters: {},
+    crafts: {},
+    items: {},
     itemNames: {},
     tasks: {},
-    flea: false,
+    flea: {},
+    goonReports: {},
     skills: [
         {
             id: 'hideoutManagement',
@@ -95,98 +112,104 @@ export async function updateLanguages() {
 }
 
 export async function updateMaps() {
-    let mapQueries = [];
-    for (const langCode of gameData.languages) {
-        mapQueries.push(`${langCode}: maps(lang: ${langCode}) {
-            ...MapFields
-        }`);
-    }
-    const query = `query StashMaps {
-        ${mapQueries.join('\n')}
-    }
-    fragment MapFields on Map {
-        id
-        tarkovDataId
-        name
-        nameId
-        normalizedName
-        wiki
-        description
-        enemies
-        raidDuration
-        players
-        bosses {
+    for (const gameMode of gameModes) {
+        let mapQueries = [];
+        for (const langCode of gameData.languages) {
+            mapQueries.push(`${langCode}: maps(lang: ${langCode}, gameMode: ${gameMode}) {
+                ...MapFields
+            }`);
+        }
+        const query = `query StashMaps {
+            ${mapQueries.join('\n')}
+        }
+        fragment MapFields on Map {
+            id
+            tarkovDataId
             name
+            nameId
             normalizedName
-            spawnChance
-            spawnLocations {
-                name
-                chance
-            }
-            escorts {
+            wiki
+            description
+            enemies
+            raidDuration
+            players
+            bosses {
                 name
                 normalizedName
-                amount {
-                    count
+                spawnChance
+                spawnLocations {
+                    name
                     chance
                 }
-            }
-            spawnTime
-            spawnTimeRandom
-            spawnTrigger
-        }
-        accessKeys {
-            id
-        }
-        accessKeysMinPlayerLevel
-    }`;
-    const [response, mapImages] = await Promise.all([
-        graphqlRequest({ graphql: query }).then(response => response.data),
-        got('https://raw.githubusercontent.com/the-hideout/tarkov-dev/master/src/data/maps.json', {
-            responseType: 'json',
-            headers: { "user-agent": "stash-tarkov-dev" }
-        }).then(response => response.body)
-    ]);
-
-    for (const lang in response) {
-        gameData.maps[lang] = response[lang];
-        
-        for (const mapData of gameData.maps[lang]) {
-            let testKey = mapData.normalizedName;
-
-            if (mapKeys[mapData.id]) 
-                testKey = mapKeys[mapData.id];      // remap night-factory=>facory and the-lab=>labs map keys 
-            
-            for (const mapImage of mapImages) {
-                if (mapImage.normalizedName !== testKey) 
-                    continue;
-                
-                const map = mapImage.maps.find(m => m.projection === '2D');
-
-                if (!map) {
-                    continue;
+                escorts {
+                    name
+                    normalizedName
+                    amount {
+                        count
+                        chance
+                    }
                 }
+                spawnTime
+                spawnTimeRandom
+                spawnTrigger
+            }
+            accessKeys {
+                id
+            }
+            accessKeysMinPlayerLevel
+        }`;
+        const [response, mapImages] = await Promise.all([
+            graphqlRequest({ graphql: query }).then(response => response.data),
+            got('https://raw.githubusercontent.com/the-hideout/tarkov-dev/master/src/data/maps.json', {
+                responseType: 'json',
+                headers: { "user-agent": "stash-tarkov-dev" }
+            }).then(response => response.body)
+        ]);
 
-                mapData.key = map.key;
-                mapData.source = map.source;
-                mapData.sourceLink = map.sourceLink;
-
-                break;
+        if (!gameData.maps[gameMode]) {
+            gameData.maps[gameMode] = {};
+        }
+    
+        for (const lang in response) {
+            gameData.maps[gameMode][lang] = response[lang];
+            
+            for (const mapData of gameData.maps[gameMode][lang]) {
+                let testKey = mapData.normalizedName;
+    
+                if (mapKeys[mapData.id]) 
+                    testKey = mapKeys[mapData.id];      // remap night-factory=>facory and the-lab=>labs map keys 
+                
+                for (const mapImage of mapImages) {
+                    if (mapImage.normalizedName !== testKey) 
+                        continue;
+                    
+                    const map = mapImage.maps.find(m => m.projection === '2D');
+    
+                    if (!map) {
+                        continue;
+                    }
+    
+                    mapData.key = map.key;
+                    mapData.source = map.source;
+                    mapData.sourceLink = map.sourceLink;
+    
+                    break;
+                }
             }
         }
     }
-
+    
     const newMapChoices = [];
     const bosses = [];
     // Loop through each map and collect names and bosses
-    for (const mapData of gameData.maps.en) {
+    for (const mapData of gameData.maps.regular.en) {
         newMapChoices.push({
             name: mapData.name, 
             value: mapData.id, 
             name_localizations: gameData.languages.reduce((loc, langCode) => {
                 const dLocale = getDiscordLocale(langCode);
                 if (dLocale) {
-                    loc[dLocale] = gameData.maps[langCode].find(m => m.id === mapData.id).name;
+                    loc[dLocale] = gameData.maps.regular[langCode].find(m => m.id === mapData.id).name;
                 }
                 return loc;
             }, {}),
@@ -205,7 +228,7 @@ export async function updateMaps() {
             }
 
             for (const langCode of gameData.languages) {
-                const locMap = gameData.maps[langCode].find(m => m.id === mapData.id);
+                const locMap = gameData.maps.regular[langCode].find(m => m.id === mapData.id);
                 if (!locMap) {
                     continue;
                 }
@@ -234,20 +257,20 @@ export async function updateMaps() {
     choices.boss = bosses.sort((a, b) => {
         return a.name.localeCompare(b.name);
     });
-    choices.goonsMaps = choices.map.filter(c => gameData.maps.en.some(m => m.id === c.value && m.bosses.some(b => b.normalizedName === 'death-knight')));
-
+    choices.goonsMaps = choices.map.filter(c => gameData.maps.regular.en.some(m => m.id === c.value && m.bosses.some(b => b.normalizedName === 'death-knight')));
     return gameData.maps;
 };
 
-export async function getMaps(lang = 'en') {
+export async function getMaps(options = defaultOptions) {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'gameData', function: 'maps.getAll', args: lang});
+        return getParentReply({data: 'gameData', function: 'maps.getAll', args: options});
     }
+    let { lang, gameMode } = mergeOptions(options);
     lang = validateLanguage(lang);
-    if (gameData.maps[lang]) {
-        return gameData.maps[lang];
+    if (gameData.maps[gameMode]?.[lang]) {
+        return gameData.maps[gameMode][lang];
     }
-    return updateMaps().then(ms => ms[lang]);
+    return updateMaps().then(ms => ms[gameMode][lang]);
 };
 
 export async function updateBosses() {
@@ -308,32 +331,15 @@ export async function updateBosses() {
             return langData;
         }, {});
     }
-
-    /*const newBossChoices = [];
-    for (const boss of gameData.bosses) {
-        newBossChoices.push({
-            name: boss.name, 
-            value: normalizedName, 
-            name_localizations: gameData.languages.reduce((loc, langCode) => {
-                const dLocale = getDiscordLocale(langCode);
-                if (dLocale) {
-                    loc[dLocale] = gameData.bossNames[langCode].find(b => b.normalizedName === boss.normalizedName).name;
-                }
-                return loc;
-            }, {}),
-        });
-    }
-    bossChoices = newBossChoices.sort((a,b) => {
-        return a.name.localeCompare(b.name);
-    });*/
     eventEmitter.emit('updatedBosses');
     return gameData.bosses;
 };
 
-export async function getBosses(lang = 'en') {
+export async function getBosses(options = defaultOptions) {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'gameData', function: 'bosses.getAll', args: lang});
+        return getParentReply({data: 'gameData', function: 'bosses.getAll', args: options});
     }
+    let { lang } = mergeOptions(options);
     lang = validateLanguage(lang);
     if (!gameData.bosses) {
         await updateBosses();
@@ -351,44 +357,50 @@ export async function getBosses(lang = 'en') {
 }
 
 export async function updateTraders() {
-    const traderQueries = [];
-    for (const langCode of gameData.languages) {
-        traderQueries.push(`${langCode}: traders(lang: ${langCode}) {
-            ...TraderFields
-        }`);
-    }
-    const query = `query StashTraders {
-        ${traderQueries.join('\n')}
-    }
-    fragment TraderFields on Trader {
-        id
-        tarkovDataId
-        name
-        normalizedName
-        resetTime
-        discount
-        imageLink
-        levels {
-            id
-            level
-            payRate
+    for (const gameMode of gameModes) {
+        const traderQueries = [];
+        for (const langCode of gameData.languages) {
+            traderQueries.push(`${langCode}: traders(lang: ${langCode}, gameMode: ${gameMode}) {
+                ...TraderFields
+            }`);
         }
-    }`;
-    const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+        const query = `query StashTraders {
+            ${traderQueries.join('\n')}
+        }
+        fragment TraderFields on Trader {
+            id
+            tarkovDataId
+            name
+            normalizedName
+            resetTime
+            discount
+            imageLink
+            levels {
+                id
+                level
+                payRate
+            }
+        }`;
+        const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+    
 
-    for (const lang in response) {
-        gameData.traders[lang] = response[lang];
+        if (!gameData.traders[gameMode]) {
+            gameData.traders[gameMode] = {};
+        }
+        for (const lang in response) {
+            gameData.traders[gameMode][lang] = response[lang];
+        }
     }
 
     const newTraderChoices = [];
-    for (const trader of gameData.traders.en) {
+    for (const trader of gameData.traders.regular.en) {
         newTraderChoices.push({
             name: trader.name, 
             value: trader.id, 
             name_localizations: gameData.languages.reduce((loc, langCode) => {
                 const dLocale = getDiscordLocale(langCode);
                 if (dLocale) {
-                    loc[dLocale] = gameData.traders[langCode].find(tr => tr.id === trader.id).name;
+                    loc[dLocale] = gameData.traders.regular[langCode].find(tr => tr.id === trader.id).name;
                 }
                 return loc;
             }, {}),
@@ -401,53 +413,59 @@ export async function updateTraders() {
     return gameData.traders;
 };
 
-export async function getTraders(lang = 'en') {
+export async function getTraders(options = defaultOptions) {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'gameData', function: 'traders.getAll', args: lang});
+        return getParentReply({data: 'gameData', function: 'traders.getAll', args: options});
     }
+    let { lang, gameMode } = mergeOptions(options);
     lang = validateLanguage(lang);
-    if (gameData.traders[lang]) {
-        return gameData.traders[lang];
+    if (gameData.traders[gameMode]?.[lang]) {
+        return gameData.traders[gameMode][lang];
     }
-    return updateTraders().then(ts => ts[lang]);
+    return updateTraders().then(ts => ts[gameMode][lang]);
 };
 
 export async function updateHideout() {
-    const hideoutQueries = [];
-    for (const langCode of gameData.languages) {
-        hideoutQueries.push(`${langCode}: hideoutStations(lang: ${langCode}) {
-            ...HideoutStationFields
-        }`);
-    }
-    const query = `query StashHideout {
-        ${hideoutQueries.join('\n')}
-    }
-    fragment HideoutStationFields on HideoutStation {
-        id
-        tarkovDataId
-        name
-        normalizedName
-        imageLink
-        levels {
+    for (const gameMode of gameModes) {
+        const hideoutQueries = [];
+        for (const langCode of gameData.languages) {
+            hideoutQueries.push(`${langCode}: hideoutStations(lang: ${langCode}, gameMode: ${gameMode}) {
+                ...HideoutStationFields
+            }`);
+        }
+        const query = `query StashHideout {
+            ${hideoutQueries.join('\n')}
+        }
+        fragment HideoutStationFields on HideoutStation {
             id
             tarkovDataId
-            level
+            name
+            normalizedName
+            imageLink
+            levels {
+                id
+                tarkovDataId
+                level
+            }
+        }`;
+        const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+        if (!gameData.hideout[gameMode]) {
+            gameData.hideout[gameMode] = {};
         }
-    }`;
-    const response = await graphqlRequest({ graphql: query }).then(response => response.data);
-    for (const lang in response) {
-        gameData.hideout[lang] = response[lang];
+        for (const lang in response) {
+            gameData.hideout[gameMode][lang] = response[lang];
+        }
     }
 
     const newWideoutChoices = [];
-    for (const hideoutData of gameData.hideout.en) {
+    for (const hideoutData of gameData.hideout.regular.en) {
         newWideoutChoices.push({
             name: hideoutData.name, 
             value: hideoutData.id, 
             name_localizations: gameData.languages.reduce((loc, langCode) => {
                 const dLocale = getDiscordLocale(langCode);
                 if (dLocale) {
-                    loc[dLocale] = gameData.hideout[langCode].find(hi => hi.id === hideoutData.id).name;
+                    loc[dLocale] = gameData.hideout.regular[langCode].find(hi => hi.id === hideoutData.id).name;
                 }
                 return loc;
             }, {}),
@@ -460,125 +478,135 @@ export async function updateHideout() {
     return gameData.hideout;
 };
 
-export async function getHideout(lang = 'en') {
+export async function getHideout(options = defaultOptions) {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'gameData', function: 'hideout.getAll', args: lang});
+        return getParentReply({data: 'gameData', function: 'hideout.getAll', args: options});
     }
+    let { lang, gameMode } = mergeOptions(options);
     lang = validateLanguage(lang);
-    if (gameData.hideout[lang]) {
-        return gameData.hideout[lang];
+    if (gameData.hideout[gameMode]?.[lang]) {
+        return gameData.hideout[gameMode][lang];
     }
-    return updateHideout().then(hs => hs[lang]);
+    return updateHideout().then(hs => hs[gameMode][lang]);
 };
 
-export async function getFlea() {
-    if (gameData.flea) {
-        return gameData.flea;
+export async function getFlea(options = defaultOptions) {
+    const { gameMode } = mergeOptions(options);
+    if (gameData.flea[gameMode]) {
+        return gameData.flea[gameMode];
     }
-    return updateFlea();
+    return updateFlea().then(flea => flea[gameMode]);
 };
 
 export async function updateFlea() {
-    const query = `query StashFleaMarket {
-        fleaMarket {
-            minPlayerLevel
-            enabled
-            sellOfferFeeRate
-            sellRequirementFeeRate
-        }
-    }`;
-    const response = await graphqlRequest({ graphql: query });
-    gameData.flea = response.data.fleaMarket;
+    for (const gameMode of gameModes) {
+        const query = `query StashFleaMarket {
+            fleaMarket(gameMode: ${gameMode}) {
+                minPlayerLevel
+                enabled
+                sellOfferFeeRate
+                sellRequirementFeeRate
+            }
+        }`;
+        const response = await graphqlRequest({ graphql: query });
+        gameData.flea[gameMode] = response.data.fleaMarket;
+    }
 
     return gameData.flea;
 };
 
 export async function updateBarters() {
-    const query = `query StashBarters {
-        barters {
-            id
-            trader {
+    for (const gameMode of gameModes) {
+        const query = `query StashBarters {
+            barters(gameMode: ${gameMode}) {
                 id
-            }
-            level
-            taskUnlock {
-                id
-            }
-            requiredItems {
-                item {
+                trader {
                     id
                 }
-                attributes {
-                    name
-                    value
-                }
-                count
-            }
-            rewardItems {
-                item {
+                level
+                taskUnlock {
                     id
                 }
-                count
+                requiredItems {
+                    item {
+                        id
+                    }
+                    attributes {
+                        name
+                        value
+                    }
+                    count
+                }
+                rewardItems {
+                    item {
+                        id
+                    }
+                    count
+                }
             }
-        }
-    }`;
-    const response = await graphqlRequest({ graphql: query });
-    gameData.barters = response.data.barters;
+        }`;
+        const response = await graphqlRequest({ graphql: query });
+        gameData.barters[gameMode] = response.data.barters;
+    }
 
     return gameData.barters;
 }
 
-export async function getBarters() {
+export async function getBarters(options = defaultOptions) {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'gameData', function: 'barters.getAll'});
+        return getParentReply({data: 'gameData', function: 'barters.getAll', args: options});
     }
-    if (gameData.barters) {
-        return gameData.barters;
+    const { gameMode } = mergeOptions(options);
+    if (gameData.barters[gameMode]) {
+        return gameData.barters[gameMode];
     }
-    return updateBarters();
+    return updateBarters().then(b => b[gameMode]);
 }
 
 export async function updateCrafts() {
-    const query = `query StashCrafts {
-        crafts {
-            id
-            station {
+    for (const gameMode of gameModes) {
+        const query = `query StashCrafts {
+            crafts(gameMode: ${gameMode}) {
                 id
-            }
-            level
-            duration
-            requiredItems {
-                item {
+                station {
                     id
                 }
-                count
-                attributes {
-                    type
-                    value
+                level
+                duration
+                requiredItems {
+                    item {
+                        id
+                    }
+                    count
+                    attributes {
+                        type
+                        value
+                    }
+                }
+                rewardItems {
+                    item {
+                        id
+                    }
+                    count
                 }
             }
-            rewardItems {
-                item {
-                    id
-                }
-                count
-            }
-        }
-    }`;
-    const response = await graphqlRequest({ graphql: query });
-    gameData.crafts = response.data.crafts;
+        }`;
+        const response = await graphqlRequest({ graphql: query });
+        gameData.crafts[gameMode] = response.data.crafts;
+    }
 
     return gameData.crafts;
 }
 
-export async function getCrafts() {
+export async function getCrafts(options = defaultOptions) {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'gameData', function: 'crafts.getAll'});
+        return getParentReply({data: 'gameData', function: 'crafts.getAll', args: options});
     }
-    if (gameData.crafts) {
-        return gameData.crafts;
+    const { gameMode } = mergeOptions(options);
+    if (gameData.crafts[gameMode]) {
+        return gameData.crafts[gameMode];
     }
-    return updateCrafts();
+    return updateCrafts().then(c => c[gameMode]);
 }
 
 export async function updateItemNames() {
@@ -599,54 +627,11 @@ export async function updateItemNames() {
         name
         shortName
         properties {
-            ...on ItemPropertiesAmmo {
-                caliber
-                penetrationPower
-                damage
-                armorDamage
-                fragmentationChance
-                initialSpeed
-            }
             ...on ItemPropertiesStim {
                 cures
                 stimEffects {
                     type
-                    chance
-                    delay
-                    duration
-                    value
-                    percent
                     skillName
-                }
-            }
-            ...on ItemPropertiesWeapon {
-                defaultPreset {
-                    iconLink
-                    width
-                    height
-                    traderPrices {
-                        price
-                        priceRUB
-                        currency
-                        trader {
-                            id
-                            name
-                        }
-                    }
-                    sellFor {
-                        price
-                        currency
-                        priceRUB
-                        vendor {
-                            name
-                            normalizedName
-                            ...on TraderOffer {
-                                trader {
-                                    id
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -669,148 +654,150 @@ export async function getItemNames(lang) {
 }
 
 export async function updateItems() {
-    const query = `query StashItems {
-        items {
-            id
-            name
-            shortName
-            normalizedName
-            updated
-            width
-            height
-            weight
-            iconLink
-            link
-            category {
-                name
+    for (const gameMode of gameModes) {
+        const query = `query StashItems {
+            items(gameMode: ${gameMode}) {
                 id
-            }
-            properties {
-                ...on ItemPropertiesAmmo {
-                    caliber
-                    penetrationPower
-                    damage
-                    armorDamage
-                    fragmentationChance
-                    initialSpeed
+                name
+                shortName
+                normalizedName
+                updated
+                width
+                height
+                weight
+                iconLink
+                link
+                category {
+                    name
+                    id
                 }
-                ...on ItemPropertiesStim {
-                    cures
-                    stimEffects {
-                        type
-                        chance
-                        delay
-                        duration
-                        value
-                        percent
-                        skillName
+                properties {
+                    ...on ItemPropertiesAmmo {
+                        caliber
+                        penetrationPower
+                        damage
+                        armorDamage
+                        fragmentationChance
+                        initialSpeed
                     }
-                }
-                ...on ItemPropertiesWeapon {
-                    defaultPreset {
-                        iconLink
-                        width
-                        height
-                        traderPrices {
-                            price
-                            priceRUB
-                            currency
-                            trader {
-                                id
-                                name
-                            }
+                    ...on ItemPropertiesStim {
+                        cures
+                        stimEffects {
+                            type
+                            chance
+                            delay
+                            duration
+                            value
+                            percent
+                            skillName
                         }
-                        sellFor {
-                            price
-                            currency
-                            priceRUB
-                            vendor {
-                                name
-                                normalizedName
-                                ...on TraderOffer {
-                                    trader {
-                                        id
+                    }
+                    ...on ItemPropertiesWeapon {
+                        defaultPreset {
+                            iconLink
+                            width
+                            height
+                            traderPrices {
+                                price
+                                priceRUB
+                                currency
+                                trader {
+                                    id
+                                    name
+                                }
+                            }
+                            sellFor {
+                                price
+                                currency
+                                priceRUB
+                                vendor {
+                                    name
+                                    normalizedName
+                                    ...on TraderOffer {
+                                        trader {
+                                            id
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
-            avg24hPrice
-            lastLowPrice
-            traderPrices {
-                price
-                priceRUB
-                currency
-                trader {
+                avg24hPrice
+                lastLowPrice
+                traderPrices {
+                    price
+                    priceRUB
+                    currency
+                    trader {
+                        id
+                        name
+                    }
+                }
+                buyFor {
+                    price
+                    currency
+                    priceRUB
+                    vendor {
+                        name
+                        ...on TraderOffer {
+                            trader {
+                                id
+                            }
+                            minTraderLevel
+                            taskUnlock {
+                                id
+                            }
+                        }
+                    }
+                }
+                sellFor {
+                    price
+                    currency
+                    priceRUB
+                    vendor {
+                        name
+                        ...on TraderOffer {
+                            trader {
+                                id
+                            }
+                        }
+                    }
+                }
+                types
+                basePrice
+                craftsFor {
                     id
-                    name
+                }
+                craftsUsing {
+                    id
+                }
+                bartersFor {
+                    id
+                }
+                bartersUsing {
+                    id
                 }
             }
-            buyFor {
-                price
-                currency
-                priceRUB
-                vendor {
-                    name
-                    ...on TraderOffer {
-                        trader {
-                            id
-                        }
-                        minTraderLevel
-                        taskUnlock {
-                            id
-                        }
+        }`;
+        const response = await graphqlRequest({ graphql: query });
+        response.data?.items.forEach(item => {
+            if (item.properties?.defaultPreset) {
+                item.iconLink = item.properties.defaultPreset.iconLink;
+                item.width = item.properties.defaultPreset.width;
+                item.height = item.properties.defaultPreset.height;
+                item.traderPrices = item.properties.defaultPreset.traderPrices;
+                item.sellFor = item.sellFor.filter(sellFor => sellFor.vendor.normalizedName === 'flea-market');
+                item.properties.defaultPreset.sellFor.forEach(sellFor => {
+                    if (sellFor.vendor.normalizedName !== 'flea-market') {
+                        item.sellFor.push(sellFor);
                     }
-                }
+                });
             }
-            sellFor {
-                price
-                currency
-                priceRUB
-                vendor {
-                    name
-                    ...on TraderOffer {
-                        trader {
-                            id
-                        }
-                    }
-                }
-            }
-            types
-            basePrice
-            craftsFor {
-                id
-            }
-            craftsUsing {
-                id
-            }
-            bartersFor {
-                id
-            }
-            bartersUsing {
-                id
-            }
-        }
-    }`;
-    const response = await graphqlRequest({ graphql: query });
-    response.data?.items.forEach(item => {
-        if (item.properties?.defaultPreset) {
-            item.iconLink = item.properties.defaultPreset.iconLink;
-            item.width = item.properties.defaultPreset.width;
-            item.height = item.properties.defaultPreset.height;
-            item.traderPrices = item.properties.defaultPreset.traderPrices;
-            item.sellFor = item.sellFor.filter(sellFor => sellFor.vendor.normalizedName === 'flea-market');
-            item.properties.defaultPreset.sellFor.forEach(sellFor => {
-                if (sellFor.vendor.normalizedName !== 'flea-market') {
-                    item.sellFor.push(sellFor);
-                }
-            });
-        }
-    });
-    gameData.items = response.data.items;
-    await updateTiers(gameData.items);
+        });
+        gameData.items[gameMode] = response.data.items;
+        await updateTiers(gameData.items[gameMode], gameMode);
+    }
     await updateItemNames().catch(error => {
         console.log(`Error updating item names: ${error.message}`);
     });
@@ -818,134 +805,184 @@ export async function updateItems() {
     return gameData.items;
 }
 
-export async function getItems(lang = 'en') {
+export async function getItems(options = defaultOptions) {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'gameData', function: 'items.getAll', args: lang});
+        return getParentReply({data: 'gameData', function: 'items.getAll', args: options});
     }
+    let { lang, gameMode } = mergeOptions(options);
     lang = validateLanguage(lang);
-    if (!gameData.items) {
+    if (!gameData.items[gameMode]) {
         await updateItems();
     }
     if (lang === 'en') {
-        return gameData.items;
+        return gameData.items[gameMode];
     }
     const itemNames = await getItemNames(lang).catch(error => {
         console.log(`Error getting ${lang} item names: ${error.message}`);
         return {};
     });
-    return gameData.items.map(item => {
+    return gameData.items[gameMode].map(item => {
+        let properties = item.properties;
+        if (properties) {
+            if (properties.cures) {
+                properties = {
+                    ...item.properties,
+                    cures: itemNames[item.id].properties.cures,
+                    stimEffects: item.properties.stimEffects.map((effect, index) => {
+                        return {
+                            ...effect,
+                            type: itemNames[item.id].properties.stimEffects[index].type,
+                            skillName: itemNames[item.id].properties.stimEffects[index].skillName,
+                        };
+                    }),
+                };
+            }
+        }
         return {
             ...item,
-            ...itemNames[item.id],
+            name: itemNames[item.id].name,
+            shortName: itemNames.shortName,
+            properties,
         }
     });
 }
 
-export async function getAmmo(lang = 'en') {
+export async function getAmmo(options = defaultOptions) {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'gameData', function: 'items.getAmmo', args: lang});
+        return getParentReply({data: 'gameData', function: 'items.getAmmo', args: options});
     }
-    return getItems(lang).then(items => {
+    return getItems(options).then(items => {
         return items.filter(item => item.category.id === '5485a8684bdc2da71d8b4567');
     });
 }
 
-export async function getStims(lang = 'en') {
+export async function getStims(options = defaultOptions) {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'gameData', function: 'items.getStims', args: lang});
+        return getParentReply({data: 'gameData', function: 'items.getStims', args: options});
     }
-    return getItems(lang).then(items => {
+    return getItems(options).then(items => {
         return items.filter(item => item.category.id === '5448f3a64bdc2d60728b456a');
     });
 }
 
 export async function updateTasks() {
-    const taskQueries = [];
-    for (const langCode of gameData.languages) {
-        taskQueries.push(`${langCode}: tasks(lang: ${langCode}) {
-            ...TaskFields
-        }`);
-    }
-    const query = `query StashTasks {
-        ${taskQueries.join('\n')}
-    }
-    fragment TaskFields on Task {
-        id
-        name
-        normalizedName
-        taskImageLink
-        objectives {
+    for (const gameMode of gameModes) {
+        const taskQueries = [];
+        for (const langCode of gameData.languages) {
+            taskQueries.push(`${langCode}: tasks(lang: ${langCode}, gameMode: ${gameMode}) {
+                ...TaskFields
+            }`);
+        }
+        const query = `query StashTasks {
+            ${taskQueries.join('\n')}
+        }
+        fragment TaskFields on Task {
             id
-            description
-            __typename
-            ...on TaskObjectiveBasic {
-                requiredKeys {
-                    id
+            name
+            normalizedName
+            taskImageLink
+            objectives {
+                id
+                description
+                __typename
+                ...on TaskObjectiveBasic {
+                    requiredKeys {
+                        id
+                    }
                 }
-            }
-            ...on TaskObjectiveItem {
-                count
-                requiredKeys {
-                    id
+                ...on TaskObjectiveItem {
+                    count
+                    requiredKeys {
+                        id
+                    }
                 }
-            }
-            ...on TaskObjectivePlayerLevel {
-                playerLevel
-            }
-            ...on TaskObjectiveShoot {
-                count
-            }
-            ...on TaskObjectiveSkill {
-                skillLevel {
-                    name
+                ...on TaskObjectivePlayerLevel {
+                    playerLevel
+                }
+                ...on TaskObjectiveShoot {
+                    count
+                }
+                ...on TaskObjectiveSkill {
+                    skillLevel {
+                        name
+                        level
+                    }
+                }
+                ...on TaskObjectiveTraderLevel {
+                    trader {
+                        id
+                    }
                     level
                 }
-            }
-            ...on TaskObjectiveTraderLevel {
-                trader {
-                    id
+                ...on TaskObjectiveUseItem {
+                    count
                 }
-                level
             }
-            ...on TaskObjectiveUseItem {
-                count
+            trader {
+                id
             }
-        }
-        trader {
-            id
-        }
-        minPlayerLevel
-        wikiLink
-        experience
-        finishRewards {
-            traderStanding {
-                trader {
-                    id
+            minPlayerLevel
+            wikiLink
+            experience
+            finishRewards {
+                traderStanding {
+                    trader {
+                        id
+                    }
+                    standing
                 }
-                standing
             }
-        }
-    }`;
-    const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+        }`;
+        const response = await graphqlRequest({ graphql: query }).then(response => response.data);
 
-    for (const lang in response) {
-        gameData.tasks[lang] = response[lang];
+        if (!gameData.tasks[gameMode]) {
+            gameData.tasks[gameMode] = {};
+        }
+        for (const lang in response) {
+            gameData.tasks[gameMode][lang] = response[lang];
+        }
     }
 
     eventEmitter.emit('updatedTasks');
     return gameData.tasks;
 };
 
-export async function getTasks(lang = 'en') {
+export async function getTasks(options = defaultOptions) {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'gameData', function: 'tasks.getAll', args: lang});
+        return getParentReply({data: 'gameData', function: 'tasks.getAll', args: options});
     }
+    let { lang, gameMode } = mergeOptions(options);
     lang = validateLanguage(lang);
-    if (gameData.tasks[lang]) {
-        return gameData.tasks[lang];
+    if (gameData.tasks[gameMode]?.[lang]) {
+        return gameData.tasks[gameMode][lang];
     }
-    return updateTasks().then(ts => ts[lang]);
+    return updateTasks().then(ts => ts[gameMode][lang]);
 };
+
+export async function updateGoonReports() {
+    for (const gameMode of gameModes) {
+        const query = `query StashGoonReports {
+            goonReports(gameMode: ${gameMode}) {
+                map {
+                    id
+                }
+                timestamp
+            }
+        }`;
+        const response = await graphqlRequest({ graphql: query });
+        gameData.goonReports[gameMode] = response.data.goonReports;
+    }
+    
+    return gameData.goonReports;
+}
+
+export async function getGoonReports(options = defaultOptions) {
+    const { gameMode } = mergeOptions(options);
+    if (gameData.goonReports[gameMode]) {
+        return gameData.goonReports[gameMode];
+    }
+    return updateGoonReports().then(goonReports => goonReports[gameMode]);
+}
 
 export async function updateAll(rejectOnError = false) {
     try {
@@ -965,6 +1002,7 @@ export async function updateAll(rejectOnError = false) {
         updateHideout(),
         updateItems(),
         updateTasks(),
+        updateGoonReports(),
     ]).then(results => {
         const taskNames = [
             'barters',
@@ -975,6 +1013,7 @@ export async function updateAll(rejectOnError = false) {
             'hideout',
             'items',
             'tasks',
+            'goonReports',
         ];
         let reject = false;
         results.forEach((result, index) => {
@@ -1052,11 +1091,11 @@ const gameDataExport = {
     },
     traders: {
         getAll: getTraders,
-        get: async (id, lang = 'en') => {
+        get: async (id, options) => {
             if (process.env.IS_SHARD) {
-                return getParentReply({data: 'gameData', function: 'traders.get', args: [id, lang]});
+                return getParentReply({data: 'gameData', function: 'traders.get', args: [id, options]});
             }
-            const traders = await getTraders(lang);
+            const traders = await getTraders(options);
             return traders.find(trader => trader.id === id);
         },
         update: updateTraders,
@@ -1066,11 +1105,11 @@ const gameDataExport = {
     },
     hideout: {
         getAll: getHideout,
-        get: async (id, lang = 'en') => {
+        get: async (id, options) => {
             if (process.env.IS_SHARD) {
-                return getParentReply({data: 'gameData', function: 'hideout.get', args: [id, lang]});
+                return getParentReply({data: 'gameData', function: 'hideout.get', args: [id, options]});
             }
-            const stations = await getHideout(lang);
+            const stations = await getHideout(options);
             return stations.find(station => station.id === id);
         },
         update: updateHideout,
@@ -1099,6 +1138,26 @@ const gameDataExport = {
         get: getFlea,
         update: updateFlea
     },
+    goonReports: {
+        get: async (options) => {
+            if (process.env.IS_SHARD) {
+                return getParentReply({data: 'gameData', function: 'goonReports.get', args: [options]});
+            }
+            return getGoonReports(options);
+        },
+        update: updateGoonReports,
+    },
+    gameModes: {
+        choices: () => {
+            return gameModes.map(gameMode => {
+                return {
+                    name: gameMode, 
+                    value: gameMode, 
+                    name_localizations: getCommandLocalizations(`game_mode_${gameMode}`),
+                }
+            });
+        },
+    },
     barters: {
         getAll: getBarters
     },
@@ -1107,11 +1166,11 @@ const gameDataExport = {
     },
     items: {
         getAll: getItems,
-        get: async (id, lang = 'en') => {
+        get: async (id, options) => {
             if (process.env.IS_SHARD) {
-                return getParentReply({data: 'gameData', function: 'items.get', args: [id, lang]});
+                return getParentReply({data: 'gameData', function: 'items.get', args: [id, options]});
             }
-            const items = await getItems(lang);
+            const items = await getItems(options);
             return items.find(item => item.id === id);
         },
         getAmmo: getAmmo,
@@ -1119,11 +1178,11 @@ const gameDataExport = {
     },
     tasks: {
         getAll: getTasks,
-        get: async (id, lang = 'en') => {
+        get: async (id, options) => {
             if (process.env.IS_SHARD) {
-                return getParentReply({data: 'gameData', function: 'tasks.get', args: [id, lang]});
+                return getParentReply({data: 'gameData', function: 'tasks.get', args: [id, options]});
             }
-            const tasks = await getTasks(lang);
+            const tasks = await getTasks(options);
             return tasks.find(task => task.id === id);
         },
     },

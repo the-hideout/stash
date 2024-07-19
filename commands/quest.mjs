@@ -21,21 +21,26 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
-        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
-        const t = getFixedT(locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
         const searchString = interaction.options.getString('name');
 
         const [tasks, traders] = await Promise.all([
-            gameData.tasks.getAll(locale),
-            gameData.traders.getAll(locale),
+            gameData.tasks.getAll({lang, gameMode}),
+            gameData.traders.getAll({lang, gameMode}),
         ]);
         const matchedTasks = tasks.filter(t => t.name.toLowerCase().includes(searchString.toLowerCase()));
 
         if (matchedTasks.length === 0) {
+            const embed = new EmbedBuilder();
+            embed.setDescription(t(`Found no results for "{{searchString}}"`, {
+                searchString: searchString
+            }));
+            embed.setFooter({text: gameModeLabel});
             return interaction.editReply({
-                content: t('Found no results for "{{searchString}}"', {
-                    searchString: searchString
-                }),
+                embeds: [embed],
                 ephemeral: true,
             });
         }
@@ -77,6 +82,7 @@ const defaultFunction = {
             const sign = repReward.standing >= 0 ? '+' : '';
             footerParts.push(`${repTrader.name} ${sign}${repReward.standing}`);
         }
+        footerParts.push(gameModeLabel);
 
         embed.setFooter({ text: footerParts.join(' | ') });
 

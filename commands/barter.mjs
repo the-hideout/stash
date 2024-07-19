@@ -22,8 +22,9 @@ const defaultFunction = {
         ),
     async execute(interaction) {
         await interaction.deferReply();
-        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
-        const t = getFixedT(locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
         const searchString = interaction.options.getString('name');
 
         if (!searchString) {
@@ -33,12 +34,14 @@ const defaultFunction = {
             });
         }
 
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+
         const matchedBarters = [];
 
         const [items, barters, traders] = await Promise.all([
-            gameData.items.getAll(locale),
-            gameData.barters.getAll(),
-            gameData.traders.getAll(locale)
+            gameData.items.getAll({lang, gameMode}),
+            gameData.barters.getAll({gameMode}),
+            gameData.traders.getAll({lang, gameMode})
         ]);
         const searchedItems = items.filter(item => item.name.toLowerCase().includes(searchString.toLowerCase()));
 
@@ -54,17 +57,20 @@ const defaultFunction = {
         }
 
         if (matchedBarters.length === 0) {
+            const embed = new EmbedBuilder();
+            embed.setDescription(t(`Found no results for "{{searchString}}"`, {
+                searchString: searchString
+            }));
+            embed.setFooter({text: gameModeLabel});
             return interaction.editReply({
-                content: t(`Found no results for "{{searchString}}"`, {
-                    searchString: searchString
-                }),
+                embeds: [embed],
                 ephemeral: true,
             });
         }
 
         let embeds = [];
 
-        const prog = await progress.getSafeProgress(interaction.user.id);
+        const prog = await progress.getProgressOrDefault(interaction.user.id);
 
         for (let i = 0; i < matchedBarters.length; i = i + 1) {
             const barter = barters.find(b => b.id === matchedBarters[i]);
@@ -135,10 +141,10 @@ const defaultFunction = {
                 }
 
                 totalCost += itemCost * req.count;
-                embed.addFields({name: reqName, value: itemCost.toLocaleString(locale) + "₽ x " + req.count, inline: true});
+                embed.addFields({name: reqName, value: itemCost.toLocaleString(lang) + "₽ x " + req.count, inline: true});
             }
 
-            embed.addFields({name: t('Total'), value: totalCost.toLocaleString(locale) + "₽", inline: false});
+            embed.addFields({name: t('Total'), value: totalCost.toLocaleString(lang) + "₽", inline: false});
 
             embeds.push(embed);
 
@@ -162,7 +168,7 @@ const defaultFunction = {
                 const bitemname = `[${rewardItem.name}](${rewardItem.link}) (${trader.name} LL${barter.level})`;
 
                 if (bitemname.length + 2 + otheritems.length > 2048) {
-                    ending.setFooter({text: `${matchedBarters.length-i} ${t('additional results not shown.')}`,});
+                    ending.setFooter({text: `${matchedBarters.length-i} ${t('additional results not shown.')} | ${gameModeLabel}`,});
                     break;
                 }
                 otheritems += bitemname + "\n";
@@ -170,6 +176,8 @@ const defaultFunction = {
             ending.setDescription(otheritems);
 
             embeds.push(ending);
+        } else {
+            embeds[embeds.length-1].setFooter({text: gameModeLabel});
         }
 
         return interaction.editReply({ embeds: embeds });

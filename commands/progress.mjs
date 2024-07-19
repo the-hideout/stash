@@ -7,10 +7,14 @@ import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs'
 
 const subCommands = {
     show: async interaction => {
-        const t = getFixedT(interaction.locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
         let prog = await progress.getProgress(interaction.user.id);
 
         const embed = new EmbedBuilder();
+        embed.setFooter({ text: gameModeLabel});
         if (!prog) {
             prog = await progress.getDefaultProgress();
             embed.setTitle(`${t('Default progress')} - ${t('Level')} ${prog.level}`);
@@ -22,14 +26,20 @@ const subCommands = {
 
         const hideoutStatus = [];
         for (const stationId in prog.hideout) {
-            const station = await gameData.hideout.get(stationId);
+            const station = await gameData.hideout.get(stationId, {gameMode});
+            if (!station) {
+                continue;
+            }
             hideoutStatus.push(`${station.name} ${t('level')} ${prog.hideout[stationId]}`);
         }
         if (hideoutStatus.length > 0) embed.addFields({name: `${t('Hideout')} 🏠`, value: hideoutStatus.join('\n'), inline: true});
 
         const traderStatus = [];
         for (const traderId in prog.traders) {
-            const trader = await gameData.traders.get(traderId);
+            const trader = await gameData.traders.get(traderId, {gameMode});
+            if (!trader) {
+                continue;
+            }
             traderStatus.push(`${trader.name} ${t('LL')}${prog.traders[traderId]}`);
         }
         if (traderStatus.length > 0) embed.addFields({name: `${t('Traders')} 🛒`, value: traderStatus.join('\n'), inline: true});
@@ -57,19 +67,30 @@ const subCommands = {
         });
     },
     level: async interaction => {
-        const t = getFixedT(interaction.locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
         const level = interaction.options.getInteger('level');
         progress.setLevel(interaction.user.id, level);
+        const embed = new EmbedBuilder();
+        embed.setTitle(`✅ ${t('PMC level set to {{level}}.', {level: level})}`);
+        embed.setFooter({ text: gameModeLabel});
         return interaction.reply({
-            content: `✅ ${t('PMC level set to {{level}}.', {level: level})}`,
+            embeds: [embed],
             ephemeral: true
         });
     },
     trader: async interaction => {
         await interaction.deferReply({ephemeral: true});
-        const t = getFixedT(interaction.locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
         const traderId = interaction.options.getString('trader');
         const level = interaction.options.getInteger('level');
+        const embed = new EmbedBuilder();
+        embed.setFooter({ text: gameModeLabel});
         if (traderId === 'all') {
             const traders = await gameData.traders.getAll();
             for (const trader of traders) {
@@ -78,14 +99,16 @@ const subCommands = {
                 if (lvl > maxValue) lvl = maxValue;
                 progress.setTrader(interaction.user.id, trader.id, lvl);
             }
+            embed.setTitle(`✅ ${t('All traders set to {{level}}.', {level: level})}`);
             return interaction.editReply({
-                content: `✅ ${t('All traders set to {{level}}.', {level: level})}`
+                embeds: [embed],
             });
         }
         const trader = await gameData.traders.get(traderId);
         if (!trader) {
+            embed.setTitle(`❌ ${t('No matching trader found.')}`);
             return interaction.editReply({
-                content: `❌ ${t('No matching trader found.')}`
+                embeds: [embed],
             });
         }
         let lvl = level;
@@ -93,13 +116,21 @@ const subCommands = {
         if (lvl > maxValue) lvl = maxValue;
         progress.setTrader(interaction.user.id, trader.id, lvl);
 
+        embed.setTitle(`✅ ${t('{{thingName}} set to {{level}}.', {thingName: trader.name, level: lvl})}`);
         return interaction.editReply({
-            content: `✅ ${t('{{thingName}} set to {{level}}.', {thingName: trader.name, level: lvl})}`
+            embeds: [embed],
         });
     },
     hideout: async interaction => {
         await interaction.deferReply({ephemeral: true});
-        const t = getFixedT(interaction.locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+
+        const embed = new EmbedBuilder();
+        embed.setFooter({ text: gameModeLabel});
+
         const stations = await gameData.hideout.getAll(interaction.locale);
         let stationId; 
         const stationName = interaction.options.getString('station').toLowerCase();
@@ -114,14 +145,16 @@ const subCommands = {
             }
         }
         if (!stationId) {
+            embed.setTitle(`❌ ${t('No matching hideout station found.')}`);
             return interaction.editReply({
-                content: `❌ ${t('No matching hideout station found.')}`
+                embeds: [embed],
             });
         }
         const level = interaction.options.getInteger('level');
         const prog = await progress.getProgress(interaction.user.id);
         let ttWarn = '';
         if (prog && prog.tarkovTracker.token) {
+            embed.setDescription(t('Note: Progress synced via [TarkovTracker](https://tarkovtracker.io/settings/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.'));
             ttWarn = '\n'+t('Note: Progress synced via [TarkovTracker](https://tarkovtracker.io/settings/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.');
         }
         if (stationId === 'all') {
@@ -131,15 +164,17 @@ const subCommands = {
                 if (lvl > maxValue) lvl = maxValue;
                 progress.setHideout(interaction.user.id, station.id, lvl);
             }
+            embed.setTitle(`✅ ${t('All hideout stations set to {{level}}.', {level: level})}`);
             return interaction.editReply({
-                content: `✅ ${t('All hideout stations set to {{level}}.', {level: level})}${ttWarn}`
+                embeds: [embed],
             });
         }
 
         const station = await gameData.hideout.get(stationId);
         if (!station) {
+            embed.setTitle(`❌ ${t('No matching hideout station found.')}`);
             return interaction.editReply({
-                content: `❌ ${t('No matching hideout station found.')}`
+                embeds: [embed],
             });
         }
         let lvl = level;
@@ -147,66 +182,102 @@ const subCommands = {
         if (lvl > maxValue) lvl = maxValue;
         progress.setHideout(interaction.user.id, station.id, lvl);
 
+        embed.setTitle(`✅ ${t('{{thingName}} set to {{level}}.', {thingName: station.name, level: lvl})}`);
         return interaction.editReply({
-            content: `✅ ${t('{{thingName}} set to {{level}}.', {thingName: station.name, level: lvl})}${ttWarn}`
+            embeds: [embed],
         });
     },
     skill: async interaction => {
-        const t = getFixedT(interaction.locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+
+        const embed = new EmbedBuilder();
+        embed.setFooter({ text: gameModeLabel});
+
         const skillId = interaction.options.getString('skill');
         let level = interaction.options.getInteger('level');
         if (level > 50) level = 50;
         if (level < 0) level = 0;
         progress.setSkill(interaction.user.id, skillId, level);
         const skill = await gameData.skills.get(skillId);
+        embed.setTitle(`✅ ${t('{{thingName}} set to {{level}}.', {thingName: skill.name, level: level})}`);
         return interaction.reply({
-            content: `✅ ${t('{{thingName}} set to {{level}}.', {thingName: skill.name, level: level})}`,
+            embeds: [embed],
             ephemeral: true
         });
     },
     link: async interaction => {
-        const t = getFixedT(interaction.locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+
+        const embed = new EmbedBuilder();
+        embed.setFooter({ text: gameModeLabel});
+
         const token = interaction.options.getString('token');
         if (!token) {
+            embed.setTitle(`❌ ${t('You must supply your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.')}`);
             return interaction.reply({
-                content: `❌ ${t('You must supply your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.')}`,
-                ephemeral: true
+                embeds: [embed],
+                ephemeral: true,
             });
         }
         if (!token.match(/^[a-zA-Z0-9]{22}$/)) {
+            embed.setTitle(`❌ ${t('The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.')}`);
             return interaction.reply({
-                content: `❌ ${t('The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.')}`,
-                ephemeral: true
+                embeds: [embed],
+                ephemeral: true,
             });
         }
 
         progress.setToken(interaction.user.id, token);
         moment.locale(interaction.locale);
         const updateTime = moment(await progress.getUpdateTime(interaction.user.id)).fromNow();
+        embed.setTitle(`✅ ${t('Your hideout progress will update from TarkovTracker {{updateTime}}.', {updateTime: updateTime})}`);
         return interaction.reply({
-            content: `✅ ${t('Your hideout progress will update from TarkovTracker {{updateTime}}.', {updateTime: updateTime})}`,
-            ephemeral: true
+            embeds: [embed],
+            ephemeral: true,
         });
     },
     unlink: async interaction => {
-        const t = getFixedT(interaction.locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+
+        const embed = new EmbedBuilder();
+        embed.setFooter({ text: gameModeLabel});
+
         progress.setToken(interaction.user.id, false);
+        embed.setTitle(`✅ ${t('TarkovTracker account unlinked.')}`);
         return interaction.reply({
-            content: `✅ ${t('TarkovTracker account unlinked.')}`,
-            ephemeral: true
+            embeds: [embed],
+            ephemeral: true,
         });
     },
     flea_market_fee: async interaction => {
-        const t = getFixedT(interaction.locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+
+        const embed = new EmbedBuilder();
+        embed.setFooter({ text: gameModeLabel});
+
         const intel = interaction.options.getInteger('intel_center_level');
         let mgmt = interaction.options.getInteger('hideout_management_level');
         if (mgmt > 50) mgmt = 50;
         if (mgmt < 0) mgmt = 0;
         progress.setHideout(interaction.user.id, '5d484fdf654e7600691aadf8', intel);
         progress.setSkill(interaction.user.id, 'hideoutManagement', mgmt);
+
+        embed.setTitle(`✅ ${t('{{thingName}} set to {{level}}.', {thingName: t('Intelligence Center'), level: intel})}.\n✅ ${t('Hideout Management skill set to {{managementLevel}}.', {managementLevel: mgmt})}`);
         return interaction.reply({
-            content: `✅ ${t('{{thingName}} set to {{level}}.', {thingName: t('Intelligence Center'), level: intel})}.\n✅ ${t('Hideout Management skill set to {{managementLevel}}.', {managementLevel: mgmt})}`,
-            ephemeral: true
+            embeds: [embed],
+            ephemeral: true,
         });
     }
 };
