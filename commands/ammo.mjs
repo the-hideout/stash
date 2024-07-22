@@ -122,6 +122,9 @@ const defaultFunction = {
         }
 
         for (const ammo of ammos) {
+            if (!ammo.shortName) {
+                continue;
+            }
             tableData.push([
                 ammo.shortName.substring(0, 11),
                 ammo.properties.penetrationPower,

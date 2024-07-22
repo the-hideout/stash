@@ -248,6 +248,9 @@ const addRestockAlert = async (id, traders, locale) => {
     if (locale) {
         prog.locale = locale;
     }
+    if (!prog.alerts.restock[gameMode]) {
+        prog.alerts.restock[gameMode] = [];
+    }
     const restockAlerts = prog.alerts.restock[gameMode];
     for (const traderId of traders) {
         if (!restockAlerts.includes(traderId)) restockAlerts.push(traderId);

@@ -57,7 +57,7 @@ const defaultFunction = {
         let embeds = [];
 
         for (const item of matchedItems) {
-            if (item.shortName.toLowerCase() === searchString) {
+            if (item.shortName?.toLowerCase() === searchString) {
                 matchedItems.length = 0;
                 matchedItems.push(item);
                 break;
