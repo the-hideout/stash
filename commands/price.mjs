@@ -25,25 +25,31 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
-        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const locale = lang;
         const t = getFixedT(locale);
+        const commandT = getFixedT(lang, 'command');
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
         // Get the search string from the user invoked command
         const searchString = interaction.options.getString('name');
 
         const [ items, traders, stations, barters, crafts ] = await Promise.all([
-            gameData.items.getAll(locale),
-            gameData.traders.getAll(locale),
-            gameData.hideout.getAll(locale),
-            gameData.barters.getAll(),
-            gameData.crafts.getAll(),
+            gameData.items.getAll({lang, gameMode}),
+            gameData.traders.getAll({lang, gameMode}),
+            gameData.hideout.getAll({lang, gameMode}),
+            gameData.barters.getAll({ gameMode}),
+            gameData.crafts.getAll({ gameMode}),
         ]);
         const matchedItems = items.filter(i => i.name.toLowerCase().includes(searchString.toLowerCase()));
 
         if (matchedItems.length === 0) {
+            const embed = new EmbedBuilder();
+            embed.setDescription(t(`Found no results for "{{searchString}}"`, {
+                searchString: searchString
+            }));
+            embed.setFooter({text: gameModeLabel});
             return interaction.editReply({
-                content: t('Found no results for "{{searchString}}"', {
-                    searchString: searchString
-                }),
+                embeds: [embed],
                 ephemeral: true,
             });
         }
@@ -51,7 +57,7 @@ const defaultFunction = {
         let embeds = [];
 
         for (const item of matchedItems) {
-            if (item.shortName.toLowerCase() === searchString) {
+            if (item.shortName?.toLowerCase() === searchString) {
                 matchedItems.length = 0;
                 matchedItems.push(item);
                 break;
@@ -66,9 +72,9 @@ const defaultFunction = {
             embed.setTitle(item.name);
             embed.setURL(item.link);
             moment.locale(locale);
-            embed.setFooter({text: `🕑 ${t('Last Updated')}: ${moment(item.updated).fromNow()}`});
+            embed.setFooter({text: `🕑 ${t('Last Updated')}: ${moment(item.updated).fromNow()} | ${gameModeLabel}`});
 
-            const prog = await progress.getSafeProgress(interaction.user.id);
+            const prog = await progress.getProgressOrDefault(interaction.user.id);
 
             embed.setThumbnail(item.iconLink);
 
@@ -83,7 +89,7 @@ const defaultFunction = {
                 }
             }
 
-            let tierPrice = item.avg24hPrice;
+            let tierPrice = item.avg24hPrice || 0;
             let tierFee = 0;
             let sellTo = t('Flea Market');
             if (item.avg24hPrice > 0) {
@@ -158,7 +164,9 @@ const defaultFunction = {
                 embed.addFields({name: bestTraderName + ` ${t('Value')}`, value: traderVal, inline: true});
             }
 
-            body += `• ${t('Sell to')}: \`${sellTo}\` ${t('for')} \`${tierPrice.toLocaleString(locale) + "₽"}\`\n`;
+            if (tierPrice > 0) {
+                body += `• ${t('Sell to')}: \`${sellTo}\` ${t('for')} \`${tierPrice.toLocaleString(locale) + "₽"}\`\n`;
+            }
 
             // Calculate item tier
             let tier = await lootTier(tierPrice / (item.width * item.height), item.types.includes('noFlea'));
@@ -192,7 +200,7 @@ const defaultFunction = {
 
                 for (const req of barter.requiredItems) {
                     const reqItem = items.find(it => it.id === req.item.id);
-                    let itemCost = reqItem.avg24hPrice;
+                    let itemCost = reqItem.avg24hPrice || 0;
 
                     if (reqItem.lastLowPrice > itemCost && reqItem.lastLowPrice > 0) {
                         itemCost = reqItem.lastLowPrice;
@@ -245,7 +253,7 @@ const defaultFunction = {
 
                 for (const req of craft.requiredItems) {
                     const reqItem = items.find(it => it.id === req.item.id);
-                    let itemCost = reqItem.avg24hPrice;
+                    let itemCost = reqItem.avg24hPrice || 0;
 
                     if (reqItem.lastLowPrice > itemCost && reqItem.lastLowPrice > 0) {
                         itemCost = reqItem.lastLowPrice;
@@ -303,7 +311,8 @@ const defaultFunction = {
                 const itemname = `[${matchedItems[i].name}](${matchedItems[i].link})`;
 
                 if (itemname.length + 2 + otheritems.length > 2048) {
-                    ending.setFooter({text: `${matchedItems.length-i} ${t('additional results not shown.')}`});
+                    ending.
+                    ending.setFooter({text: `${matchedItems.length-i} ${t('additional results not shown.')} | ${gameModeLabel}`});
 
                     break;
                 }
@@ -314,6 +323,8 @@ const defaultFunction = {
             ending.setDescription(otheritems);
 
             embeds.push(ending);
+        } else {
+            //embeds[embeds.length-1].setFooter({text: gameModeLabel});
         }
 
         return interaction.editReply({ embeds: embeds });

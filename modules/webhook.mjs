@@ -43,6 +43,11 @@ export default async function sendWebhook(message) {
         }
         embed.setDescription(message.message);
     }
+    if (message.footer) {
+        embed.setFooter({
+            text: message.footer,
+        });
+    }
     return webhookClient.send({
         embeds: [embed]
     });

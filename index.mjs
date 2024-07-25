@@ -107,5 +107,9 @@ gameData.updateAll().then(() => {
 });
 
 process.on('uncaughtException', (error) => {
-    sendWebhook({title: 'Uncaught Exception in Stash Bot', message: error.stack});
+    try {
+        sendWebhook({title: 'Uncaught exception in Stash Bot', message: error.stack});
+    } catch (error) {
+        console.log('Error sending uncaught exception webhook alert', error.stack);
+    }
 }); 

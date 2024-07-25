@@ -1,7 +1,4 @@
 import { v4 as uuidv4 } from "uuid";
-import {
-    EmbedBuilder,
-} from 'discord.js';
 
 import gameData from './game-data.mjs';
 import progress from './progress.mjs';
@@ -41,7 +38,7 @@ export const messageChannel = async (guildId, channelId, message, messageValues,
     if (process.env.IS_SHARD) {
         return Promise.reject(new Error('messageChannel can only be called by the parent process'));
     }
-    return getShardReply(shardId, {data: 'messageChannel', guildId: guildId, channelId: channelId, message: message, messageValues: messageValues}).catch(error => {
+    return getShardReply(shardId, {data: 'messageChannel', guildId, channelId, message, messageValues}).catch(error => {
         if (shardingManager.shards.has(shardId+1)) {
             return messageChannel(guildId, channelId, message, messageValues, shardId+1);
         }
@@ -63,8 +60,8 @@ export const respondToShardMessage = async (message, shard) => {
             if (message.data === 'defaultUserProgress') {
                 response.data = await progress.getDefaultProgress();
             }
-            if (message.data === 'safeUserProgress') {
-                response.data = await progress.getSafeProgress(message.userId);
+            if (message.data === 'userProgressOrDefault') {
+                response.data = await progress.getProgressOrDefault(message.userId);
             }
             if (message.data === 'userTarkovTrackerUpdateTime') {
                 response.data = await progress.getUpdateTime(message.userId);
@@ -86,20 +83,20 @@ export const respondToShardMessage = async (message, shard) => {
                 response.data = message.level;
             }
             if (message.data === 'userTraderRestockAlerts') {
-                response.data = await progress.getRestockAlerts(message.userId);
+                response.data = await progress.getRestockAlerts(message.userId, message.gameMode);
             }
             if (message.data === 'addUserTraderRestockAlert') {
-                response.data = await progress.addRestockAlert(message.userId, message.traders, message.locale);
+                response.data = await progress.addRestockAlert(message.userId, message.traders, message.locale, message.gameMode);
             }
             if (message.data === 'removeUserTraderRestockAlert') {
-                response.data = await progress.removeRestockAlert(message.userId, message.traders, message.locale);
+                response.data = await progress.removeRestockAlert(message.userId, message.traders, message.locale, message.gameMode);
             }
             if (message.data === 'setUserTarkovTrackerToken') {
                 await progress.setToken(message.userId, message.token);
                 response.data = message.token;
             }
             if (message.data === 'guildTraderRestockAlertChannel') {
-                response.data = await progress.setGuildTraderRestockAlertChannel(message.guildId, message.channelId, message.locale);
+                response.data = await progress.setGuildTraderRestockAlertChannel(message.guildId, message.channelId, message.locale, message.gameMode);
             }
             if (message.data === 'setGuildLanguage') {
                 response.data = await progress.setGuildLanguage(message.guildId, message.locale);
@@ -120,10 +117,16 @@ export const respondToShardMessage = async (message, shard) => {
                 }
             }
             if (message.data === 'getPriceTier') {
-                response.data = await getPriceTier(message.price, message.noFlea);
+                response.data = await getPriceTier(message.price, message.noFlea, message.gameMode);
             }
             if (message.data === 'getTiers') {
-                response.data = await getTiers();
+                response.data = await getTiers(message.gameMode);
+            }
+            if (message.data === 'userGameMode') {
+                response.data = await progress.getGameMode(message.userId);
+            }
+            if (message.data === 'setUserGameMode') {
+                response.data = await progress.setGameMode(message.userId, message.gameMode);
             }
         } catch (error) {
             response.data = null;
@@ -131,34 +134,12 @@ export const respondToShardMessage = async (message, shard) => {
         }
         return shard.send(response);
     }
-    if (message.type === 'reportIssue') {
-        shardingManager.broadcast(message);
-    }
     if (message.uuid) {
         shard.emit(message.uuid, message);
     }
 };
 
 export const respondToParentMessage = async (message) => {
-    if (message.type === 'reportIssue') {
-        if (discordClient.guilds.cache.has(process.env.ISSUE_SERVER_ID)) {
-            const server = discordClient.guilds.cache.get(process.env.ISSUE_SERVER_ID);
-            const reportingChannel = server.channels.cache.get(process.env.ISSUE_CHANNEL_ID);
-    
-            if (reportingChannel) {
-                const embed = new EmbedBuilder();
-                embed.setTitle('New Issue Reported 🐞');
-                embed.setDescription(`**Issue Description:**\n${message.details}`);    
-                embed.setFooter({
-                    text: `This issue was reported by @${message.user} | ${message.reportLocation}`,
-                });
-                reportingChannel.send({
-                    embeds: [embed],
-                })
-            }
-        }
-        return;
-    }
     if (!message.uuid) return;
     if (message.type === 'getReply') {
         if (message.data === 'messageUser') {

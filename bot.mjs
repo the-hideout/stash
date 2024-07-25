@@ -1,6 +1,4 @@
 import fs from 'fs';
-import * as Sentry from "@sentry/node";
-import "@sentry/tracing";
 import {
     Client,
     GatewayIntentBits,
@@ -10,15 +8,7 @@ import {
 import autocomplete from './modules/autocomplete.mjs';
 //import { updateChoices } from './modules/game-data.mjs';
 import { initShardMessenger, respondToParentMessage } from './modules/shard-messenger.mjs';
-
-if (process.env.NODE_ENV === 'production') {
-    Sentry.init({
-        dsn: "https://ed4cc8e31fd6417998db23fb37819bec@o1189140.ingest.sentry.io/6312417",
-        tracesSampleRate: 1.0,
-    });
-} else {
-    console.log(`Bypassing Sentry in ${process.env.NODE_ENV || 'dev'} environment`);
-}
+import sendWebhook from './modules/webhook.mjs';
 
 process.env.IS_SHARD = 'true';
 
@@ -146,5 +136,18 @@ discordClient.on('interactionCreate', async interaction => {
         } else {
             await interaction.reply(message);
         }
+        sendWebhook({
+            title: `Error running /${interaction.commandName} command on shard ${discordClient.shard.ids[0]}`,
+            message: error.stack,
+            footer: `Command invoked by @${interaction.member.user.username} | ${interaction.member.guild ? `Server: ${interaction.member.guild.name}` : 'DM'}`,
+        });
     }
 });
+
+process.on('uncaughtException', async (error) => {
+    try {
+        sendWebhook({title: `Uncaught exception on shard ${discordClient.shard.ids[0]}` , message: error.stack});
+    } catch (error) {
+        console.log('Error sending uncaught exception webhook alert from shard', error.stack);
+    }
+}); 

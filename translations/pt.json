@@ -5,7 +5,7 @@
     "🟢 Great": "🟢 Ótimo",
     "⭐ Legendary ⭐": "⭐ Lendário ⭐",
     "🔴 Poor": "🔴 Ruim",
-    "🛒 {{traderName}} restock in {{numMinutes}} minutes 🛒": "🛒 {{traderName}} renova o estoque em {{numMinutes}} minutos 🛒",
+    "🛒 {{traderName}} restock in {{numMinutes}} minutes 🛒 ({{gameMode}})": "🛒 {{traderName}} renova o estoque em {{numMinutes}} minutos 🛒 ({{gameMode}})",
     "❌ ERROR ❌": "❌ ERRO ❌",
     "{{thingName}} set to {{level}}.": "{{thingName}} teve o nível definido para {{level}}.",
     "A Dmg": "Dano de A",

@@ -61,21 +61,21 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
-        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
-        const t = getFixedT(locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
 
         // Get the boss name from the command interaction
         const bossName = interaction.options.getString('boss');
 
-        const bosses = await gameData.bosses.getAll(locale);
+        const bosses = await gameData.bosses.getAll({lang});
 
         // Fetch all current map/boss data
-        const maps = await gameData.maps.getAll(locale);
+        const maps = await gameData.maps.getAll({lang, gameMode});
 
         // Fetch all items
-        const items = await gameData.items.getAll(locale);
+        const items = await gameData.items.getAll({lang, gameMode});
 
-        const tiers = await getTiers();
+        const tiers = await getTiers(gameMode);
 
         // Construct the embed
         const embed = new EmbedBuilder();
