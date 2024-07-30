@@ -129,7 +129,7 @@ const defaultFunction = {
         for (const achievementId in profile.achievements) {
             const achievement = achievements.find(a => a.id === achievementId);
             if (!achievement) {
-                return;
+                continue;
             }
             completedAchievements.push({...achievement, completed: profile.achievements[achievementId]});
         }
