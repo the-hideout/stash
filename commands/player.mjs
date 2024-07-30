@@ -95,6 +95,15 @@ const defaultFunction = {
         });*/
         embed.setURL(`https://tarkov.dev/player/${accountId}`);
         const descriptionParts = [`${t('Hours Played')}: ${Math.round(profile.pmcStats.eft.totalInGameTime / 60 / 60)}`];
+        const lastActive = profile.skills.Common.reduce((mostRecent, skill) => {
+            if (skill.LastAccess > mostRecent) {
+                return skill.LastAccess;
+            }
+            return mostRecent;
+        }, 0);
+        if (lastActive > 0) {
+            descriptionParts.push(`${t('Last Active')}: ${new Date(lastActive * 1000).toLocaleString(lang)}`);
+        }
         /*if (task.minPlayerLevel) {
             descriptionParts.push(`${t('Minimum Level')}: ${task.minPlayerLevel}`);
         }*/
