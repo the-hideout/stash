@@ -52,6 +52,14 @@ async function autocomplete(interaction) {
         console.error(getError);
     }
     let cacheKey = interaction.commandName;
+    if (cacheKey === 'player') {
+        const nameResults = await gameData.profiles.search(interaction.options.getString('account'));
+        const names = [];
+        for (const id in nameResults) {
+            names.push({name: nameResults[id], value: id});
+        }
+        return names;
+    }
     if (cacheKey === 'progress' && interaction.options.getSubcommand() === 'hideout') {
         cacheKey = interaction.options.getSubcommand();
         searchString = interaction.options.getString('station');

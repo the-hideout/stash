@@ -117,8 +117,32 @@ const defaultFunction = {
         if (!caliberLabel) caliberLabel = caliber.replace('Caliber', '');
         embed.setTitle(`${caliberLabel} ${t('Ammo Table')}`);
 
+        let maxNameLength = 11;
         if (ammos.length > 0) {
-            embed.setThumbnail(ammos[0].iconLink);
+            //embed.setThumbnail(ammos[0].iconLink);
+            embed.setThumbnail(ammos.reduce((currentThumb, ammo) => {
+                if (!currentThumb) {
+                    currentThumb = ammo.iconLink;
+                }
+                if (ammo.name?.toLowerCase() === searchString.toLowerCase()) {
+                    currentThumb = ammo.iconLink;
+                }
+                const longWidths = [
+                    ammo.properties.penetrationPower >= 100 ? 1 : 0,
+                    ammo.properties.totalDamage >= 100 ? 1 : 0,
+                    ammo.properties.armorDamage >= 100 ? 1 : 0,
+                    ammo.properties.fragmentationChance >= 1 ? 1 : 0,
+                    ammo.properties.initialSpeed >= 100 ? 1 : 0,
+                ].reduce((total, current) => {
+                    return total + current;
+                }, 0);
+                if (longWidths > 2) {
+                    // more than 2 numeric fields will be display with triple digits
+                    // reduce the name field length to compensate
+                    maxNameLength = maxNameLength - longWidths - 2;
+                }
+                return currentThumb;
+            }, null));
         }
 
         for (const ammo of ammos) {
@@ -126,7 +150,7 @@ const defaultFunction = {
                 continue;
             }
             tableData.push([
-                ammo.shortName.substring(0, 11),
+                ammo.shortName.substring(0, maxNameLength),
                 ammo.properties.penetrationPower,
                 ammo.properties.totalDamage,
                 ammo.properties.armorDamage,

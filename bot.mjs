@@ -69,28 +69,14 @@ discordClient.on('guildCreate', async guild => {
 discordClient.on('interactionCreate', async interaction => {
     interaction.start = new Date();
     if (interaction.isAutocomplete()) {
-        if (interaction.commandName === 'player') {
-            const searchString = interaction.options.getString('account');
-            if (!searchString || searchString.length < 3 || searchString > 15) {
-                return [];
-            }
-            const response = await fetch(`https://player.tarkov.dev/name/${searchString}`).then(r => r.json());
-            return interaction.respond(response.map(result => {
-                return {
-                    value: result.aid,
-                    name: result.name,
-                }
-            })).catch(error => {
-                console.error(`Error responding to /${interaction.commandName} command autocomplete request on shard ${discordClient.shard.ids[0]}: ${error}`);
-                //console.error('interaction', interaction);
-                //console.error(error);
-            });
-        }
         let options = await autocomplete(interaction);
 
         options = options.splice(0, 25);
 
         await interaction.respond(options.map(name => {
+            if (typeof name === 'object' && name.name && name.value) {
+                return name;
+            }
             return {
                 name: name,
                 value: name,

@@ -35,6 +35,7 @@ const gameData = {
     playerLevels: [],
     flea: {},
     goonReports: {},
+    achievements: {},
     skills: [
         {
             id: 'hideoutManagement',
@@ -63,7 +64,10 @@ const gameData = {
         'tr',
         'zh',
     ],
+    profiles: {},
 };
+
+let profileIndexUpdateInterval = false;
 
 const mapKeys = {
     '5b0fc42d86f7744a585f9105': 'labs',
@@ -994,7 +998,7 @@ export async function updatePlayerLevels() {
     }`;
     gameData.playerLevels = await graphqlRequest({ graphql: query }).then(response => response.data.playerLevels);
 
-    eventEmitter.emit('updatedTasks');
+    eventEmitter.emit('updatedPlayerLevels');
     return gameData.playerLevels;
 };
 
@@ -1006,6 +1010,42 @@ export async function getPlayerLevels() {
         return gameData.playerLevels;
     }
     return updatePlayerLevels();
+};
+
+export async function updateAchievements() {
+    const achievementQueries = [];
+        for (const langCode of gameData.languages) {
+            achievementQueries.push(`${langCode}: achievements(lang: ${langCode}) {
+                ...AchievementFields
+            }`);
+        }
+        const query = `query StashAchievements {
+            ${achievementQueries.join('\n')}
+        }
+        fragment AchievementFields on Achievement {
+            id
+            name
+            adjustedPlayersCompletedPercent
+        }`;
+        const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+        for (const lang in response) {
+            gameData.achievements[lang] = response[lang];
+        }
+
+    eventEmitter.emit('updatedAchievements');
+    return gameData.achievements;
+};
+
+export async function getAchievements(options = defaultOptions) {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'achievements.getAll', args: options});
+    }
+    let { lang } = mergeOptions(options);
+    lang = validateLanguage(lang);
+    if (gameData.achievements[lang]) {
+        return gameData.achievements[lang];
+    }
+    return updateAchievements().then(as => as[lang]);
 };
 
 export async function updateAll(rejectOnError = false) {
@@ -1028,6 +1068,7 @@ export async function updateAll(rejectOnError = false) {
         updateTasks(),
         updateGoonReports(),
         updatePlayerLevels(),
+        updateAchievements(),
     ]).then(results => {
         const taskNames = [
             'barters',
@@ -1040,6 +1081,7 @@ export async function updateAll(rejectOnError = false) {
             'tasks',
             'goonReports',
             'playerLevels',
+            'achievements',
         ];
         let reject = false;
         results.forEach((result, index) => {
@@ -1215,9 +1257,41 @@ const gameDataExport = {
     playerLevels: {
         getAll: getPlayerLevels,
     },
+    achievements: {
+        getAll: getAchievements,
+    },
+    profiles: {
+        search: async (name) => {
+            if (process.env.IS_SHARD) {
+                return getParentReply({data: 'gameData', function: 'profiles.search', args: [name]});
+            }
+            if (!name || name.length < 3) {
+                return [];
+            }
+            const nameLower = name.toLowerCase();
+            const results = {};
+            for (const id in gameData.profiles) {
+                const playerName = gameData.profiles[id];
+                if (!playerName.toLowerCase().includes(nameLower)) {
+                    continue;
+                }
+                results[id] = playerName;
+            }
+            return results;
+        },
+    },
     events: eventEmitter,
     updateAll: updateAll,
     validateLanguage,
+    updateProfileIndex: async () => {
+        const response = await fetch('https://players.tarkov.dev/profile/index.json');
+        gameData.profiles = await response.json();
+        console.log(`Retrieved player profile index of ${Object.keys(gameData.profiles).length} profiles`);
+        if (!profileIndexUpdateInterval) {
+            profileIndexUpdateInterval = setInterval(gameDataExport.updateProfileIndex, 1000 * 60 * 60 * 24);
+            profileIndexUpdateInterval.unref();
+        }
+    }
 };
 
 export default gameDataExport;

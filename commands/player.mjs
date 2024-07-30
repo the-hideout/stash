@@ -1,4 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import moment from 'moment';
 
 import gameData from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
@@ -42,8 +43,8 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
-        const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
-        const t = getFixedT(locale);
+        const { lang } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
         const accountId = interaction.options.getString('account');
         if (isNaN(accountId)) {
             return interaction.editReply({
@@ -51,7 +52,7 @@ const defaultFunction = {
             });
         }
 
-        const profile = await fetch(`https://player.tarkov.dev/account/${accountId}`).then(r => r.json()).catch(error => {
+        const profile = await fetch(`https://players.tarkov.dev/profile/${accountId}.json`).then(r => r.json()).catch(error => {
             return {
                 err: error.message,
                 errmsg: error.message,
@@ -64,9 +65,10 @@ const defaultFunction = {
             });
         }
 
-        const [playerLevels, items] = await Promise.all([
+        const [playerLevels, items, achievements] = await Promise.all([
             gameData.playerLevels.getAll(),
-            gameData.items.getAll(locale),
+            gameData.items.getAll(lang),
+            gameData.achievements.getAll(lang),
         ]);
 
         const playerLevel = getPlayerLevel(profile.info.experience, playerLevels);
@@ -78,7 +80,10 @@ const defaultFunction = {
 
         const dogtagItem = items.find(i => i.id === dogtagIds[profile.info.side]);
 
+        const embeds = [];
+
         const embed = new EmbedBuilder();
+        embeds.push(embed);
 
         // Construct the embed
         embed.setTitle(`${profile.info.nickname} (${playerLevel} ${t(profile.info.side)})`);
@@ -89,27 +94,62 @@ const defaultFunction = {
             url: `https://tarkov.dev/trader/${trader.normalizedName}`,
         });*/
         embed.setURL(`https://tarkov.dev/player/${accountId}`);
-        const descriptionParts = [`${t('Started Wipe')}: ${new Date(profile.info.registrationDate * 1000).toLocaleString()}`];
+        const descriptionParts = [`${t('Hours Played')}: ${Math.round(profile.pmcStats.eft.totalInGameTime / 60 / 60)}`];
         /*if (task.minPlayerLevel) {
             descriptionParts.push(`${t('Minimum Level')}: ${task.minPlayerLevel}`);
         }*/
         embed.setDescription(descriptionParts.join('\n'));
+        moment.locale(lang);
+        const footerText =  t('Updated {{updateTimeAgo}}', {updateTimeAgo: moment(new Date(profile.updated)).fromNow()});
         
-        /*embed.addFields(
-            { name: t('Objectives'), value: task.objectives.map(obj => `${obj.description}${obj.count > 1 ? ` (x${obj.count})` : ''}`).join('\n'), inline: false },
-        );
-
-        const footerParts = [`${task.experience} EXP`];
-        for (const repReward of task.finishRewards.traderStanding) {
-            const repTrader = traders.find(t => t.id === repReward.trader.id);
-            const sign = repReward.standing >= 0 ? '+' : '';
-            footerParts.push(`${repTrader.name} ${sign}${repReward.standing}`);
+        const statTypes = {
+            pmc: 'PMC',
+            scav: 'Scav',
+        };
+        for (const statType in statTypes) {
+            const sideLabel = statTypes[statType];
+            const raidCount = profile[`${statType}Stats`].eft.overAllCounters.Items?.find(i => i.Key.includes('Sessions'))?.Value ?? 0
+            const raidsSurvived = profile[`${statType}Stats`].eft.overAllCounters.Items?.find(i => i.Key.includes('Survived'))?.Value ?? 0;
+            const raidsDied = profile[`${statType}Stats`].eft.overAllCounters.Items?.find(i => i.Key.includes('Killed'))?.Value ?? 0;
+            const raidSurvivalRatio = raidCount > 0 ? raidsSurvived / raidCount : 0;
+            const raidDiedRatio = raidCount > 0 ? raidsDied / raidCount : 0;
+            const kills = profile[`${statType}Stats`].eft.overAllCounters.Items?.find(i => i.Key.includes('Kills'))?.Value ?? 0;
+            const kdr = raidsDied > 0 ? (kills / raidsDied).toFixed(2) : '∞';
+            const survivalStreak = profile[`${statType}Stats`].eft.overAllCounters.Items?.find(i => i.Key.includes('LongestWinStreak'))?.Value ?? 0;
+            const fieldValue = `${t('Survive Rate')}: ${raidSurvivalRatio.toFixed(2)} (${raidsSurvived}/${raidCount})
+                                ${t('Death Rate')}: ${raidDiedRatio.toFixed(2)} (${raidsDied}/${raidCount})
+                                ${t('K:D', {nsSeparator: '|'})}: ${kdr} (${kills}/${raidsDied})
+                                ${t('Longest Survival Streak')}: ${survivalStreak}`;
+            embed.addFields(
+                { name: t('{{side}} Stats', {side: t(sideLabel)}), value: fieldValue, inline: true },
+            );
         }
 
-        embed.setFooter({ text: footerParts.join(' | ') });*/
+        const completedAchievements = [];
+        for (const achievementId in profile.achievements) {
+            const achievement = achievements.find(a => a.id === achievementId);
+            if (!achievement) {
+                return;
+            }
+            completedAchievements.push({...achievement, completed: profile.achievements[achievementId]});
+        }
+        if (completedAchievements.length > 0) {
+            const achievementsEmbed = new EmbedBuilder();
+            embeds.push(achievementsEmbed);
+            achievementsEmbed.setTitle(t('Achievements'));
+            for (const achievement of completedAchievements) {
+                const completed = new Date(achievement.completed * 1000);
+                achievementsEmbed.addFields(
+                    { name: achievement.name, value: completed.toLocaleString(lang), inline: true },
+                );
+            }
+            achievementsEmbed.setFooter({text: footerText});
+        } else {
+            embed.setFooter({text: footerText});
+        }
 
         return interaction.editReply({
-            embeds: [embed],
+            embeds,
         });
     },
     examples: [

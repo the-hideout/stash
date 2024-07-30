@@ -1,7 +1,7 @@
 import { fork } from 'child_process';
 
 import got from 'got';
-import cron from 'cron';
+import { CronJob } from 'cron';
 import { ShardingManager } from 'discord.js';
 
 import progress from './modules/progress.mjs';
@@ -45,7 +45,7 @@ manager.spawn().then(shards => {
 if (process.env.NODE_ENV === 'production') {
     // A healthcheck cron to send a GET request to our status server
     // The cron schedule is expressed in seconds for the first value
-    healthcheckJob = new cron.CronJob('*/45 * * * * *', () => {
+    healthcheckJob = new CronJob('*/45 * * * * *', () => {
         got(
             `https://status.tarkov.dev/api/push/${process.env.HEALTH_ENDPOINT}?msg=OK`,
             {
@@ -105,6 +105,7 @@ gameData.updateAll().then(() => {
         }
     });
 });
+gameData.updateProfileIndex();
 
 process.on('uncaughtException', (error) => {
     try {
