@@ -74,6 +74,9 @@ discordClient.on('interactionCreate', async interaction => {
         options = options.splice(0, 25);
 
         await interaction.respond(options.map(name => {
+            if (typeof name === 'object' && name.name && name.value) {
+                return name;
+            }
             return {
                 name: name,
                 value: name,

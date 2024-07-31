@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import crypto from 'node:crypto';
 
 import gameData from './game-data.mjs';
 import progress from './progress.mjs';
@@ -11,14 +11,25 @@ export const getShardReply = async(shardId, message) => {
     if (process.env.IS_SHARD) {
         return Promise.reject(new Error('getShardReply can only be called by the parent process'));
     }
-    message.uuid = uuidv4();
+    message.uuid = crypto.randomUUID();
     message.type = 'getReply';
     return new Promise((resolve, reject) => {
-        shardingManager.shards.get(shardId).once(message.uuid, response => {
+        const responseFunction = (response) => {
             if (response.error) return reject(response.error);
             resolve(response.data);
-        });
-        shardingManager.shards.get(shardId).send(message);
+        };
+        shardingManager.shards.get(shardId).once(message.uuid, responseFunction);
+        try {
+            shardingManager.shards.get(shardId).send(message).catch((error) => {
+                shardingManager.shards.get(shardId).off(message.uuid, responseFunction);
+                console.log(`Error sending message to shard ${shardId}`, message, error);
+                reject(error);
+            });
+        } catch (error) {
+            shardingManager.shards.get(shardId).off(message.uuid, responseFunction);
+            console.log(`Error sending message to shard ${shardId}`, message, error);
+            reject(error);
+        }
     });
 };
 
@@ -182,14 +193,25 @@ export const getParentReply = async (message) => {
     if (!process.env.IS_SHARD) {
         return Promise.reject(new Error('getParentReply can only be called by a shard'));
     }
-    message.uuid = uuidv4();
+    message.uuid = crypto.randomUUID();
     message.type = 'getReply';
     return new Promise((resolve, reject) => {
-        process.once(message.uuid, response => {
+        const responseFunction = response => {
             if (response.error) return reject(response.error);
             resolve(response.data);
-        });
-        discordClient.shard.send(message);
+        };
+        process.once(message.uuid, responseFunction);
+        try {
+            discordClient.shard.send(message).catch((error) => {
+                process.off(message.uuid, responseFunction);
+                console.log('Error sending message to shard mananger', message, error);
+                reject(error);
+            });
+        } catch (error) {
+            process.off(message.uuid, responseFunction);
+            console.log('Error sending message to shard mananger', message, error);
+            reject(error);
+        }
     });
 };
 
