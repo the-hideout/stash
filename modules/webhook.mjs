@@ -48,6 +48,9 @@ export default async function sendWebhook(message) {
             text: message.footer,
         });
     }
+    if (message.author) {
+        embed.setAuthor({name: message.author});
+    }
     return webhookClient.send({
         embeds: [embed]
     });
