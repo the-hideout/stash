@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: deployment check
-        uses: github/branch-deploy@v9.3.0
+        uses: github/branch-deploy@v9.4.0
         id: deployment-check
         with:
           merge_deploy_mode: "true" # tells the Action to use the merge commit workflow strategy
@@ -27,7 +27,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.1.7
 
-      - uses: actions/setup-node@v4.0.2
+      - uses: actions/setup-node@v4.0.3
         if: ${{ steps.deployment-check.outputs.continue == 'true' }}
         with:
           node-version-file: .node-version
