@@ -26,7 +26,8 @@ const defaultFunction = {
         const details = interaction.options.getString("message");
     
         sendWebhook({
-            author: member.user.username,
+            author: member.user.globalName,
+            authorPictureUrl: member.user.displayAvatarURL(),
             title: 'Bug Report 🐞',
             message: details,
             footer: `${member.guild ? `Server: ${member.guild.name}` : 'Reported in a DM'} | Language: ${lang} | Mode: ${gameMode}`,

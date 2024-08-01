@@ -49,7 +49,11 @@ export default async function sendWebhook(message) {
         });
     }
     if (message.author) {
-        embed.setAuthor({name: message.author});
+        let iconURL;
+        if (message.authorPictureUrl) {
+            iconURL = message.authorPictureUrl;
+        }
+        embed.setAuthor({name: message.author, iconURL});
     }
     return webhookClient.send({
         embeds: [embed]
