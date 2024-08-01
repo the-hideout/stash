@@ -36,6 +36,6 @@
     "turndown": "^7.2.0"
   },
   "devDependencies": {
-    "@railway/cli": "^3.11.0"
+    "@railway/cli": "^3.11.1"
   }
 }
