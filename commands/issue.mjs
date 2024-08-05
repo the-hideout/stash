@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "discord.js";
 
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 import sendWebhook from '../modules/webhook.mjs';
+import progress from '../modules/progress-shard.mjs';
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
@@ -19,14 +20,17 @@ const defaultFunction = {
         ),
 
     async execute(interaction) {
-        const t = getFixedT(interaction.locale);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
         const { member } = interaction;
         const details = interaction.options.getString("message");
     
         sendWebhook({
-            title: 'New Issue Reported 🐞',
-            message: `**Issue Description:**\n${details}`,
-            footer: `This issue was reported by @${member.user.username} | ${member.guild ? `Server: ${member.guild.name}` : 'Reported in a DM'}`,
+            author: member.user.globalName,
+            authorPictureUrl: member.user.displayAvatarURL(),
+            title: 'Bug Report 🐞',
+            message: details,
+            footer: `${member.guild ? `Server: ${member.guild.name}` : 'Reported in a DM'} | Language: ${lang} | Mode: ${gameMode}`,
         });
         return interaction.reply({
             content: t("Thanks for reporting, we're on it!"),
