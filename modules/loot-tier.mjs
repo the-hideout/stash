@@ -11,7 +11,7 @@ const tierDefaults = {
 };
 
 for (const gameMode of gameModes) {
-    tiers[gameMode] = tierDefaults;
+    tiers[gameMode] = {...tierDefaults};
 }
 
 const arrayAverage = (array) => array.reduce((a, b) => a + b) / array.length;
@@ -20,8 +20,7 @@ export async function updateTiers(items, gameMode = 'regular') {
     // get prices per slot
     const prices = [];
     for (const item of items) {
-        let price = item.avg24hPrice || 0;
-        if (item.lastLowPrice < price && item.lastLowPrice > 0) price = item.lastLowPrice
+        let price = Math.min(item.avg24hPrice ?? 0, item.lastLowPrice ?? 0);
         for (const traderPrice of item.sellFor) {
             if (traderPrice.vendor.normalizedName === 'flea-market') continue;
             if (traderPrice.priceRUB > price) price = traderPrice.priceRUB;
