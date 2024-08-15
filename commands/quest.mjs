@@ -72,8 +72,12 @@ const defaultFunction = {
         }
         embed.setDescription(descriptionParts.join('\n'));
         
+        let objectivesText = task.objectives.map(obj => `${obj.description}${obj.count > 1 ? ` (x${obj.count})` : ''}`).join('\n');
+        if (objectivesText.length > 1024) {
+            objectivesText = objectivesText.substring(0, 1021) + '...';
+        }
         embed.addFields(
-            { name: t('Objectives'), value: task.objectives.map(obj => `${obj.description}${obj.count > 1 ? ` (x${obj.count})` : ''}`).join('\n'), inline: false },
+            { name: t('Objectives'), value: objectivesText, inline: false },
         );
 
         const footerParts = [`${task.experience} EXP`];
