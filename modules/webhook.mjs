@@ -56,6 +56,7 @@ export default async function sendWebhook(message) {
         embed.setAuthor({name: message.author, iconURL});
     }
     return webhookClient.send({
-        embeds: [embed]
+        embeds: [embed],
+        files: message.files,
     });
 };

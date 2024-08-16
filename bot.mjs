@@ -3,6 +3,7 @@ import {
     Client,
     GatewayIntentBits,
     Collection,
+    AttachmentBuilder,
 } from 'discord.js';
 
 import autocomplete from './modules/autocomplete.mjs';
@@ -126,6 +127,12 @@ discordClient.on('interactionCreate', async interaction => {
             title: `Error running /${interaction.commandName} command on shard ${discordClient.shard.ids[0]}`,
             message: error.stack,
             footer: `Command invoked by @${interaction.member.user.username} | ${interaction.member.guild ? `Server: ${interaction.member.guild.name}` : 'DM'}`,
+            files: [
+                new AttachmentBuilder(
+                    Buffer.from(JSON.stringify(interaction.options, null, 4), 'utf8'),
+                    { name: 'options.json' },
+                ),
+            ],
         });
     }
 });
