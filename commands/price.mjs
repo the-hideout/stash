@@ -311,7 +311,6 @@ const defaultFunction = {
                 const itemname = `[${matchedItems[i].name}](${matchedItems[i].link})`;
 
                 if (itemname.length + 2 + otheritems.length > 2048) {
-                    ending.
                     ending.setFooter({text: `${matchedItems.length-i} ${t('additional results not shown.')} | ${gameModeLabel}`});
 
                     break;
