@@ -184,9 +184,14 @@ const defaultFunction = {
 
             mapEmbed.addFields(
                 { name: `${t('Spawn Chance')} 🎲`, value: `${bossData.spawnChance * 100}%`, inline: true },
-                { name: `${t('Spawn Locations')} 📍`, value: spawnLocations, inline: true },
+                //{ name: `${t('Spawn Locations')} 📍`, value: spawnLocations, inline: true },
                 //{ name: 'Spawn Time 🕒', value: spawnTime, inline: true },
             );
+            if (spawnLocations) {
+                mapEmbed.addFields(
+                    { name: `${t('Spawn Locations')} 📍`, value: spawnLocations, inline: true },
+                );
+            }
             if (escortNames) {
                 mapEmbed.addFields({name: `${t('Escort')} 💂`, value: escortNames, inline: true});
             }
