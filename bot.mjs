@@ -10,6 +10,7 @@ import autocomplete from './modules/autocomplete.mjs';
 //import { updateChoices } from './modules/game-data.mjs';
 import { initShardMessenger, respondToParentMessage } from './modules/shard-messenger.mjs';
 import sendWebhook from './modules/webhook.mjs';
+import progress from './modules/progress-shard.mjs';
 
 process.env.IS_SHARD = 'true';
 
@@ -106,6 +107,13 @@ discordClient.on('interactionCreate', async interaction => {
     try {
         await command.default.execute(interaction);
     } catch (error) {
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction).catch(error => {
+            console.log('Error getting lang and gameMode for error', error);
+            return {
+                lang: 'unknown',
+                gameMode: 'unknown',
+            };
+        });
         console.error(`Error executing /${interaction.commandName} command on shard ${discordClient.shard.ids[0]}`, error);
         console.error(`Command duration:`, new Date() - interaction.start, 'ms');
         if (error.message === 'Unknown Message') {
@@ -126,7 +134,7 @@ discordClient.on('interactionCreate', async interaction => {
         sendWebhook({
             title: `Error running /${interaction.commandName} command on shard ${discordClient.shard.ids[0]}`,
             message: error.stack,
-            footer: `Command invoked by @${interaction.member.user.username} | ${interaction.member.guild ? `Server: ${interaction.member.guild.name}` : 'DM'}`,
+            footer: `Command invoked by @${interaction.member.user.username} | ${interaction.member.guild ? `Server: ${interaction.member.guild.name}` : 'DM'} | lang: ${lang} | mode ${gameMode}`,
             files: [
                 new AttachmentBuilder(
                     Buffer.from(JSON.stringify(interaction.options, null, 4), 'utf8'),
