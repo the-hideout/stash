@@ -846,7 +846,7 @@ export async function getItems(options = defaultOptions) {
         return {
             ...item,
             name: itemNames[item.id].name,
-            shortName: itemNames.shortName,
+            shortName: itemNames[item.id].shortName,
             properties,
         }
     });
