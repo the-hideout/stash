@@ -148,6 +148,9 @@ const defaultFunction = {
             achievementsEmbed.setTitle(t('Achievements'));
             for (const achievement of completedAchievements) {
                 const completed = new Date(achievement.completed * 1000);
+                if (!completed) {
+                    continue;
+                }
                 achievementsEmbed.addFields(
                     { name: achievement.name, value: completed.toLocaleString(lang), inline: true },
                 );
