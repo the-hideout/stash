@@ -190,6 +190,7 @@ const calcFleaFee = async (id, price, baseValue, args) => {
     const options = {
         count: 1,
         requireAll: false,
+        gameMode: 'regular',
         ...args
     };
     if (typeof options.intel === 'undefined') {
@@ -216,7 +217,7 @@ const calcFleaFee = async (id, price, baseValue, args) => {
     return Math.round(fee);
 };
 
-const optimalFleaPrice = async (id, baseValue, lowerBound, upperBound) => {
+const optimalFleaPrice = async (id, baseValue, gameMode = 'regular', lowerBound, upperBound) => {
     if (!lowerBound) lowerBound = baseValue*5;
     if (!upperBound) upperBound = baseValue*25;
     let step = Math.round((upperBound - lowerBound) / 50);
@@ -226,14 +227,14 @@ const optimalFleaPrice = async (id, baseValue, lowerBound, upperBound) => {
     let highFee = 0;
     const args = getFleaFactors(id);
     for (let price = lowerBound; price <= upperBound; price += step) {
-        const fee = await calcFleaFee(id, price,baseValue, args);
+        const fee = await calcFleaFee(id, price,baseValue, {...args, gameMode});
         const profit = price - fee;
         if (profit >= highProfit) {
             highProfit = profit;
             highPrice = price;
             highFee = fee;
         } else if (profit < highProfit) {
-            if (step != 1) return optimalFleaPrice(id, baseValue, highPrice, price);
+            if (step != 1) return optimalFleaPrice(id, baseValue, gameMode, highPrice, price);
             break;
         }
     }
@@ -492,8 +493,8 @@ const settings = {
     async getFleaMarketFee(id, price, baseValue, args) {
         return calcFleaFee(id, price, baseValue, args);
     },
-    getOptimalFleaPrice(id, baseValue) {
-        return optimalFleaPrice(id, baseValue);
+    getOptimalFleaPrice(id, baseValue, gameMode = 'regular') {
+        return optimalFleaPrice(id, baseValue, gameMode);
     },
     async getRestockAlerts(id) {
         const prog = settings.getProgressOrDefault(id);

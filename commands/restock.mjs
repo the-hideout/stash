@@ -50,7 +50,24 @@ const subCommands = {
         if (traderId === 'all') {
             traderId = traders.map(trader => trader.id);
         } else {
-            forWho = traders.find(trader => trader.id === traderId).name;
+            const trader = traders.find(trader => trader.id === traderId);
+            if (!trader) {
+                let traderName = 'Unknown Trader';
+                for (const gm of gameData.gameModes.getAll()) {
+                    const gmTrader = await gameData.traders.get(traderId, {lang, gameMode: gm});
+                    if (!gmTrader) {
+                        continue;
+                    }
+                    traderName = gmTrader.name;
+                    break;
+                }
+                const errorEmbed = new EmbedBuilder();
+                errorEmbed.setDescription(`❌ ${t('Trader {{traderName}} does not exist in {{gameMode}}.', {traderName, gameMode: commandT(`game_mode_${gameMode}`)})}`);
+                return interaction.editReply({
+                    embeds: [errorEmbed],
+                });
+            }
+            forWho = trader.name;
         }
 
         let alertsFor = [];

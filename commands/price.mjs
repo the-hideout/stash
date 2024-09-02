@@ -93,7 +93,7 @@ const defaultFunction = {
             let tierFee = 0;
             let sellTo = t('Flea Market');
             if (item.avg24hPrice > 0) {
-                tierFee = await progress.getFleaMarketFee(interaction.user.id, item.avg24hPrice, item.basePrice);
+                tierFee = await progress.getFleaMarketFee(interaction.user.id, item.avg24hPrice, item.basePrice, {gameMode});
                 //tierPrice -= avgFee;
                 let fleaPrice = parseInt(item.avg24hPrice).toLocaleString(locale) + "₽";
 
@@ -110,7 +110,7 @@ const defaultFunction = {
             }
 
             if (item.lastLowPrice > 0) {
-                const lowFee = await progress.getFleaMarketFee(interaction.user.id, item.lastLowPrice, item.basePrice);
+                const lowFee = await progress.getFleaMarketFee(interaction.user.id, item.lastLowPrice, item.basePrice, {gameMode});
                 let fleaPrice = parseInt(item.lastLowPrice).toLocaleString(locale) + "₽";
 
                 if (size > 1) {
@@ -130,8 +130,8 @@ const defaultFunction = {
                 }
             }
 
-            const optimalPrice = await progress.getOptimalFleaPrice(interaction.user.id, item.basePrice);
-            const optimalFee = await progress.getFleaMarketFee(interaction.user.id, optimalPrice, item.basePrice);
+            const optimalPrice = await progress.getOptimalFleaPrice(interaction.user.id, item.basePrice, gameMode);
+            const optimalFee = await progress.getFleaMarketFee(interaction.user.id, optimalPrice, item.basePrice, {gameMode});
             if (optimalPrice - optimalFee > tierPrice - tierFee && optimalPrice < tierPrice) {
                 tierPrice = optimalPrice;
                 tierFee = optimalFee;

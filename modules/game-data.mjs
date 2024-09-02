@@ -1216,6 +1216,9 @@ const gameDataExport = {
         update: updateGoonReports,
     },
     gameModes: {
+        getAll: () => {
+            return gameModes;
+        },
         choices: () => {
             return gameModes.map(gameMode => {
                 return {
