@@ -18,6 +18,7 @@ const calcFleaFee = async (progress, price, baseValue, args) => {
     const options = {
         count: 1,
         requireAll: false,
+        gameMode: 'regular',
         ...args
     };
     if (typeof options.intel === 'undefined') {
@@ -25,7 +26,7 @@ const calcFleaFee = async (progress, price, baseValue, args) => {
         options.intel = prog.intel;
         options.management = prog.management;
     }
-    const flea = await gameData.flea.get();
+    const flea = await gameData.flea.get({gameMode: options.gameMode});
     const q = options.requireAll ? 1 : options.count;
     const vo = baseValue*(options.count/q);
     const vr = price;
@@ -44,7 +45,7 @@ const calcFleaFee = async (progress, price, baseValue, args) => {
     return Math.round(fee);
 };
 
-const optimalFleaPrice = async (progress, baseValue, lowerBound, upperBound) => {
+const optimalFleaPrice = async (progress, baseValue, gameMode = 'regular', lowerBound, upperBound) => {
     if (!lowerBound) lowerBound = baseValue*5;
     if (!upperBound) upperBound = baseValue*25;
     let step = Math.round((upperBound - lowerBound) / 50);
@@ -54,14 +55,14 @@ const optimalFleaPrice = async (progress, baseValue, lowerBound, upperBound) => 
     let highFee = 0;
     const args = await getFleaFactors(progress);
     for (let price = lowerBound; price <= upperBound; price += step) {
-        const fee = await calcFleaFee(progress, price,baseValue, args);
+        const fee = await calcFleaFee(progress, price,baseValue, {...args, gameMode});
         const profit = price - fee;
         if (profit >= highProfit) {
             highProfit = profit;
             highPrice = price;
             highFee = fee;
         } else if (profit < highProfit) {
-            if (step != 1) return optimalFleaPrice(progress, baseValue, highPrice, price);
+            if (step != 1) return optimalFleaPrice(progress, baseValue, gameMode, highPrice, price);
             break;
         }
     }
@@ -100,9 +101,9 @@ const progressShard = {
         const progress = await progressShard.getProgressOrDefault(id);
         return calcFleaFee(progress, price, baseValue, args);
     },
-    async getOptimalFleaPrice(id, baseValue) {
+    async getOptimalFleaPrice(id, baseValue, gameMode = 'regular') {
         const progress = await progressShard.getProgressOrDefault(id);
-        return optimalFleaPrice(progress, baseValue);
+        return optimalFleaPrice(progress, baseValue, gameMode);
     },
     async getRestockAlerts(id, gameMode) {
         return getParentReply({data: 'userTraderRestockAlerts', userId: id});

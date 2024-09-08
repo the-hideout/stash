@@ -145,6 +145,7 @@
         "Time": "Time",
         "Too many notes to display.": "Too many notes to display.",
         "Total": "Total",
+        "Trader {{traderName}} does not exist in {{gameMode}}.": "Trader {{traderName}} does not exist in {{gameMode}}.",
         "Trader restocks": "Trader restocks",
         "Traders": "Traders",
         "Updated {{updateTimeAgo}}": "Updated {{updateTimeAgo}}",
