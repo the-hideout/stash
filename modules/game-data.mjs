@@ -112,7 +112,9 @@ export async function updateLanguages() {
         }
     }`;
     const response = await graphqlRequest({ graphql: query });
-    gameData.languages = response.data.__type.enumValues.map(e => e.name);
+    if (!response.errors?.length) {
+        gameData.languages = response.data.__type.enumValues.map(e => e.name);
+    }
     return gameData.languages;
 }
 
@@ -176,6 +178,9 @@ export async function updateMaps() {
         }
     
         for (const lang in response) {
+            if (gameData.maps[gameMode][lang] && response.errors?.length) {
+                continue;
+            }
             gameData.maps[gameMode][lang] = response[lang];
             
             for (const mapData of gameData.maps[gameMode][lang]) {
@@ -317,6 +322,11 @@ export async function updateBosses() {
         normalizedName
     }`;
     const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+
+    if (gameData.bosses && response.errors?.length) {
+        return gameData.bosses;
+    }
+
     gameData.bosses = response.bosses.map(boss => {
         return {
             ...boss,
@@ -393,6 +403,9 @@ export async function updateTraders() {
             gameData.traders[gameMode] = {};
         }
         for (const lang in response) {
+            if (gameData.traders[gameMode][lang] && response.errors?.length) {
+                continue;
+            }
             gameData.traders[gameMode][lang] = response[lang];
         }
     }
@@ -458,6 +471,9 @@ export async function updateHideout() {
             gameData.hideout[gameMode] = {};
         }
         for (const lang in response) {
+            if (gameData.hideout[gameMode][lang] && response.errors?.length) {
+                continue;
+            }
             gameData.hideout[gameMode][lang] = response[lang];
         }
     }
@@ -514,6 +530,9 @@ export async function updateFlea() {
             }
         }`;
         const response = await graphqlRequest({ graphql: query });
+        if (gameData.flea[gameMode] && response.errors?.length) {
+            continue;
+        }
         gameData.flea[gameMode] = response.data.fleaMarket;
     }
 
@@ -551,6 +570,9 @@ export async function updateBarters() {
             }
         }`;
         const response = await graphqlRequest({ graphql: query });
+        if (gameData.barters[gameMode] && response.errors?.length) {
+            continue;
+        }
         gameData.barters[gameMode] = response.data.barters;
     }
 
@@ -597,6 +619,9 @@ export async function updateCrafts() {
             }
         }`;
         const response = await graphqlRequest({ graphql: query });
+        if (gameData.crafts[gameMode] && response.errors?.length) {
+            continue;
+        }
         gameData.crafts[gameMode] = response.data.crafts;
     }
 
@@ -643,6 +668,9 @@ export async function updateItemNames() {
     }`;
     const response = await graphqlRequest({ graphql: query }).then(response => response.data);
     for (const lang in response) {
+        if (gameData.itemNames[lang] && response.errors?.length) {
+            continue;
+        }
         gameData.itemNames[lang] = response[lang].reduce((langData, item) => {
             langData[item.id] = item;
             return langData;
@@ -786,6 +814,9 @@ export async function updateItems() {
             }
         }`;
         const response = await graphqlRequest({ graphql: query });
+        if (gameData.items[gameMode] && response.errors?.length) {
+            continue;
+        }
         response.data?.items.forEach(item => {
             if (item.properties?.defaultPreset) {
                 item.iconLink = item.properties.defaultPreset.iconLink;
@@ -944,6 +975,9 @@ export async function updateTasks() {
             gameData.tasks[gameMode] = {};
         }
         for (const lang in response) {
+            if (gameData.tasks[gameMode][lang] && response.errors?.length) {
+                continue;
+            }
             gameData.tasks[gameMode][lang] = response[lang];
         }
     }
@@ -975,6 +1009,9 @@ export async function updateGoonReports() {
             }
         }`;
         const response = await graphqlRequest({ graphql: query });
+        if (gameData.goonReports[gameMode] && response.errors?.length) {
+            continue;
+        }
         gameData.goonReports[gameMode] = response.data.goonReports;
     }
     
@@ -996,7 +1033,10 @@ export async function updatePlayerLevels() {
             exp
         }
     }`;
-    gameData.playerLevels = await graphqlRequest({ graphql: query }).then(response => response.data.playerLevels);
+    const response = await graphqlRequest({ graphql: query });
+    if (!gameData.playerLevels || !response.errors?.length) {
+        gameData.playerLevels = response.data.playerLevels;
+    }
 
     eventEmitter.emit('updatedPlayerLevels');
     return gameData.playerLevels;
@@ -1029,6 +1069,9 @@ export async function updateAchievements() {
         }`;
         const response = await graphqlRequest({ graphql: query }).then(response => response.data);
         for (const lang in response) {
+            if (gameData.achievements[lang] && response.errors?.length) {
+                continue;
+            }
             gameData.achievements[lang] = response[lang];
         }
 
