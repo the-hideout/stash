@@ -22,6 +22,9 @@ const caches = {
             return names;
         }, []).sort());
     },
+    key: async lang => {
+        return gameData.items.getKeys(lang).then(items => items.map(item => item.name).sort());
+    },
     ammo: async lang => {
         return gameData.items.getAmmo(lang).then(items => items.map(item => item.name).sort());
     },

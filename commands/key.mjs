@@ -5,14 +5,14 @@ import gameData from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 import createEmbed from '../modules/create-embed.mjs';
 
-const MAX_ITEMS = 2;
+const MAX_ITEMS = 1;
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
-        .setName('price')
-        .setDescription('Get an item\'s flea and trader value')
-        .setNameLocalizations(getCommandLocalizations('price'))
-        .setDescriptionLocalizations(getCommandLocalizations('price_desc'))
+        .setName('key')
+        .setDescription('Get a key\'s price and maps it is used on')
+        .setNameLocalizations(getCommandLocalizations('key'))
+        .setDescriptionLocalizations(getCommandLocalizations('key_desc'))
         .addStringOption(option => option
             .setName('name')
             .setDescription('Item name to search for')
@@ -32,12 +32,13 @@ const defaultFunction = {
         // Get the search string from the user invoked command
         const searchString = interaction.options.getString('name');
 
-        const [ items, traders, hideout, barters, crafts ] = await Promise.all([
+        const [ items, traders, hideout, barters, crafts, maps ] = await Promise.all([
             gameData.items.getAll({lang, gameMode}),
             gameData.traders.getAll({lang, gameMode}),
             gameData.hideout.getAll({lang, gameMode}),
             gameData.barters.getAll({ gameMode}),
             gameData.crafts.getAll({ gameMode}),
+            gameData.maps.getAll({ lang, gameMode}),
         ]);
         const matchedItems = items.filter(i => i.name.toLowerCase().includes(searchString.toLowerCase()));
 
@@ -71,42 +72,21 @@ const defaultFunction = {
 
             embeds.push(embed);
 
+            embeds.push(await createEmbed.unlockMaps(item, interaction, {maps, interactionSettings: {lang, gameMode}}));
+
             if (i >= MAX_ITEMS - 1) {
                 break;
             }
         }
 
-        if (MAX_ITEMS < matchedItems.length) {
-            const ending = new EmbedBuilder();
-
-            ending.setTitle("+" + (matchedItems.length - MAX_ITEMS) + ` ${t('more')}`);
-            ending.setURL("https://tarkov.dev/?search=" + encodeURIComponent(searchString));
-
-            let otheritems = '';
-            for (let i = MAX_ITEMS; i < matchedItems.length; i = i + 1) {
-                const item = matchedItems[i];
-                const itemname = `[${matchedItems[i].name}](${matchedItems[i].link})`;
-
-                if (itemname.length + 2 + otheritems.length > 2048) {
-                    ending.setFooter({text: `${matchedItems.length-i} ${t('additional results not shown.')} | ${gameModeLabel}`});
-
-                    break;
-                }
-
-                otheritems += itemname + "\n";
-            }
-
-            ending.setDescription(otheritems);
-
-            embeds.push(ending);
-        } else {
-            //embeds[embeds.length-1].setFooter({text: gameModeLabel});
+        if (embeds.length > 10) {
+            embeds = embeds.slice(0, 9);
         }
 
         return interaction.editReply({ embeds: embeds });
     },
     examples: [
-        '/$t(price) bitcoin'
+        '/$t(key) Factory Emergency Exit Key'
     ]
 };
 

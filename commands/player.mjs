@@ -34,7 +34,7 @@ const defaultFunction = {
             .setName('account')
             .setDescription('Account to retrieve')
             .setNameLocalizations(getCommandLocalizations('account'))
-            .setDescriptionLocalizations(getCommandLocalizations('account_seach_desc'))
+            .setDescriptionLocalizations(getCommandLocalizations('account_search_desc'))
             .setAutocomplete(true)
             .setRequired(true)
             .setMinLength(3)

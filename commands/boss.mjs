@@ -11,7 +11,7 @@ const bossDetails = [
         "details": "Sneaky bois. Cultists lurk in the shadows in groups of 3-5, waiting for a player to approach. They silently approach their enemies and stab them using either normal knives or, in case of the priests, the poisoned Cultist knife. If fired upon, the Cultists will return fire using firearms and grenades. After they attack a player with their knife, they may choose to run off into the woods again and return to the shadows.",
     },
     {
-        "name": "death-knight",
+        "name": "knight",
         "details": "The leader of 'The Goons'. Can spawn on many different maps.",
     },
     {
@@ -65,7 +65,7 @@ const defaultFunction = {
         const t = getFixedT(lang);
 
         // Get the boss name from the command interaction
-        const bossName = interaction.options.getString('boss');
+        const bossId = interaction.options.getString('boss');
 
         const bosses = await gameData.bosses.getAll({lang});
 
@@ -80,7 +80,7 @@ const defaultFunction = {
         // Construct the embed
         const embed = new EmbedBuilder();
 
-        const boss = bosses.find(b => b.normalizedName === bossName);
+        const boss = bosses.find(b => b.id === bossId);
 
         // Add base fields to the embed
         // Construct the description with boss details
@@ -139,7 +139,7 @@ const defaultFunction = {
         embed.setURL(`https://tarkov.dev/boss/${boss.normalizedName}`);
 
         for (const bossData of bossDetails) {
-            if (bossData.name === bossName) {
+            if (bossData.id === bossId) {
                 details = bossData.details;
                 //loot = boss.loot?.map(lootItem => items.find(i => i.id === lootItem.id)?.name).filter(Boolean).join(', ');
                 break;
@@ -157,7 +157,7 @@ const defaultFunction = {
         const mapEmbeds = [];
         for (const map of maps) {
             // Only use the data for the boss specified in the command
-            const bossData = map.bosses.find(boss => boss.normalizedName === bossName);
+            const bossData = map.bosses.find(boss => boss.id === bossId);
             if (!bossData) continue;
 
             embed.setTitle(bossData.name);

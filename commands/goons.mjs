@@ -35,7 +35,7 @@ const defaultFunction = {
                 gameData.goonReports.get({gameMode})
             ]);
             const reportsEmbed = new EmbedBuilder();
-            const goons = bosses.find(b => b.normalizedName === 'death-knight');
+            const goons = bosses.find(b => b.id === 'bossKnight');
             if (goons) {
                 reportsEmbed.setThumbnail(goons.imagePortraitLink);
             }
