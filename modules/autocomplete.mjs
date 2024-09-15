@@ -54,9 +54,10 @@ async function autocomplete(interaction) {
     } catch (getError) {
         console.error(getError);
     }
+    const { lang, gameMode } = await progress.getInteractionSettings(interaction);
     let cacheKey = interaction.commandName;
     if (cacheKey === 'player') {
-        const nameResults = await gameData.profiles.search(interaction.options.getString('account'));
+        const nameResults = await gameData.profiles.search(interaction.options.getString('account'), {gameMode});
         const names = [];
         for (const id in nameResults) {
             names.push({name: nameResults[id], value: id});
@@ -68,8 +69,7 @@ async function autocomplete(interaction) {
         searchString = interaction.options.getString('station');
     }
     const cacheFunction = caches[cacheKey] || caches.default;
-    const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
-    const nameCache = await cacheFunction(locale);
+    const nameCache = await cacheFunction(lang);
 
     if (cacheKey === 'ammo') {
         return nameCache.filter(name => name.toLowerCase().replace(/\./g, '').includes(searchString.toLowerCase().replace(/\./g, '')));
