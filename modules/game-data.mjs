@@ -1327,17 +1327,18 @@ const gameDataExport = {
         getAll: getAchievements,
     },
     profiles: {
-        search: async (name) => {
+        search: async (name, options) => {
             if (process.env.IS_SHARD) {
-                return getParentReply({data: 'gameData', function: 'profiles.search', args: [name]});
+                return getParentReply({data: 'gameData', function: 'profiles.search', args: [name, options]});
             }
             if (!name || name.length < 3) {
                 return [];
             }
+            let { gameMode } = mergeOptions(options);
             const nameLower = name.toLowerCase();
             const results = {};
-            for (const id in gameData.profiles) {
-                const playerName = gameData.profiles[id];
+            for (const id in gameData.profiles[gameMode]) {
+                const playerName = gameData.profiles[gameMode][id];
                 if (!playerName.toLowerCase().includes(nameLower)) {
                     continue;
                 }
@@ -1350,12 +1351,18 @@ const gameDataExport = {
     updateAll: updateAll,
     validateLanguage,
     updateProfileIndex: async () => {
-        const response = await fetch('https://players.tarkov.dev/profile/index.json');
-        gameData.profiles = await response.json();
-        console.log(`Retrieved player profile index of ${Object.keys(gameData.profiles).length} profiles`);
-        if (!profileIndexUpdateInterval) {
-            profileIndexUpdateInterval = setInterval(gameDataExport.updateProfileIndex, 1000 * 60 * 60 * 24);
-            profileIndexUpdateInterval.unref();
+        for (const gameMode of gameModes) {
+            let folder = 'profile';
+            if (gameMode !== 'regular') {
+                folder = gameMode;
+            }
+            const response = await fetch(`https://players.tarkov.dev/${folder}/index.json`);
+            gameData.profiles[gameMode] = await response.json();
+            console.log(`Retrieved ${gameMode} player profile index of ${Object.keys(gameData.profiles[gameMode]).length} profiles`);
+            if (!profileIndexUpdateInterval) {
+                profileIndexUpdateInterval = setInterval(gameDataExport.updateProfileIndex, 1000 * 60 * 60 * 24);
+                profileIndexUpdateInterval.unref();
+            }
         }
     }
 };

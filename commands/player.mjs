@@ -43,16 +43,21 @@ const defaultFunction = {
 
     async execute(interaction) {
         await interaction.deferReply();
-        const { lang } = await progress.getInteractionSettings(interaction);
+        const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
         const accountId = interaction.options.getString('account');
         if (isNaN(accountId)) {
             return interaction.editReply({
                 content: `❌ ${t('{{accountId}} is not a valid account id', {accountId})}`
             });
         }
+        let profilePath = 'profile';
+        if (gameMode !== 'regular') {
+            profilePath = gameMode;
+        }
 
-        const profile = await fetch(`https://players.tarkov.dev/profile/${accountId}.json`).then(r => r.json()).catch(error => {
+        const profile = await fetch(`https://players.tarkov.dev/${profilePath}/${accountId}.json`).then(r => r.json()).catch(error => {
             return {
                 err: error.message,
                 errmsg: error.message,
@@ -93,7 +98,7 @@ const defaultFunction = {
             iconURL: trader.imageLink,
             url: `https://tarkov.dev/trader/${trader.normalizedName}`,
         });*/
-        embed.setURL(`https://tarkov.dev/player/${accountId}`);
+        embed.setURL(`https://tarkov.dev/players/${gameMode}/${accountId}`);
         const descriptionParts = [`${t('Hours Played')}: ${Math.round(profile.pmcStats.eft.totalInGameTime / 60 / 60)}`];
         const lastActive = profile.skills.Common.reduce((mostRecent, skill) => {
             if (skill.LastAccess > mostRecent) {
@@ -109,7 +114,9 @@ const defaultFunction = {
         }*/
         embed.setDescription(descriptionParts.join('\n'));
         moment.locale(lang);
-        const footerText =  t('Updated {{updateTimeAgo}}', {updateTimeAgo: moment(new Date(profile.updated)).fromNow()});
+        const updatedText =  t('Updated {{updateTimeAgo}}', {updateTimeAgo: moment(new Date(profile.updated)).fromNow()});
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+        const footerText = `${updatedText} | ${gameModeLabel}`;
         
         const statTypes = {
             pmc: 'PMC',
