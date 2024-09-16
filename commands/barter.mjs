@@ -3,6 +3,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
+import createEmbed from '../modules/create-embed.mjs';
 
 const MAX_BARTERS = 3;
 
@@ -74,77 +75,7 @@ const defaultFunction = {
 
         for (let i = 0; i < matchedBarters.length; i = i + 1) {
             const barter = barters.find(b => b.id === matchedBarters[i]);
-            let totalCost = 0;
-            const embed = new EmbedBuilder();
-
-            const rewardItem = items.find(it => it.id === barter.rewardItems[0].item.id);
-            let title = rewardItem.name;
-
-            if (barter.rewardItems[0].count > 1) {
-                title += " (" + barter.rewardItems[0].count + ")";
-            }
-
-            //title += `\r\n ${traders.find(tr => tr.id === barter.trader.id).name} ${t('LL')}${barter.level}${locked}`;
-            embed.setTitle(title);
-            embed.setURL(rewardItem.link);
-            const locked = prog.traders[barter.trader.id] < barter.level ? '🔒' : '';
-            const trader = traders.find(tr => tr.id === barter.trader.id);
-            embed.setAuthor({
-                name: `${trader.name} ${t('LL')}${barter.level}${locked}`,
-                iconURL: trader.imageLink,
-                url: `https://tarkov.dev/trader/${trader.normalizedName}`,
-            });
-
-            if (rewardItem.iconLink) {
-                embed.setThumbnail(rewardItem.iconLink);
-            }
-
-            for (const req of barter.requiredItems) {
-                const reqItem = items.find(i => i.id === req.item.id);
-                let itemCost = reqItem.avg24hPrice || 0;
-
-                if (reqItem.lastLowPrice > itemCost && reqItem.lastLowPrice > 0) {
-                    itemCost = reqItem.lastLowPrice;
-                }
-
-                for (const offer of reqItem.buyFor) {
-                    if (!offer.vendor.trader) {
-                        continue;
-                    }
-                    let traderPrice = offer.priceRUB;
-
-                    if ((traderPrice < itemCost && prog.traders[offer.vendor.trader.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
-                        itemCost = traderPrice;
-                    }
-                }
-
-                let bestSellPrice = 0;
-                for (const offer of reqItem.sellFor) {
-                    if (!offer.vendor.trader) {
-                        continue;
-                    }
-                    if (offer.priceRUB > bestSellPrice) {
-                        bestSellPrice = offer.priceRUB;
-                    }
-                }
-
-                let reqName = reqItem.name;
-                if (itemCost === 0) {
-                    itemCost = bestSellPrice;
-
-                    const isDogTag = req.attributes.some(att => att.name === 'minLevel');
-                    if (isDogTag) {
-                        const tagLevel = req.attributes.find(att => att.name === 'minLevel').value;
-                        itemCost = bestSellPrice * tagLevel;
-                        reqName += ' >= '+tagLevel;
-                    }
-                }
-
-                totalCost += itemCost * req.count;
-                embed.addFields({name: reqName, value: itemCost.toLocaleString(lang) + "₽ x " + req.count, inline: true});
-            }
-
-            embed.addFields({name: t('Total'), value: totalCost.toLocaleString(lang) + "₽", inline: false});
+            const embed = await createEmbed.barter(barter, interaction, {items, traders, progress: prog, interactionSettings: {lang, gameMode}});
 
             embeds.push(embed);
 

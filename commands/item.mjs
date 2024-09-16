@@ -5,14 +5,14 @@ import gameData from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 import createEmbed from '../modules/create-embed.mjs';
 
-const MAX_ITEMS = 2;
+const MAX_ITEMS = 1;
 
 const defaultFunction = {
     data: new SlashCommandBuilder()
-        .setName('price')
-        .setDescription('Get an item\'s flea and trader value')
-        .setNameLocalizations(getCommandLocalizations('price'))
-        .setDescriptionLocalizations(getCommandLocalizations('price_desc'))
+        .setName('item')
+        .setDescription('Get price, craft, barter, etc. information about an item')
+        .setNameLocalizations(getCommandLocalizations('item'))
+        .setDescriptionLocalizations(getCommandLocalizations('item_desc'))
         .addStringOption(option => option
             .setName('name')
             .setDescription('Item name to search for')
@@ -32,12 +32,13 @@ const defaultFunction = {
         // Get the search string from the user invoked command
         const searchString = interaction.options.getString('name');
 
-        const [ items, traders, hideout, barters, crafts ] = await Promise.all([
+        const [ items, traders, hideout, barters, crafts, maps ] = await Promise.all([
             gameData.items.getAll({lang, gameMode}),
             gameData.traders.getAll({lang, gameMode}),
             gameData.hideout.getAll({lang, gameMode}),
             gameData.barters.getAll({ gameMode}),
             gameData.crafts.getAll({ gameMode}),
+            gameData.maps.getAll({ lang, gameMode}),
         ]);
         const matchedItems = items.filter(i => i.name.toLowerCase().includes(searchString.toLowerCase()));
 
@@ -49,7 +50,6 @@ const defaultFunction = {
             embed.setFooter({text: gameModeLabel});
             return interaction.editReply({
                 embeds: [embed],
-                ephemeral: true,
             });
         }
 
@@ -67,46 +67,39 @@ const defaultFunction = {
 
         for (let i = 0; i < matchedItems.length; i = i + 1) {
             const item = matchedItems[i];
-            const embed = await createEmbed.price(item, interaction, {items, traders, hideout, barters, crafts, interactionSettings: {lang, gameMode}, progress: prog});
+            const priceEmbed = await createEmbed.price(item, interaction, {items, traders, hideout, barters, crafts, interactionSettings: {lang, gameMode}, progress: prog});
 
-            embeds.push(embed);
+            embeds.push(priceEmbed);
+
+            const matchedBarters = barters.filter(b => b.rewardItems.some(reward => reward.item.id === item.id) || b.requiredItems.some(req => req.item.id === item.id));
+            for (const barter of matchedBarters) {
+                embeds.push(await createEmbed.barter(barter, interaction, {items, traders, progress: prog, interactionSettings: {lang, gameMode}}));
+            }
+
+            const matchedCrafts = crafts.filter(c => c.rewardItems.some(reward => reward.item.id === item.id) || c.requiredItems.some(req=> req.item.id === item.id));
+            for (const craft of matchedCrafts) {
+                embeds.push(await createEmbed.craft(craft, interaction, {items, hideout, progress: prog, interactionSettings: {lang, gameMode}}));
+            }
+            
+            if (item.categories.some(cat => cat.id === '543be5e94bdc2df1348b4568')) {
+                embeds.push(await createEmbed.unlockMaps(item, interaction, {maps, interactionSettings: {lang, gameMode}}));
+            }
 
             if (i >= MAX_ITEMS - 1) {
                 break;
             }
         }
 
-        if (MAX_ITEMS < matchedItems.length) {
-            const ending = new EmbedBuilder();
-
-            ending.setTitle("+" + (matchedItems.length - MAX_ITEMS) + ` ${t('more')}`);
-            ending.setURL("https://tarkov.dev/?search=" + encodeURIComponent(searchString));
-
-            let otheritems = '';
-            for (let i = MAX_ITEMS; i < matchedItems.length; i = i + 1) {
-                const item = matchedItems[i];
-                const itemname = `[${matchedItems[i].name}](${matchedItems[i].link})`;
-
-                if (itemname.length + 2 + otheritems.length > 2048) {
-                    ending.setFooter({text: `${matchedItems.length-i} ${t('additional results not shown.')} | ${gameModeLabel}`});
-
-                    break;
-                }
-
-                otheritems += itemname + "\n";
-            }
-
-            ending.setDescription(otheritems);
-
-            embeds.push(ending);
-        } else {
-            //embeds[embeds.length-1].setFooter({text: gameModeLabel});
+        if (embeds.length > 10) {
+            console.log(embeds[1]);
+            embeds = embeds.slice(0, 10);
+            console.log(embeds[1]);
         }
 
-        return interaction.editReply({ embeds: embeds });
+        return interaction.editReply({ embeds });
     },
     examples: [
-        '/$t(price) bitcoin'
+        '/$t(item) LEDX'
     ]
 };
 

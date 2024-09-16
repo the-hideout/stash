@@ -141,8 +141,11 @@ export async function updateMaps() {
             raidDuration
             players
             bosses {
-                name
-                normalizedName
+                boss {
+                    id
+                    name
+                    normalizedName
+                }
                 spawnChance
                 spawnLocations {
                     name
@@ -163,10 +166,15 @@ export async function updateMaps() {
             accessKeys {
                 id
             }
+            locks {
+                key {
+                    id
+                }
+            }
             accessKeysMinPlayerLevel
         }`;
         const [response, mapImages] = await Promise.all([
-            graphqlRequest({ graphql: query }).then(response => response.data),
+            graphqlRequest({ graphql: query }),
             got('https://raw.githubusercontent.com/the-hideout/tarkov-dev/master/src/data/maps.json', {
                 responseType: 'json',
                 headers: { "user-agent": "stash-tarkov-dev" }
@@ -177,11 +185,12 @@ export async function updateMaps() {
             gameData.maps[gameMode] = {};
         }
     
-        for (const lang in response) {
+        for (const lang in response.data) {
             if (gameData.maps[gameMode][lang] && response.errors?.length) {
+                console.log('Error getting maps data', response.errors);
                 continue;
             }
-            gameData.maps[gameMode][lang] = response[lang];
+            gameData.maps[gameMode][lang] = response.data[lang];
             
             for (const mapData of gameData.maps[gameMode][lang]) {
                 let testKey = mapData.normalizedName;
@@ -226,14 +235,14 @@ export async function updateMaps() {
         });
 
         // Loop through each boss and push the boss name to the bossChoices array
-        for (const boss of mapData.bosses) {
+        for (const spawn of mapData.bosses) {
             const boss_loc = {};
             // Don't add Rogues and Raiders
-            if (boss.normalizedName === 'rogue' || boss.normalizedName === 'raider') {
+            if (spawn.boss.id === 'ExUsec' || spawn.boss.id === 'PmcBot') {
                 continue;
             }
             // Don't add duplicates
-            if (bosses.some(bossChoice => bossChoice.value === boss.normalizedName)) {
+            if (bosses.some(bossChoice => bossChoice.value === spawn.boss.id)) {
                 continue;
             }
 
@@ -247,7 +256,7 @@ export async function updateMaps() {
                     if (!dLocale) {
                         continue;
                     }
-                    if (boss.normalizedName !== locBoss.normalizedName) {
+                    if (spawn.boss.id !== locBoss.id) {
                         continue;
                     }
                     boss_loc[dLocale] = locBoss.name;
@@ -255,8 +264,8 @@ export async function updateMaps() {
             }
 
             bosses.push({
-                name: boss.name,
-                value: boss.normalizedName,
+                name: spawn.boss.name,
+                value: spawn.boss.id,
                 name_localizations: boss_loc,
             });
         }
@@ -267,7 +276,7 @@ export async function updateMaps() {
     choices.boss = bosses.sort((a, b) => {
         return a.name.localeCompare(b.name);
     });
-    choices.goonsMaps = choices.map.filter(c => gameData.maps.regular.en.some(m => m.id === c.value && m.bosses.some(b => b.normalizedName === 'death-knight')));
+    choices.goonsMaps = choices.map.filter(c => gameData.maps.regular.en.some(m => m.id === c.value && m.bosses.some(spawn => spawn.boss.id === 'bossKnight')));
     return gameData.maps;
 };
 
@@ -295,7 +304,7 @@ export async function updateBosses() {
     }
     const query = `query StashBosses {
         bosses {
-            name
+            ...BossName
             normalizedName
             imagePortraitLink
             health {
@@ -318,8 +327,8 @@ export async function updateBosses() {
         ${bossQueries.join('\n')}
     }
     fragment BossName on MobInfo {
+        id
         name
-        normalizedName
     }`;
     const response = await graphqlRequest({ graphql: query }).then(response => response.data);
 
@@ -342,7 +351,7 @@ export async function updateBosses() {
             continue;
         }
         gameData.bossNames[lang] = response[lang].reduce((langData, boss) => {
-            langData[boss.normalizedName] = boss;
+            langData[boss.id] = boss;
             return langData;
         }, {});
     }
@@ -366,7 +375,7 @@ export async function getBosses(options = defaultOptions) {
     return gameData.bosses.map(boss => {
         return {
             ...boss,
-            ...bossNames[boss.normalizedName],
+            ...bossNames[boss.id],
         }
     });
 }
@@ -702,6 +711,9 @@ export async function updateItems() {
                 link
                 category {
                     name
+                    id
+                }
+                categories {
                     id
                 }
                 properties {
@@ -1289,6 +1301,14 @@ const gameDataExport = {
         },
         getAmmo: getAmmo,
         getStims: getStims,
+        getKeys: async (options) => {
+            if (process.env.IS_SHARD) {
+                return getParentReply({data: 'gameData', function: 'items.getKeys', args: options});
+            }
+            return getItems(options).then(items => {
+                return items.filter(item => item.categories.some(cat => cat.id === '543be5e94bdc2df1348b4568'));
+            });
+        },
     },
     tasks: {
         getAll: getTasks,
@@ -1307,17 +1327,18 @@ const gameDataExport = {
         getAll: getAchievements,
     },
     profiles: {
-        search: async (name) => {
+        search: async (name, options) => {
             if (process.env.IS_SHARD) {
-                return getParentReply({data: 'gameData', function: 'profiles.search', args: [name]});
+                return getParentReply({data: 'gameData', function: 'profiles.search', args: [name, options]});
             }
             if (!name || name.length < 3) {
                 return [];
             }
+            let { gameMode } = mergeOptions(options);
             const nameLower = name.toLowerCase();
             const results = {};
-            for (const id in gameData.profiles) {
-                const playerName = gameData.profiles[id];
+            for (const id in gameData.profiles[gameMode]) {
+                const playerName = gameData.profiles[gameMode][id];
                 if (!playerName.toLowerCase().includes(nameLower)) {
                     continue;
                 }
@@ -1330,12 +1351,18 @@ const gameDataExport = {
     updateAll: updateAll,
     validateLanguage,
     updateProfileIndex: async () => {
-        const response = await fetch('https://players.tarkov.dev/profile/index.json');
-        gameData.profiles = await response.json();
-        console.log(`Retrieved player profile index of ${Object.keys(gameData.profiles).length} profiles`);
-        if (!profileIndexUpdateInterval) {
-            profileIndexUpdateInterval = setInterval(gameDataExport.updateProfileIndex, 1000 * 60 * 60 * 24);
-            profileIndexUpdateInterval.unref();
+        for (const gameMode of gameModes) {
+            let folder = 'profile';
+            if (gameMode !== 'regular') {
+                folder = gameMode;
+            }
+            const response = await fetch(`https://players.tarkov.dev/${folder}/index.json`);
+            gameData.profiles[gameMode] = await response.json();
+            console.log(`Retrieved ${gameMode} player profile index of ${Object.keys(gameData.profiles[gameMode]).length} profiles`);
+            if (!profileIndexUpdateInterval) {
+                profileIndexUpdateInterval = setInterval(gameDataExport.updateProfileIndex, 1000 * 60 * 60 * 24);
+                profileIndexUpdateInterval.unref();
+            }
         }
     }
 };
