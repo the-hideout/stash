@@ -30,9 +30,9 @@ const defaultFunction = {
             gameData.items.getAll({lang, gameMode}),
         ]);
 
-        const selectedMapData = maps.find(mapObject => mapObject.id === mapId);
+        const map = maps.find(m => m.id === mapId);
 
-        const embed = await createEmbed.map(selectedMapData, interaction, {items, maps, interactionOptions: {lang, gameMode}});
+        const embed = await createEmbed.map(map, interaction, {items, maps, interactionOptions: {lang, gameMode}});
 
         return interaction.editReply({
             embeds: [embed],
