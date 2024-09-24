@@ -32,13 +32,14 @@ const defaultFunction = {
         // Get the search string from the user invoked command
         const searchString = interaction.options.getString('name');
 
-        const [ items, traders, hideout, barters, crafts, maps ] = await Promise.all([
+        const [ items, traders, hideout, barters, crafts, maps, tasks ] = await Promise.all([
             gameData.items.getAll({lang, gameMode}),
             gameData.traders.getAll({lang, gameMode}),
             gameData.hideout.getAll({lang, gameMode}),
             gameData.barters.getAll({ gameMode}),
             gameData.crafts.getAll({ gameMode}),
             gameData.maps.getAll({ lang, gameMode}),
+            gameData.tasks.getAll({ lang, gameMode }),
         ]);
         const matchedItems = items.filter(i => i.name.toLowerCase().includes(searchString.toLowerCase()));
 
@@ -84,6 +85,8 @@ const defaultFunction = {
             if (item.categories.some(cat => cat.id === '543be5e94bdc2df1348b4568')) {
                 embeds.push(await createEmbed.unlockMaps(item, interaction, {maps, interactionSettings: {lang, gameMode}}));
             }
+
+            embeds.push(await createEmbed.itemUsedInTasks(item, interaction, {tasks, interactionSettings: {lang, gameMode}}));
 
             if (i >= MAX_ITEMS - 1) {
                 break;

@@ -414,7 +414,7 @@ const createEmbed = {
         }
 
         // Calculate item tier
-        let tier = await lootTier(tierPrice / (item.width * item.height), item.types.includes('noFlea'));
+        let tier = await lootTier(tierPrice / (item.width * item.height), item.types.includes('noFlea'), gameMode);
         embed.setColor(tier.color);
         body += `• ${t('Item Tier')}: ${t(tier.msg)}\n`;
 
@@ -556,6 +556,45 @@ const createEmbed = {
             unlocksEmbed.setDescription(mapLinks.join('\n'));
         }
         return unlocksEmbed;
+    },
+    itemUsedInTasks: async (item, interaction, options = {}) => {
+        const { lang, gameMode } = options.interactionSettings ?? await progress.getInteractionSettings(interaction);
+        const t = getFixedT(lang);
+
+        const [ tasks ] = await Promise.all([
+            options.tasks ?? gameData.tasks.getAll({lang, gameMode}),
+        ]);
+
+        const embed = new EmbedBuilder();
+
+        for (const task of tasks) {
+            let needed = task.objectives.some(obj => obj.requiredKeys?.some(keyOptions => keyOptions.some(k => k.id === item.id)));
+            needed = needed || task.objectives.some(obj => obj.items?.some(i => i.id === item.id));
+            if (!needed) {
+                continue;
+            }
+
+            let alternates = task.objectives.some(obj => obj.requiredKeys?.some(keyOptions => keyOptions.some(k => k.id === item.id) && keyOptions.length > 1));
+            alternates = alternates || task.objectives.some(obj => obj.items?.some(i => i.id === item.id) && obj.items.length > 1);
+            const fieldValueLines = [];
+            if (alternates) {
+                fieldValueLines.push(t('Has alternates'));
+            } else {
+                fieldValueLines.push(t('No alternates'));
+            }
+            const fir = task.objectives.some(obj => obj.items?.some(i => i.id === item.id) && obj.foundInRaid);
+            if (fir) {
+                fieldValueLines.push(t('Found in raid'));
+            }
+            embed.addFields({name: task.name, value: `[${fieldValueLines.join('\n')}](https://tarkov.dev/task/${task.normalizedName})`});
+        }
+        if (embed.data?.fields?.length > 0) {
+            embed.setTitle(`${t('Used in tasks')} 📋`);
+        } else {
+            embed.setTitle(`${t('Not used in any tasks')} 📋`);
+        }
+
+        return embed;
     },
 };
 

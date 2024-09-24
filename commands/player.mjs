@@ -47,9 +47,20 @@ const defaultFunction = {
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
         const accountId = interaction.options.getString('account');
+
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+
+        const embeds = [];
+
+        const embed = new EmbedBuilder();
+        embeds.push(embed);
+
         if (isNaN(accountId)) {
+            embed.setTitle(`❌ ${t('{{accountId}} is not a valid account id', {accountId})}`);
+            embed.setDescription(t('Make sure you have the right game mode active and that the profile has been viewed on [tarkov.dev](https://tarkov.dev/players).'));
+            embed.setFooter({text: gameModeLabel});
             return interaction.editReply({
-                content: `❌ ${t('{{accountId}} is not a valid account id', {accountId})}`
+                embeds,
             });
         }
         let profilePath = 'profile';
@@ -85,11 +96,6 @@ const defaultFunction = {
 
         const dogtagItem = items.find(i => i.id === dogtagIds[profile.info.side]);
 
-        const embeds = [];
-
-        const embed = new EmbedBuilder();
-        embeds.push(embed);
-
         // Construct the embed
         embed.setTitle(`${profile.info.nickname} (${playerLevel} ${t(profile.info.side)})`);
         embed.setThumbnail(dogtagItem.iconLink);
@@ -115,7 +121,6 @@ const defaultFunction = {
         embed.setDescription(descriptionParts.join('\n'));
         moment.locale(lang);
         const updatedText =  t('Updated {{updateTimeAgo}}', {updateTimeAgo: moment(new Date(profile.updated)).fromNow()});
-        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
         const footerText = `${updatedText} | ${gameModeLabel}`;
         
         const statTypes = {
@@ -124,7 +129,7 @@ const defaultFunction = {
         };
         for (const statType in statTypes) {
             const sideLabel = statTypes[statType];
-            const raidCount = profile[`${statType}Stats`].eft.overAllCounters.Items?.find(i => i.Key.includes('Sessions'))?.Value ?? 0
+            const raidCount = profile[`${statType}Stats`].eft.overAllCounters.Items?.find(i => i.Key.includes('Sessions'))?.Value ?? 0;
             const raidsSurvived = profile[`${statType}Stats`].eft.overAllCounters.Items?.find(i => i.Key.includes('Survived'))?.Value ?? 0;
             const raidsDied = profile[`${statType}Stats`].eft.overAllCounters.Items?.find(i => i.Key.includes('Killed'))?.Value ?? 0;
             const raidSurvivalRatio = raidCount > 0 ? raidsSurvived / raidCount : 0;
@@ -157,6 +162,9 @@ const defaultFunction = {
                 const completed = new Date(achievement.completed * 1000);
                 if (!completed) {
                     continue;
+                }
+                if (achievementsEmbed.data.fields?.length >= 25) {
+                    break;
                 }
                 achievementsEmbed.addFields(
                     { name: achievement.name, value: completed.toLocaleString(lang), inline: true },
