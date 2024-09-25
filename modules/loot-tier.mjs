@@ -20,6 +20,10 @@ export async function updateTiers(items, gameMode = 'regular') {
     // get prices per slot
     const prices = [];
     for (const item of items) {
+        if (item.types.includes('noFlea')) {
+            // ignore values of flea banned items since they have their own category
+            continue;
+        }
         let price = Math.min(item.avg24hPrice ?? 0, item.lastLowPrice ?? 0);
         for (const traderPrice of item.sellFor) {
             if (traderPrice.vendor.normalizedName === 'flea-market') continue;

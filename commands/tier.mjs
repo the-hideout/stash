@@ -21,11 +21,11 @@ const defaultFunction = {
             .setTitle(t('Loot Tiers'))
             .setDescription(`
                 ${t('Loot tiers are divided primarily by the per-slot value of the item')}:
-                • ${t((await getPriceTier(tiers.legendary)).msg)} ≥ ${tiers.legendary.toLocaleString(lang)}₽
-                • ${t((await getPriceTier(0, true)).msg)}
-                • ${t((await getPriceTier(tiers.great)).msg)} ≥ ${tiers.great.toLocaleString(lang)}₽
-                • ${t((await getPriceTier(tiers.average)).msg)} ≥ ${tiers.average.toLocaleString(lang)}₽
-                • ${t((await getPriceTier(tiers.average -1)).msg)} < ${tiers.average.toLocaleString(lang)}₽
+                • ${t((await getPriceTier(tiers.legendary, false, gameMode)).msg)} ≥ ${tiers.legendary.toLocaleString(lang)}₽
+                • ${t((await getPriceTier(0, true, gameMode)).msg)}
+                • ${t((await getPriceTier(tiers.great, false, gameMode)).msg)} ≥ ${tiers.great.toLocaleString(lang)}₽
+                • ${t((await getPriceTier(tiers.average, false, gameMode)).msg)} ≥ ${tiers.average.toLocaleString(lang)}₽
+                • ${t((await getPriceTier(tiers.average -1, false, gameMode)).msg)} < ${tiers.average.toLocaleString(lang)}₽
             `)
             .setFooter({text: gameModeLabel});
         return interaction.reply({ embeds: [embed] });

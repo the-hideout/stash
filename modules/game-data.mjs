@@ -330,13 +330,13 @@ export async function updateBosses() {
         id
         name
     }`;
-    const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+    const response = await graphqlRequest({ graphql: query });
 
     if (gameData.bosses && response.errors?.length) {
         return gameData.bosses;
     }
 
-    gameData.bosses = response.bosses.map(boss => {
+    gameData.bosses = response.data.bosses.map(boss => {
         return {
             ...boss,
             health: boss.health ? boss.health.reduce((total, healthPart) => {
@@ -346,11 +346,11 @@ export async function updateBosses() {
         }
     });
 
-    for (const lang in response) {
+    for (const lang in response.data) {
         if (lang === 'bosses') {
             continue;
         }
-        gameData.bossNames[lang] = response[lang].reduce((langData, boss) => {
+        gameData.bossNames[lang] = response.data[lang].reduce((langData, boss) => {
             langData[boss.id] = boss;
             return langData;
         }, {});
@@ -405,17 +405,16 @@ export async function updateTraders() {
                 payRate
             }
         }`;
-        const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+        const response = await graphqlRequest({ graphql: query });
     
-
         if (!gameData.traders[gameMode]) {
             gameData.traders[gameMode] = {};
         }
-        for (const lang in response) {
+        for (const lang in response.data) {
             if (gameData.traders[gameMode][lang] && response.errors?.length) {
                 continue;
             }
-            gameData.traders[gameMode][lang] = response[lang];
+            gameData.traders[gameMode][lang] = response.data[lang];
         }
     }
 
@@ -475,15 +474,15 @@ export async function updateHideout() {
                 level
             }
         }`;
-        const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+        const response = await graphqlRequest({ graphql: query });
         if (!gameData.hideout[gameMode]) {
             gameData.hideout[gameMode] = {};
         }
-        for (const lang in response) {
+        for (const lang in response.data) {
             if (gameData.hideout[gameMode][lang] && response.errors?.length) {
                 continue;
             }
-            gameData.hideout[gameMode][lang] = response[lang];
+            gameData.hideout[gameMode][lang] = response.data[lang];
         }
     }
 
@@ -675,12 +674,12 @@ export async function updateItemNames() {
             }
         }
     }`;
-    const response = await graphqlRequest({ graphql: query }).then(response => response.data);
-    for (const lang in response) {
+    const response = await graphqlRequest({ graphql: query });
+    for (const lang in response.data) {
         if (gameData.itemNames[lang] && response.errors?.length) {
             continue;
         }
-        gameData.itemNames[lang] = response[lang].reduce((langData, item) => {
+        gameData.itemNames[lang] = response.data[lang].reduce((langData, item) => {
             langData[item.id] = item;
             return langData;
         }, {});
@@ -938,8 +937,23 @@ export async function updateTasks() {
                         id
                     }
                 }
+                ...on TaskObjectiveExtract {
+                    requiredKeys {
+                        id
+                    }
+                }
                 ...on TaskObjectiveItem {
+                    id
                     count
+                    foundInRaid
+                    requiredKeys {
+                        id
+                    }
+                    items {
+                        id
+                    }
+                }
+                ...on TaskObjectiveMark {
                     requiredKeys {
                         id
                     }
@@ -947,8 +961,16 @@ export async function updateTasks() {
                 ...on TaskObjectivePlayerLevel {
                     playerLevel
                 }
+                ...on TaskObjectiveQuestItem {
+                    requiredKeys {
+                        id
+                    }
+                }
                 ...on TaskObjectiveShoot {
                     count
+                    requiredKeys {
+                        id
+                    }
                 }
                 ...on TaskObjectiveSkill {
                     skillLevel {
@@ -964,6 +986,9 @@ export async function updateTasks() {
                 }
                 ...on TaskObjectiveUseItem {
                     count
+                    requiredKeys {
+                        id
+                    }
                 }
             }
             trader {
@@ -981,16 +1006,16 @@ export async function updateTasks() {
                 }
             }
         }`;
-        const response = await graphqlRequest({ graphql: query }).then(response => response.data);
+        const response = await graphqlRequest({ graphql: query });
 
         if (!gameData.tasks[gameMode]) {
             gameData.tasks[gameMode] = {};
         }
-        for (const lang in response) {
+        for (const lang in response.data) {
             if (gameData.tasks[gameMode][lang] && response.errors?.length) {
                 continue;
             }
-            gameData.tasks[gameMode][lang] = response[lang];
+            gameData.tasks[gameMode][lang] = response.data[lang];
         }
     }
 
@@ -1079,12 +1104,12 @@ export async function updateAchievements() {
             name
             adjustedPlayersCompletedPercent
         }`;
-        const response = await graphqlRequest({ graphql: query }).then(response => response.data);
-        for (const lang in response) {
+        const response = await graphqlRequest({ graphql: query });
+        for (const lang in response.data) {
             if (gameData.achievements[lang] && response.errors?.length) {
                 continue;
             }
-            gameData.achievements[lang] = response[lang];
+            gameData.achievements[lang] = response.data[lang];
         }
 
     eventEmitter.emit('updatedAchievements');
