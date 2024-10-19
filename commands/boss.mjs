@@ -158,24 +158,25 @@ const defaultFunction = {
         const mapEmbeds = [];
         for (const map of maps) {
             // Only use the data for the boss specified in the command
-            const bossData = map.bosses.find(spawn => spawn.boss.id === bossId);
-            if (!bossData) continue;
+            const bossSpawn = map.bosses.find(spawn => spawn.boss.id === bossId);
+            if (!bossSpawn) continue;
 
             const mapEmbed = new EmbedBuilder();
             mapEmbed.setTitle(map.name);
-            //mapEmbed.addFields({name: 'Map', value: `${map.name} (${bossData.spawnChance * 100}%)`, inline: false});
+            mapEmbed.setURL(`https://tarkov.dev/map/${map.normalizedName}`);
+            //mapEmbed.addFields({name: 'Map', value: `${map.name} (${bossSpawn.spawnChance * 100}%)`, inline: false});
 
             // Join the spawn locations into a comma separated string
-            const spawnLocations = bossData.spawnLocations.map(spawnLocation => spawnLocation.name).join(', ');
+            const spawnLocations = bossSpawn.spawnLocations.map(spawnLocation => spawnLocation.name).join(', ');
 
             // Join the escort names into a comma separated string
-            const escortNames = bossData.escorts.map(escortName => `${escortName.name} x${escortName.amount[0].count}`).join(', ').replaceAll(' x1', '');
+            const escortNames = bossSpawn.escorts.map(escortName => `${escortName.name} x${escortName.amount[0].count}`).join(', ').replaceAll(' x1', '');
 
             var spawnTime;
-            if (bossData.spawnTime === -1) {
+            if (bossSpawn.spawnTime === -1) {
                 spawnTime = t('Raid Start');
             } else {
-                spawnTime = `${bossData.spawnTime} ${t('seconds')}`;
+                spawnTime = `${bossSpawn.spawnTime} ${t('seconds')}`;
             }
 
             // Format the embed description body
@@ -183,7 +184,7 @@ const defaultFunction = {
             // description += `• **Spawn Locations**: ${spawnLocations}\n`;
 
             mapEmbed.addFields(
-                { name: `${t('Spawn Chance')} 🎲`, value: `${bossData.spawnChance * 100}%`, inline: true },
+                { name: `${t('Spawn Chance')} 🎲`, value: `${bossSpawn.spawnChance * 100}%`, inline: true },
                 //{ name: `${t('Spawn Locations')} 📍`, value: spawnLocations, inline: true },
                 //{ name: 'Spawn Time 🕒', value: spawnTime, inline: true },
             );
