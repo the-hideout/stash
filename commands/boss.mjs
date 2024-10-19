@@ -66,7 +66,6 @@ const defaultFunction = {
 
         // Get the boss name from the command interaction
         const bossId = interaction.options.getString('boss');
-        console.log(bossId);
 
         const bosses = await gameData.bosses.getAll({lang});
 
