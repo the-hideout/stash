@@ -66,6 +66,7 @@ const defaultFunction = {
 
         // Get the boss name from the command interaction
         const bossId = interaction.options.getString('boss');
+        console.log(bossId);
 
         const bosses = await gameData.bosses.getAll({lang});
 
@@ -135,6 +136,7 @@ const defaultFunction = {
             loot.push(item);
         }
         loot = loot.map(item => item.name).join(', ');
+        embed.setTitle(boss.name);
         embed.setThumbnail(boss.imagePortraitLink);
         embed.setURL(`https://tarkov.dev/boss/${boss.normalizedName}`);
 
@@ -157,10 +159,9 @@ const defaultFunction = {
         const mapEmbeds = [];
         for (const map of maps) {
             // Only use the data for the boss specified in the command
-            const bossData = map.bosses.find(boss => boss.id === bossId);
+            const bossData = map.bosses.find(spawn => spawn.boss.id === bossId);
             if (!bossData) continue;
 
-            embed.setTitle(bossData.name);
             const mapEmbed = new EmbedBuilder();
             mapEmbed.setTitle(map.name);
             //mapEmbed.addFields({name: 'Map', value: `${map.name} (${bossData.spawnChance * 100}%)`, inline: false});
