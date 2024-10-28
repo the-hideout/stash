@@ -21,20 +21,29 @@ This bot is open source and supported by the team behind [Tarkov.dev](https://ta
 |  Command  |  Example   |  Description   |
 |    :----:   |     :----:    |        :----:       |
 | `/help`      | `/help` or `help <command>`         | The help command to view all available commands |
-| `/price` | `/price name: <item>`  | Get a detailed output on the price of an item, its price tier, and more! |
-| `/map` | `/map woods` | View a map and some general info about it |
-| `/barter` | `/barter name: <item>` | Check barter details for an item |
-| `/craft` | `/craft name: <item>` | Check crafting details for an item |
-| `/ammo` | `/ammo ammo_type: 5.45x39mm` | Get a sorted ammo table for a certain ammo type |
-| `/status` | - | Get the game/server/website status of Escape from Tarkov |
 | `/about` | - | View details about the bot |
-| `/issue` | `/issue message: <text>` | Report an issue with the bot |
-| `/invite` | - | Get a Discord invite link for the bot to join it to another server |
-| `/tier` | - | Show the criteria for loot tiers |
+| `/ammo` | `/ammo ammo_type: 5.45x39mm` | Get a sorted ammo table for a certain ammo type |
+| `/barter` | `/barter name: <item>` | Check barter details for an item |
+| `/boss` | - | Get detailed information about a boss |
 | `/changes` | - | Get the latest game changes from [tarkov-changes.com](https://tarkov-changes.com) |
+| `/craft` | `/craft name: <item>` | Check crafting details for an item |
+| `/gamemode` | - | Set the game mode (regular, PVE) for bot responses |
+| `/goons` | - | Check or report the location of the Goons |
+| `/invite` | - | Get a Discord invite link for the bot to join it to another server |
+| `/issue` | `/issue message: <text>` | Report an issue with the bot |
+| `/item` | - | Get price, craft, barter, etc. information about an item |
+| `/key` | - | Get a key's price and maps it is used on |
+| `/map` | `/map woods` | View a map and some general info about it |
 | `/patchnotes` | - | Get the latest *official* patchnotes for EFT |
-| `/stim` | - | Get information about a in-game stim |
+| `/player` | - | Get player profile information |
+| `/price` | `/price name: <item>`  | Get a detailed output on the price of an item, its price tier, and more! |
+| `/progress` | - | Manage your customized hideout and trader progress |
+| `/quest` | - | Get detailed information about a quest |
+| `/restock` | - | Show or set alerts for trader restock timers |
 | `/roulette` | - | Play a game of roulette to determine how you play your next raid |
+| `/status` | - | Get the game/server/website status of Escape from Tarkov |
+| `/stim` | - | Get information about a in-game stim |
+| `/tier` | - | Show the criteria for loot tiers |
 | `/uptime` | - | Get the bot's uptime |
 
 ---
