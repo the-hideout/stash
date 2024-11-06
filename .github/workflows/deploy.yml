@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: deployment check
-        uses: github/branch-deploy@v9.8.1
+        uses: github/branch-deploy@v9.9.1
         id: deployment-check
         with:
           merge_deploy_mode: "true" # tells the Action to use the merge commit workflow strategy
@@ -25,9 +25,9 @@ jobs:
       # always run checkout because the 'release (sentry)' step needs the code
       # do we still need this after removing sentry?
       - name: checkout
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.2
 
-      - uses: actions/setup-node@v4.0.4
+      - uses: actions/setup-node@v4.1.0
         if: ${{ steps.deployment-check.outputs.continue == 'true' }}
         with:
           node-version-file: .node-version
