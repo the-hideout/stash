@@ -106,6 +106,7 @@
         "Restock alert disabled for {{traderName}}.": "Alarm uzupełnienia wyłączony dla: {{traderName}}.",
         "Restock alert enabled for {{traderName}}.": "Alarm uzupełnienia włączony dla: {{traderName}}.",
         "Required Tools": "Wymagane narzędzia",
+        "Required Ingredients": "Required Ingredients",
         "seconds": "sekundy",
         "Sell to": "Sprzedaj do",
         "Server language set to {{languageCode}}.": "Server language set to {{languageCode}}.",

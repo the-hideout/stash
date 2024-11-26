@@ -106,6 +106,7 @@
         "Restock alert disabled for {{traderName}}.": "Alarmierung für neue Vorräte des Händlers {{traderName}} deaktiviert.",
         "Restock alert enabled for {{traderName}}.": "Alarmierung für neue Vorräte des Händlers {{traderName}} aktiviert.",
         "Required Tools": "benötigte Werkzeuge",
+        "Required Ingredients": "Required Ingredients",
         "seconds": "Sekunden",
         "Sell to": "verkaufen an",
         "Server language set to {{languageCode}}.": "Server language set to {{languageCode}}.",
