@@ -107,6 +107,7 @@
         "Restock alert disabled for {{traderName}}.": "Оповещения о пополнении запасов отключено для {{traderName}}.",
         "Restock alert enabled for {{traderName}}.": "Оповещения о пополнении запасов включено для {{traderName}}.",
         "Required Tools": "Необходимые инструменты",
+        "Required Ingredients": "Required Ingredients",
         "seconds": "секунд",
         "Sell to": "Продать",
         "Server language set to {{languageCode}}.": "Язык сервера установлен на {{languageCode}}.",

@@ -106,6 +106,7 @@
         "Restock alert disabled for {{traderName}}.": "Alerte de réapprovisionnement désactivée pour {{traderName}}.",
         "Restock alert enabled for {{traderName}}.": "Alerte de réapprovisionnement activée pour {{traderName}}.",
         "Required Tools": "Outils requis",
+        "Required Ingredients": "Required Ingredients",
         "seconds": "secondes",
         "Sell to": "Vendre à",
         "Server language set to {{languageCode}}.": "Server language set to {{languageCode}}.",
