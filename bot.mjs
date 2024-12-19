@@ -134,7 +134,7 @@ discordClient.on('interactionCreate', async interaction => {
         sendWebhook({
             title: `Error running /${interaction.commandName} command on shard ${discordClient.shard.ids[0]}`,
             message: error.stack,
-            footer: `Command invoked by @${interaction.member.user.username} | ${interaction.member.guild ? `Server: ${interaction.member.guild.name}` : 'DM'} | lang: ${lang} | mode ${gameMode}`,
+            footer: `Command invoked by @${interaction.member?.user?.username ?? 'Unknown User'} | ${interaction.member?.guild ? `Server: ${interaction.member.guild.name}` : 'DM'} | lang: ${lang} | mode ${gameMode}`,
             files: [
                 new AttachmentBuilder(
                     Buffer.from(JSON.stringify(interaction.options, null, 4), 'utf8'),
