@@ -9,7 +9,7 @@
         "numReplicas": 1,
         "sleepApplication": false,
         "multiRegionConfig": {
-            "us-west1": {
+            "us-west2": {
                 "numReplicas": 1
             }
         },
