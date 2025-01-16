@@ -74,10 +74,9 @@ const buildDefaultProgress = id => {
             restock: {},
         },
     };
-    const gameModes = ['regular', 'pve'];
     for (const gameMode of gameModes) {
         progress[gameMode] = getDefaultGameModeProgress();
-        progress.alerts[gameMode] = [];
+        progress.alerts.restock[gameMode] = [];
     }
     return progress;
 };
@@ -167,8 +166,13 @@ const getUserProgress = async id => {
     if (Array.isArray(userProgress[id].alerts.restock)) {
         userProgress[id].alerts.restock = {
             regular: userProgress[id].alerts.restock,
-            pve: [],
         };
+    }
+    for (const gameMode of gameModes) {
+        if (!userProgress[id].alerts.restock[gameMode]) {
+            userProgress[id].alerts.restock[gameMode] = [];
+        }
+        
     }
     return userProgress[id];
 };
@@ -248,9 +252,6 @@ const addRestockAlert = async (id, traders, locale) => {
     const gameMode = prog.gameMode ?? 'regular';
     if (locale) {
         prog.locale = locale;
-    }
-    if (!prog.alerts.restock[gameMode]) {
-        prog.alerts.restock[gameMode] = [];
     }
     const restockAlerts = prog.alerts.restock[gameMode];
     for (const traderId of traders) {
