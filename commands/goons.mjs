@@ -103,7 +103,7 @@ const defaultFunction = {
                 json: {
                     map: selectedMap.nameId,
                     timestamp: new Date().getTime(),
-                    accountId: parseInt(interaction.user.id.slice(-10)),
+                    discordId: interaction.user.id,
                     gameMode: gameMode,
                 },
             }).json();
