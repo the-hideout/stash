@@ -21,13 +21,13 @@
   },
   "type": "module",
   "dependencies": {
-    "@discordjs/rest": "^2.4.2",
+    "@discordjs/rest": "^2.4.3",
     "ascii-table": "^0.0.9",
     "cheerio": "^1.0.0",
     "cron": "^3.1.7",
     "cross-env": "^7.0.3",
     "discord-api-types": "^0.37.118",
-    "discord.js": "^14.17.3",
+    "discord.js": "^14.18.0",
     "dotenv": "^16.4.7",
     "got": "^14.4.2",
     "i18next": "^24.2.2",
@@ -36,6 +36,6 @@
     "turndown": "^7.2.0"
   },
   "devDependencies": {
-    "@railway/cli": "^3.20.2"
+    "@railway/cli": "^3.21.0"
   }
 }
