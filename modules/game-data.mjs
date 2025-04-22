@@ -1068,6 +1068,7 @@ export async function updatePlayerLevels() {
         playerLevels {
             level
             exp
+            levelBadgeImageLink
         }
     }`;
     const response = await graphqlRequest({ graphql: query });
