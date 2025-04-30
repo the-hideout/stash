@@ -17,11 +17,11 @@ const getPlayerLevel = (exp, levels) => {
             return levelData.level;
         }
         if (expTotal > exp) {
-            return levels[i - 1].level;
+            return levels[i - 1];
         }
         
     }
-    return levels[levels.length-1].level;
+    return levels[levels.length-1];
 };
 
 const defaultFunction = {
@@ -81,24 +81,16 @@ const defaultFunction = {
             });
         }
 
-        const [playerLevels, items, achievements] = await Promise.all([
+        const [playerLevels, achievements] = await Promise.all([
             gameData.playerLevels.getAll(),
-            gameData.items.getAll(lang),
             gameData.achievements.getAll(lang),
         ]);
 
-        const playerLevel = getPlayerLevel(profile.info.experience, playerLevels);
-
-        const dogtagIds = {
-            Usec: '59f32c3b86f77472a31742f0',
-            Bear: '59f32bb586f774757e1e8442'
-        };
-
-        const dogtagItem = items.find(i => i.id === dogtagIds[profile.info.side]);
+        const { level: playerLevel, levelBadgeImageLink } = getPlayerLevel(profile.info.experience, playerLevels);
 
         // Construct the embed
         embed.setTitle(`${profile.info.nickname} (${playerLevel} ${t(profile.info.side)})`);
-        embed.setThumbnail(dogtagItem.iconLink);
+        embed.setThumbnail(levelBadgeImageLink);
         /*embed.setAuthor({
             name: trader.name,
             iconURL: trader.imageLink,
