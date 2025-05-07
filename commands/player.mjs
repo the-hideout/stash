@@ -56,8 +56,8 @@ const defaultFunction = {
         embeds.push(embed);
 
         if (isNaN(accountId)) {
-            embed.setTitle(`❌ ${t('{{accountId}} is not a valid account id', {accountId})}`);
-            embed.setDescription(t('Make sure you have the right game mode active and that the profile has been viewed on [tarkov.dev](https://tarkov.dev/players).'));
+            embed.setTitle(`❌ ${t('Account id {{accountId}} not found', {accountId})}`);
+            embed.setDescription(t('Make sure you have the right game mode active and that the profile has been viewed on [tarkov.dev](https://tarkov.dev/players). It may take up to 24 hours after the profile first being viewed on tarkov.dev to be available here.'));
             embed.setFooter({text: gameModeLabel});
             return interaction.editReply({
                 embeds,
