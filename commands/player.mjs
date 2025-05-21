@@ -6,20 +6,16 @@ import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs'
 import progress from '../modules/progress-shard.mjs';
 
 const getPlayerLevel = (exp, levels) => {
-    if (exp === 0) {
-        return 0;
-    }
     let expTotal = 0;
     for (let i = 0; i < levels.length; i++) {
         const levelData = levels[i];
         expTotal += levelData.exp;
         if (expTotal === exp) {
-            return levelData.level;
+            return levelData;
         }
         if (expTotal > exp) {
             return levels[i - 1];
         }
-        
     }
     return levels[levels.length-1];
 };
@@ -96,6 +92,65 @@ const defaultFunction = {
             iconURL: trader.imageLink,
             url: `https://tarkov.dev/trader/${trader.normalizedName}`,
         });*/
+        const profileImageUrl = new URL(`https://imagemagic.tarkov.dev/player/${profile.aid}.webp`);
+        const skipSlots = [
+            'FirstPrimaryWeapon',
+            'SecondPrimaryWeapon',
+            'Holster',
+            'Scabbard',
+            'Pockets',
+            'SecuredContainer',
+            'ArmBand',
+        ];
+        const armorSlots = [
+            /_plate$/,
+            /^[Ss]oft_armor_/,
+            /^Collar$/,
+            /^Groin$/,
+            /^[Hh]elmet_/,
+        ];
+        const skipProps = [
+            'Repairable',
+            'Sight',
+            'StackObjectsCount',
+        ];
+        const equipment = {
+            ...profile.equipment,
+            Items: profile.equipment.Items.filter(e => {
+                if (e._id === profile.equipment.Id) {
+                    return true;
+                }
+                if (armorSlots.some(pattern => e.slotId.match(pattern))) {
+                    return false;
+                }
+                let rootItem = e;
+                while (rootItem.parentId !== profile.equipment.Id) {
+                    rootItem = profile.equipment.Items.find(ee => ee._id === rootItem.parentId);
+                }
+                return !skipSlots.includes(rootItem.slotId);
+            }).map(e => {
+                if (!e.upd) {
+                    return e;
+                }
+                for (const key in e.upd) {
+                    if (skipProps.includes(key)) {
+                        delete e.upd[key];
+                    }
+                }
+                if (!Object.keys(e.upd)) {
+                    delete e.upd;
+                }
+                return e;
+            }),
+        };
+
+        profileImageUrl.searchParams.set('data', JSON.stringify({aid: profile.aid, customization: profile.customization, equipment}));
+        if (profileImageUrl.toString().length <= 2048) {
+            embed.setImage(profileImageUrl.toString());
+        } else {
+            console.log(`Skipping /player profile image for url length ${profileImageUrl.toString().length}`);
+            console.log(JSON.stringify(equipment, null, 4));
+        }
         embed.setURL(`https://tarkov.dev/players/${gameMode}/${accountId}`);
         const descriptionParts = [`${t('Hours Played')}: ${Math.round(profile.pmcStats.eft.totalInGameTime / 60 / 60)}`];
         const lastActive = profile.skills.Common.reduce((mostRecent, skill) => {
