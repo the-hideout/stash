@@ -14,8 +14,7 @@ const graphqlRequest = async (options) => {
         }),
         headers: { 
             'user-agent': 'stash-tarkov-dev', 
-            'Content-Type': 'application/json', 
-            'Referer': 'http://stash.tarkov.dev'
+            'Content-Type': 'application/json',
         },
         resolveBodyOnly: true,
     });
