@@ -18,7 +18,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4.2.2
       - name: comment
-        uses: GrantBirki/comment@f524ee31407667c05061bad41e1758b40298bd82 # pin@v2.1.0
+        uses: GrantBirki/comment@608e41b19bc973020ec0e189ebfdae935d7fe0cc # pin@v2.1.1
         continue-on-error: true
         with:
           file: .github/new-pr-comment.md
