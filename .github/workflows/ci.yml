@@ -21,7 +21,7 @@ jobs:
 
       # validate JSON and YAML files
       - name: json-yaml-validate
-        uses: GrantBirki/json-yaml-validate@v3.3.0
+        uses: GrantBirki/json-yaml-validate@v3.3.2
         with:
           comment: "true"
           exclude_file: ".github/config/exclude.txt"
