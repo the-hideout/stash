@@ -26,16 +26,16 @@
     "cheerio": "^1.0.0",
     "cron": "^3.1.7",
     "cross-env": "^7.0.3",
-    "discord-api-types": "^0.38.1",
-    "discord.js": "^14.19.2",
+    "discord-api-types": "^0.38.9",
+    "discord.js": "^14.19.3",
     "dotenv": "^16.5.0",
     "got": "^14.4.2",
-    "i18next": "^25.0.2",
+    "i18next": "^25.2.1",
     "moment": "^2.30.1",
     "nodemon": "^3.1.10",
     "turndown": "^7.2.0"
   },
   "devDependencies": {
-    "@railway/cli": "^4.3.0"
+    "@railway/cli": "^4.5.3"
   }
 }
