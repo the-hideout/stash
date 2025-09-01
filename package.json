@@ -21,21 +21,21 @@
   },
   "type": "module",
   "dependencies": {
-    "@discordjs/rest": "^2.5.1",
+    "@discordjs/rest": "^2.6.0",
     "ascii-table": "^0.0.9",
     "cheerio": "^1.1.2",
     "cron": "^3.1.7",
     "cross-env": "^10.0.0",
-    "discord-api-types": "^0.38.18",
-    "discord.js": "^14.21.0",
+    "discord-api-types": "^0.38.22",
+    "discord.js": "^14.22.1",
     "dotenv": "^17.2.1",
     "got": "^14.4.2",
-    "i18next": "^25.3.2",
+    "i18next": "^25.4.2",
     "moment": "^2.30.1",
     "nodemon": "^3.1.10",
-    "turndown": "^7.2.0"
+    "turndown": "^7.2.1"
   },
   "devDependencies": {
-    "@railway/cli": "^4.5.6"
+    "@railway/cli": "^4.6.3"
   }
 }
