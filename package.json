@@ -25,17 +25,17 @@
     "ascii-table": "^0.0.9",
     "cheerio": "^1.1.2",
     "cron": "^3.1.7",
-    "cross-env": "^10.0.0",
-    "discord-api-types": "^0.38.22",
+    "cross-env": "^10.1.0",
+    "discord-api-types": "^0.38.26",
     "discord.js": "^14.22.1",
-    "dotenv": "^17.2.1",
+    "dotenv": "^17.2.3",
     "got": "^14.4.2",
-    "i18next": "^25.4.2",
+    "i18next": "^25.5.2",
     "moment": "^2.30.1",
     "nodemon": "^3.1.10",
     "turndown": "^7.2.1"
   },
   "devDependencies": {
-    "@railway/cli": "^4.6.3"
+    "@railway/cli": "^4.10.0"
   }
 }
