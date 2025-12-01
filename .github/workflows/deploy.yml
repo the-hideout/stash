@@ -25,7 +25,7 @@ jobs:
       # always run checkout because the 'release (sentry)' step needs the code
       # do we still need this after removing sentry?
       - name: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ steps.deployment-check.outputs.sha }}
 
