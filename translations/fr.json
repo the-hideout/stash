@@ -7,7 +7,7 @@
         "🔴 Poor": "🔴 Mauvais",
         "🛒 {{traderName}} restock in {{numMinutes}} minutes 🛒 ({{gameMode}})": "🛒 {{traderName}} se réapprovisionne dans {{numMinutes}} minutes 🛒 ({{gameMode}})",
         "❌ ERROR ❌": "❌ ERREUR ❌",
-        "{{side}} Stats": "{{side}} Stats",
+        "{{side}} Stats": "{{side}} Statistiques",
         "{{thingName}} set to {{level}}.": "{{thingName}} mise au niveau {{level}}.",
         "A Dmg": "A Dmg",
         "About": "À propos",
