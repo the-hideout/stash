@@ -129,7 +129,7 @@
         "The official Tarkov.dev Discord bot! An open source project by The Hideout to help you play Escape from Tarkov.": "Le Bot Discord officiel de Tarkov.dev ! Un projet open source de The Hideout pour vous aider à jouer à Escape from Tarkov.",
         "The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.": "Le jeton que vous avez fourni n'est pas valide. Fournissez votre [jeton API TarkovTracker] (https://tarkovtracker.io/settings/) pour lier votre compte.",
         "There was an error processing your request.": "Il y a eu une erreur dans le traitement de votre demande.",
-        "These values are used to determine craft/barter/price unlocks and flea market fees.": "Ces valeurs sont utilisées pour déterminer les déblocages d'artisanat/barter/prix et les frais de marché aux puces.",
+        "These values are used to determine craft/barter/price unlocks and flea market fees.": "Ces valeurs sont utilisées pour déterminer les déblocages d'craft/échanges/prix et les frais de marché aux puces.",
         "Time": "Temps",
         "Too many notes to display.": "Trop de notes à afficher.",
         "Tools Total": "Tools Total",
