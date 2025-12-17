@@ -112,7 +112,7 @@
         "Required Ingredients": "Ingrédients requis",
         "seconds": "secondes",
         "Sell to": "Vendre à",
-        "Server language set to {{languageCode}}.": "Server language set to {{languageCode}}.",
+        "Server language set to {{languageCode}}.": "Serveur de langue sur : {{languageCode}}.",
         "Skills": "Compétences",
         "slot": "emplacement",
         "Something went wrong when trying to fetch status, please try again": "Un problème est survenu lors de la récupération de l'état, veuillez réessayer.",
