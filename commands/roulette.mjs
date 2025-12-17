@@ -19,8 +19,8 @@ const defaultFunction = {
         const draw = rouletteData[Math.floor(Math.random()*rouletteData.length)];
 
         const embed = new EmbedBuilder();
-        embed.setTitle(draw.name);
-        embed.setDescription(draw.description);
+        embed.setTitle(t(draw.name));
+        embed.setDescription(t(draw.description));
         embed.setFooter({
             text: `${t('Good Luck!')} 🎲`,
         });
