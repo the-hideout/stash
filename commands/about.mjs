@@ -4,7 +4,6 @@ import {
     EmbedBuilder,
     SlashCommandBuilder
 } from 'discord.js';
-import got from 'got';
 
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 import progress from '../modules/progress-shard.mjs';
@@ -23,10 +22,14 @@ const defaultFunction = {
         let data;
 
         try {
-            data = await got('https://api.github.com/repos/the-hideout/stash/contributors', {
+            const response = await fetch('https://api.github.com/repos/the-hideout/stash/contributors', {
                 responseType: 'json',
                 headers: { "user-agent": "stash-tarkov-dev" }
             });
+            if (!response.ok) {
+                throw new Error(`${response.status} ${response.statusText}`);
+            }
+            data = await response.json();
         } catch (loadError) {
             console.error(loadError);
         }
@@ -50,7 +53,7 @@ const defaultFunction = {
 
         let contributorsString = '';
 
-        for (const contributor of data.body) {
+        for (const contributor of data) {
             contributorsString = `${contributorsString}, ${contributor.login}`;
         }
 
