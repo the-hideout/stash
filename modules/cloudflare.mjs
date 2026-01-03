@@ -1,7 +1,5 @@
 import zlib from 'zlib';
 
-import got from 'got';
-
 const BASE_URL = 'https://api.cloudflare.com/client/v4/';
 
 const doRequest = async (method = 'GET', operation, key, value, extraHeaders) => {
@@ -35,13 +33,12 @@ const doRequest = async (method = 'GET', operation, key, value, extraHeaders) =>
         requestOptions.body = value;
     }
 
-    return got(`${BASE_URL}${fullCloudflarePath}`, requestOptions).then(response => {
-        if (response.statusCode !== 200 && response.statusCode !== 304) {
-            const json = JSON.parse(response.body);
-            return Promise.reject(new Error(json.errors.map(error => `${error.message} (${error.code})`).join('; ')));
-        }
-        return response.body;
-    });
+    const response = await fetch(`${BASE_URL}${fullCloudflarePath}`, requestOptions);
+    if (!response.ok) {
+        const json = await response.json();
+        return Promise.reject(new Error(json.errors.map(error => `${error.message} (${error.code})`).join('; ')));
+    }
+    return response.text();
 };
 
 export async function putValue(key, value) {

@@ -1,5 +1,4 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import got from 'got';
 
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 import progress from '../modules/progress-shard.mjs';
@@ -10,10 +9,11 @@ let changes = false;
 let lastCheck = new Date(0);
 
 const getChanges = async () => {
+    return;
     if (changes && new Date() - lastCheck < 1000 * 60 * 10) return changes;
-    const data = await got(`${URL}/changelogs/data.txt`);
+    const response = await fetch(`${URL}/changelogs/data.txt`);
     lastCheck = new Date();
-    changes = data.body;
+    changes = await response.text();
     return changes;
 };
 
@@ -32,7 +32,8 @@ const defaultFunction = {
 
         var message = `**${t('Changes provided by')} https://tarkov-changes.com**\n\n${data}`;
 
-        if (message.length >= MAX_EMBED_LENGTH) {
+        // tarkov changes no longer provides plaintext changes
+        if (true || message.length >= MAX_EMBED_LENGTH) {
             message = `${t('Sorry, the current change list is too long to be displayed in Discord')}\n\n${t('Please visit {{url}} for more information', {url: URL, interpolation: { escapeValue: false } })}`;
         }
 

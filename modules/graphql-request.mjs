@@ -1,5 +1,3 @@
-import got from 'got';
-
 const url = 'https://api.tarkov.dev/graphql';
 
 const graphqlRequest = async (options) => {
@@ -7,8 +5,8 @@ const graphqlRequest = async (options) => {
         return Promise.reject(new Error('You must provide a graphql query'));
     }
 
-    return got.post(url, {
-        responseType: 'json',
+    const response = await fetch(url, {
+        method: 'POST',
         body: JSON.stringify({
             query: options.graphql,
         }),
@@ -16,8 +14,11 @@ const graphqlRequest = async (options) => {
             'user-agent': 'stash-tarkov-dev', 
             'Content-Type': 'application/json',
         },
-        resolveBodyOnly: true,
     });
+    if (!response.ok) {
+        return Promise.reject(new Error(`${response.status} ${response.statusText}`));
+    }
+    return response.json();
 };
 
 export default graphqlRequest;

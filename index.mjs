@@ -1,6 +1,5 @@
 import { fork } from 'child_process';
 
-import got from 'got';
 import { CronJob } from 'cron';
 import { ShardingManager } from 'discord.js';
 
@@ -46,11 +45,11 @@ if (process.env.NODE_ENV === 'production') {
     // A healthcheck cron to send a GET request to our status server
     // The cron schedule is expressed in seconds for the first value
     healthcheckJob = new CronJob('*/45 * * * * *', () => {
-        got(
+        fetch(
             `https://status.tarkov.dev/api/push/${process.env.HEALTH_ENDPOINT}?msg=OK`,
             {
                 headers: { "user-agent": "stash-tarkov-dev" },
-                timeout: { request: 5000 }
+                signal: AbortSignal.timeout(5000),
             }
         ).catch(error => {
             console.error(`Healthcheck error: ${error}`);
