@@ -117,10 +117,10 @@ function main() {
   ############################
 
   echo "[-] Killing old docker processes"
-  sudo -E bash -c "source ~/.profile && $DC_CMD -f docker-compose.yml -f docker-compose.prod.yml down -v -t 1"
+  sudo -E bash -c "$DC_CMD -f docker-compose.yml down -v -t 1"
 
   echo "[i] Building docker containers"
-  sudo -E bash -c "source ~/.profile && $DC_CMD -f docker-compose.yml -f docker-compose.prod.yml up --build -d"
+  sudo -E bash -c "$DC_CMD -f docker-compose.yml up --build -d"
 
   echo "[+] Containers are now running!"
 }
