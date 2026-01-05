@@ -1,0 +1,128 @@
+#!/bin/bash
+
+# run script/deploy -h for help
+
+set -e
+
+BASE_BRANCH="main"
+DC_CMD="docker-compose"
+
+function usage() {
+  echo -e "\t ============================== script/deploy usage =============================="
+  echo -e "\t-h --help               : displays help message"
+  echo -e "\t-f --fork               : the checkout command to use if a fork"
+  echo -e "\t-n --fork-full-name     : the full name of the fork source in 'org/repo' format"
+  echo -e "\t-d --dir                : the directory to enter for the deployment"
+  echo -e "\t-r --ref                : ref to deploy - best practice is to use the full sha"
+  echo -e "\texample: script/deploy --ref sha123deadbeef123 --dir /path/to/repo"
+}
+
+function parse_args() {
+  while [[ "$#" -gt 0 ]]; do
+    case $1 in
+      -h|--help) usage; exit 0 ;;
+      -f|--fork) fork="$2"; shift ;;
+      -n|--fork-full-name) fork_full_name="$2"; shift ;;
+      -d|--dir) dir="$2"; shift ;;
+      -r|--ref) ref="$2"; shift ;;
+      *) echo "ERROR: unknown parameter: $1"; usage; exit 1 ;;
+    esac
+    shift
+  done
+}
+
+function checkout_fork() {
+  echo "[i] fork deployment requested: $fork"
+  git fetch --all
+
+  forkarray=($fork)
+  fork_branch_local_name="${forkarray[0]}"
+  fork_branch_remote_name="${forkarray[1]}"
+
+  # check if the branch already exists
+  if git show-ref --verify --quiet refs/heads/$fork_branch_local_name; then
+    echo "[i] fork branch $fork_branch_local_name already exists - checking it out"
+    git checkout $fork_branch_local_name
+  else
+    echo "[i] creating and checking out new fork branch $fork_branch_local_name"
+    git checkout -b $fork_branch_local_name $BASE_BRANCH
+  fi
+
+  # check if the branch exists in the remote repository
+  if git ls-remote --exit-code --heads "https://github.com/$fork_full_name.git" $fork_branch_remote_name; then
+    # pull the latest changes from the fork repository
+    git pull "https://github.com/$fork_full_name.git" $fork_branch_remote_name
+  else
+    echo "[i] remote fork branch $fork_branch_remote_name does not exist - exiting"
+    exit 1
+  fi
+
+  # checkout the specific SHA for safety
+  if [[ -n $ref ]]; then
+    echo "[i] checking out specific fork SHA: $ref"
+    git checkout $ref
+  else
+    echo "[i] no specific SHA provided - exiting due to safety"
+    exit 1
+  fi
+}
+
+function checkout_ref() {
+  echo "[i] requested deployment to: $ref"
+  git fetch --all
+  git checkout $ref
+
+  # If the ref is exactly equal to the base branch, run a git pull
+  if [[ $ref == $BASE_BRANCH ]]; then
+    echo "[i] pulling $BASE_BRANCH changes since it is the stable branch"
+    git pull origin $BASE_BRANCH
+  fi
+}
+
+function main() {
+  parse_args "$@"
+
+  # prefer docker-compose, fallback to docker compose
+  if command -v docker-compose >/dev/null 2>&1; then
+    DC_CMD="docker-compose"
+  elif command -v docker >/dev/null 2>&1; then
+    DC_CMD="docker compose"
+  else
+    echo "ERROR: docker is not installed"
+    exit 1
+  fi
+
+  # If a deployment dir is specified, enter it
+  if [[ -n $dir ]]; then
+    cd $dir || { echo "ERROR: failed to change directory to $dir"; exit 1; }
+  fi
+
+  # debug info for deployments
+  echo "[i] current working directory: $(pwd)"
+  echo "[i] current commit SHA: $(git rev-parse HEAD)"
+
+  # Determine deployment type
+  if [[ -n $fork ]]; then
+    checkout_fork
+  elif [[ -n $ref ]]; then
+    checkout_ref
+  else
+    echo "[i] deployment requested"
+  fi
+
+  echo "[i] checked out commit SHA to deploy: $(git rev-parse HEAD)"
+
+  ############################
+  # DEPLOYMENT LOGIC
+  ############################
+
+  echo "[-] Killing old docker processes"
+  sudo -E bash -c "$DC_CMD -f docker-compose.yml down -v -t 1"
+
+  echo "[i] Building docker containers"
+  sudo -E bash -c "$DC_CMD -f docker-compose.yml up --build -d"
+
+  echo "[+] Containers are now running!"
+}
+
+main "$@"

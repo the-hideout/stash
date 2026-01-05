@@ -29,7 +29,7 @@ jobs:
         with:
           ref: ${{ steps.deployment-check.outputs.sha }}
 
-      - uses: actions/setup-node@v6.0.0
+      - uses: actions/setup-node@v6.1.0
         if: ${{ steps.deployment-check.outputs.continue == 'true' }}
         with:
           node-version-file: .node-version
@@ -47,8 +47,13 @@ jobs:
           DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
         run: node deploy-commands.mjs
 
-      - name: deploy to railway
+      - name: SSH Remote Deploy
         if: ${{ steps.deployment-check.outputs.continue == 'true' }}
-        run: npm run deploy
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        uses: appleboy/ssh-action@823bd89e131d8d508129f9443cad5855e9ba96f0 # pin@v1.2.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script_stop: true
+          script: ~/stash/script/deploy -r "main" -d "/home/ubuntu/stash"
