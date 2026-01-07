@@ -1,5 +1,4 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import got from 'got';
 import moment from 'moment/min/moment-with-locales.js';
 
 import gameData from '../modules/game-data.mjs';
@@ -99,17 +98,18 @@ const defaultFunction = {
         }
 
         try {
-            const response = await got.post('https://manager.tarkov.dev/api/goons', {
-                json: {
+            const response = await fetch('https://manager.tarkov.dev/api/goons', {
+                method: 'POST',
+                body: JSON.stringify({
                     map: selectedMap.nameId,
                     timestamp: new Date().getTime(),
                     discordId: interaction.user.id,
                     gameMode: gameMode,
-                },
-            }).json();
+                }),
+            });
 
-            if (response.status !== 'success') {
-                throw new Error (response.status);
+            if (!response.ok) {
+                throw new Error(`${response.status} ${response.statusText}`);
             }
     
             return confirmation.update({
