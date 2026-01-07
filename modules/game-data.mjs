@@ -1,5 +1,4 @@
 import EventEmitter from 'events';
-import got from 'got';
 import graphqlRequest from "./graphql-request.mjs";
 import { updateTiers } from './loot-tier.mjs';
 import { getDiscordLocale, getCommandLocalizations } from "./translations.mjs";
@@ -175,10 +174,9 @@ export async function updateMaps() {
         }`;
         const [response, mapImages] = await Promise.all([
             graphqlRequest({ graphql: query }),
-            got('https://raw.githubusercontent.com/the-hideout/tarkov-dev/master/src/data/maps.json', {
-                responseType: 'json',
+            fetch('https://raw.githubusercontent.com/the-hideout/tarkov-dev/master/src/data/maps.json', {
                 headers: { "user-agent": "stash-tarkov-dev" }
-            }).then(response => response.body)
+            }).then(response => response.json()),
         ]);
 
         if (!gameData.maps[gameMode]) {
@@ -493,7 +491,7 @@ export async function updateHideout() {
             value: hideoutData.id, 
             name_localizations: gameData.languages.reduce((loc, langCode) => {
                 const dLocale = getDiscordLocale(langCode);
-                if (dLocale) {
+                if (dLocale && gameData.hideout.regular[langCode]) {
                     loc[dLocale] = gameData.hideout.regular[langCode].find(hi => hi.id === hideoutData.id).name;
                 }
                 return loc;

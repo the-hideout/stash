@@ -1,5 +1,3 @@
-import got from 'got';
-
 const url = 'https://tarkovtracker.io/api/v2/';
 
 export async function apiRequest(token, endpoint) {
@@ -12,14 +10,16 @@ export async function apiRequest(token, endpoint) {
     }
 
     try {
-        const response = await got(url+endpoint, {
-            responseType: 'json',
+        const response = await fetch(url+endpoint, {
             headers: { 
                 'Authorization': 'Bearer '+token
              }
         });
-
-        return response.body.data;
+        if (!response.ok) {
+            throw new Error(`${response.status} ${response.statusText}`);
+        }
+        const body = await response.json();
+        return body.data;
     } catch (requestError) {
         //console.error(requestError);
 
