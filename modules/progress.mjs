@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import moment from 'moment';
 
 import {getProgress} from "./tarkovtracker.js";
 import gameData from "./game-data.mjs";
@@ -445,7 +444,9 @@ const settings = {
         for (let i = 0; i < users.length; i++) {
             let user = users[i];
             if (user.id !== id) continue;
-            return moment(new Date()).add(Math.ceil((i+1) / 25), 'm').toDate();
+            const updateTime = new Date();
+            updateTime.setMinutes(updateTime.getMinutes() + Math.ceil((i+1) / 25));
+            return updateTime;
         }
     },
     async getProgress(id) {

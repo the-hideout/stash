@@ -1,5 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import moment from 'moment';
+import { DateTime } from 'luxon';
 
 import gameData from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
@@ -166,8 +166,7 @@ const defaultFunction = {
             descriptionParts.push(`${t('Minimum Level')}: ${task.minPlayerLevel}`);
         }*/
         embed.setDescription(descriptionParts.join('\n'));
-        moment.locale(lang);
-        const updatedText =  t('Updated {{updateTimeAgo}}', {updateTimeAgo: moment(new Date(profile.updated)).fromNow()});
+        const updatedText =  t('Updated {{updateTimeAgo}}', {updateTimeAgo: DateTime.fromMillis(profile.updated, {locale: lang}).toRelative()});
         const footerText = `${updatedText} | ${gameModeLabel}`;
         
         const statTypes = {

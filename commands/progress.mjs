@@ -1,5 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import moment from 'moment/min/moment-with-locales.js';
+import { DateTime } from 'luxon';
 
 import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
@@ -52,10 +52,9 @@ const subCommands = {
         if (skillStatus.length > 0) embed.addFields({name: `${('Skills')} 💪`, value: skillStatus.join('\n'), inline: true});
 
         if (prog.tarkovTracker && prog.tarkovTracker.token) {
-            moment.locale(interaction.locale);
-            let lastUpdate = moment(prog.tarkovTracker.lastUpdate).fromNow();
+            let lastUpdate = DateTime.fromJSDate(prog.tarkovTracker.lastUpdate, {locale: interaction.locale}).toRelative();
             if (prog.tarkovTracker.lastUpdate == 0) lastUpdate = t('never');
-            const nextUpdate = moment(await progress.getUpdateTime(interaction.user.id)).fromNow();
+            const nextUpdate = DateTime.fromJSDate(await progress.getUpdateTime(interaction.user.id), {locale: interaction.locale}).toRelative();
             embed.addFields({name: 'TarkovTracker 🧭', value: `${t('Last Updated')}: ${lastUpdate}\n${t('Next update')}: ${nextUpdate}`, inline: false});
         } else if (prog.tarkovTracker && prog.tarkovTracker.lastUpdateStatus === 'invalid') {
             embed.addFields({name: 'TarkovTracker 🧭', value: `[❌ ${t('Invalid token')}](https://tarkovtracker.io/settings/)`, inline: false});
@@ -234,8 +233,7 @@ const subCommands = {
         }
 
         progress.setToken(interaction.user.id, token);
-        moment.locale(interaction.locale);
-        const updateTime = moment(await progress.getUpdateTime(interaction.user.id)).fromNow();
+        const updateTime = DateTime.fromJSDate(await progress.getUpdateTime(interaction.user.id), {locale: interaction.locale}).toRelative()
         embed.setTitle(`✅ ${t('Your hideout progress will update from TarkovTracker {{updateTime}}.', {updateTime: updateTime})}`);
         return interaction.reply({
             embeds: [embed],
