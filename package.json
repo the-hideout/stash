@@ -31,5 +31,7 @@
     "i18next": "^25.8.0",
     "luxon": "^3.7.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
 }
