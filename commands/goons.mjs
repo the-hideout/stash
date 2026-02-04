@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import moment from 'moment/min/moment-with-locales.js';
+import { DateTime } from 'luxon';
 
 import gameData from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
@@ -48,9 +48,7 @@ const defaultFunction = {
                     if (!map) {
                         return false;
                     }
-                    const reportDate = new Date(parseInt(report.timestamp));
-                    moment.locale(lang);
-                    return `${map.name}: ${moment(reportDate).fromNow()}`;
+                    return `${map.name}: ${DateTime.fromMillis(parseInt(report.timestamp), {locale: lang}).toRelative()}`;
                 }).filter(Boolean).join('\n')}`;
             }
             reportsEmbed.setTitle(embedTitle);

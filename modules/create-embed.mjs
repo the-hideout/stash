@@ -1,5 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import moment from 'moment/min/moment-with-locales.js';
+import { DateTime } from 'luxon';
 
 import realTimeToTarkovTime from './time.mjs';
 import lootTier from './loot-tier.mjs';
@@ -318,8 +318,7 @@ const createEmbed = {
         let body = `**${t('Price and Item Details')}:**\n`;
         embed.setTitle(item.name);
         embed.setURL(item.link);
-        moment.locale(lang);
-        embed.setFooter({text: `🕑 ${t('Last Updated')}: ${moment(item.updated).fromNow()} | ${gameModeLabel}`});
+        embed.setFooter({text: `🕑 ${t('Last Updated')}: ${DateTime.fromISO(item.updated, {locale: lang}).toRelative()} | ${gameModeLabel}`});
 
         embed.setThumbnail(item.iconLink);
 
