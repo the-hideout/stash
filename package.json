@@ -25,13 +25,11 @@
     "ascii-table": "^0.0.9",
     "cron": "^3.1.7",
     "cross-env": "^10.1.0",
-    "discord-api-types": "^0.38.37",
+    "discord-api-types": "^0.38.38",
     "discord.js": "^14.25.1",
     "dotenv": "^17.2.3",
     "i18next": "^25.8.0",
     "luxon": "^3.7.2"
   },
-  "devDependencies": {
-    "@railway/cli": "^4.17.1"
-  }
+  "devDependencies": {}
 }
