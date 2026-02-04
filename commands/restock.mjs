@@ -1,5 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import moment from 'moment/min/moment-with-locales.js';
+import { DateTime } from 'luxon';
 import { ChannelType, PermissionFlagsBits } from 'discord-api-types/v10';
 
 import gameData from '../modules/game-data.mjs';
@@ -19,9 +19,8 @@ const subCommands = {
             const embed = new EmbedBuilder();
             embed.setTitle(`${t('Trader restocks')} 🛒`);
             //embed.setDescription(``);
-            moment.locale(lang);
             for (const trader of traders) {
-                embed.addFields({name: trader.name, value: moment(trader.resetTime).fromNow(), inline: true});
+                embed.addFields({name: trader.name, value: DateTime.fromISO(trader.resetTime, {locale: lang}).toRelative(), inline: true});
             }
             const alertsFor = await progress.getRestockAlerts(interaction.user.id, gameMode);
             if (alertsFor.length > 0) {
@@ -34,6 +33,7 @@ const subCommands = {
                 embeds: [embed]
             });
         } catch (error) {
+            console.log(error);
             interaction.editReply(t('There was an error processing your request.'));
         }
     },
