@@ -28,7 +28,7 @@
     "discord-api-types": "^0.38.38",
     "discord.js": "^14.25.1",
     "dotenv": "^17.2.3",
-    "i18next": "^25.8.0",
+    "i18next": "^25.7.4",
     "luxon": "^3.7.2"
   },
   "devDependencies": {
