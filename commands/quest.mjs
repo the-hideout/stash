@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
 
 import gameData from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
@@ -41,7 +41,7 @@ const defaultFunction = {
             embed.setFooter({text: gameModeLabel});
             return interaction.editReply({
                 embeds: [embed],
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 

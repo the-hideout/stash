@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
 
 import { getStims } from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
@@ -37,7 +37,7 @@ const defaultFunction = {
                 content: t('Found no results for "{{searchString}}"', {
                     searchString: searchString
                 }),
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 

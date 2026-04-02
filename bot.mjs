@@ -4,6 +4,7 @@ import {
     GatewayIntentBits,
     Collection,
     AttachmentBuilder,
+    MessageFlags,
 } from 'discord.js';
 
 import autocomplete from './modules/autocomplete.mjs';
@@ -124,7 +125,7 @@ discordClient.on('interactionCreate', async interaction => {
         }
         const message = {
             content: 'There was an error while executing this command!',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         };
         if (interaction.deferred) {
             await interaction.editReply(message);

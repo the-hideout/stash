@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { DateTime } from 'luxon';
 
 import gameData from '../modules/game-data.mjs';
@@ -62,7 +62,7 @@ const subCommands = {
 
         return interaction.reply({
             embeds: [embed],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral,
         });
     },
     level: async interaction => {
@@ -77,11 +77,11 @@ const subCommands = {
         embed.setFooter({ text: gameModeLabel});
         return interaction.reply({
             embeds: [embed],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral,
         });
     },
     trader: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -121,7 +121,7 @@ const subCommands = {
         });
     },
     hideout: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -204,7 +204,7 @@ const subCommands = {
         embed.setTitle(`✅ ${t('{{thingName}} set to {{level}}.', {thingName: skill.name, level: level})}`);
         return interaction.reply({
             embeds: [embed],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral,
         });
     },
     link: async interaction => {
@@ -221,14 +221,14 @@ const subCommands = {
             embed.setTitle(`❌ ${t('You must supply your [TarkovTracker API token](https://tarkovtracker.org/account/) to link your account.')}`);
             return interaction.reply({
                 embeds: [embed],
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
         if (!token.match(/^[A-Z]{3}_[a-zA-Z0-9]{18}$/)) {
             embed.setTitle(`❌ ${t('The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.org/account/) to link your account.')}`);
             return interaction.reply({
                 embeds: [embed],
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 
@@ -237,7 +237,7 @@ const subCommands = {
         embed.setTitle(`✅ ${t('Your hideout progress will update from TarkovTracker {{updateTime}}.', {updateTime: updateTime})}`);
         return interaction.reply({
             embeds: [embed],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     },
     unlink: async interaction => {
@@ -253,7 +253,7 @@ const subCommands = {
         embed.setTitle(`✅ ${t('TarkovTracker account unlinked.')}`);
         return interaction.reply({
             embeds: [embed],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     },
     flea_market_fee: async interaction => {
@@ -275,7 +275,7 @@ const subCommands = {
         embed.setTitle(`✅ ${t('{{thingName}} set to {{level}}.', {thingName: t('Intelligence Center'), level: intel})}.\n✅ ${t('Hideout Management skill set to {{managementLevel}}.', {managementLevel: mgmt})}`);
         return interaction.reply({
             embeds: [embed],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     }
 };

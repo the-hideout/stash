@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
 
 import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
@@ -31,7 +31,7 @@ const defaultFunction = {
         if (!searchString) {
             return interaction.editReply({
                 content: t('You need to specify a search term'),
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 
@@ -67,7 +67,7 @@ const defaultFunction = {
             embed.setFooter({text: gameModeLabel});
             return interaction.editReply({
                 embeds: [embed],
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 

@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
 
 import progress from '../modules/progress-shard.mjs';
 import gameData from '../modules/game-data.mjs';
@@ -51,7 +51,7 @@ const defaultFunction = {
             embed.setFooter({text: gameModeLabel});
             return interaction.editReply({
                 embeds: [embed],
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 

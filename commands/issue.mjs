@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder, MessageFlags } from "discord.js";
 
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 import sendWebhook from '../modules/webhook.mjs';
@@ -34,7 +34,7 @@ const defaultFunction = {
         });
         return interaction.reply({
             content: t("Thanks for reporting, we're on it!"),
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     },
 };

@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { DateTime } from 'luxon';
 import { ChannelType, PermissionFlagsBits } from 'discord-api-types/v10';
 
@@ -8,7 +8,7 @@ import { getFixedT, getCommandLocalizations, getTranslationChoices } from '../mo
 
 const subCommands = {
     show: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -38,7 +38,7 @@ const subCommands = {
         }
     },
     alert: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -93,7 +93,7 @@ const subCommands = {
         });
     },
     channel: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');

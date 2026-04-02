@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { DateTime } from 'luxon';
 
 import gameData from '../modules/game-data.mjs';
@@ -21,7 +21,7 @@ const defaultFunction = {
         ),
 
     async execute(interaction) {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
