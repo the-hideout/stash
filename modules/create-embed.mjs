@@ -488,8 +488,8 @@ const createEmbed = {
             }
 
             barterCost = Math.round(barterCost / barter.rewardItems[0].count).toLocaleString(lang) + "₽";
-            const locked = prog.traders[barter.trader] < barter.level ? '🔒' : '';
-            const title = `${traders.find(t => t.id === barter.trader).name} ${t('LL')}${barter.level} ${t('Barter')}${locked}`;
+            const locked = prog.traders[barter.trader] < barter.minTraderLevel ? '🔒' : '';
+            const title = `${traders.find(t => t.id === barter.trader).name} ${t('LL')}${barter.minTraderLevel} ${t('Barter')}${locked}`;
             embed.addFields({name: title, value: barterCost, inline: true});
         }
 
