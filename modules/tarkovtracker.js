@@ -1,4 +1,4 @@
-const url = 'https://tarkovtracker.io/api/v2/';
+const url = 'https://tarkovtracker.org/api/v2/';
 
 export async function apiRequest(token, endpoint) {
     if (!token) {

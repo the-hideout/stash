@@ -57,7 +57,7 @@ const subCommands = {
             const nextUpdate = DateTime.fromJSDate(await progress.getUpdateTime(interaction.user.id), {locale: interaction.locale}).toRelative();
             embed.addFields({name: 'TarkovTracker 🧭', value: `${t('Last Updated')}: ${lastUpdate}\n${t('Next update')}: ${nextUpdate}`, inline: false});
         } else if (prog.tarkovTracker && prog.tarkovTracker.lastUpdateStatus === 'invalid') {
-            embed.addFields({name: 'TarkovTracker 🧭', value: `[❌ ${t('Invalid token')}](https://tarkovtracker.io/settings/)`, inline: false});
+            embed.addFields({name: 'TarkovTracker 🧭', value: `[❌ ${t('Invalid token')}](https://tarkovtracker.org/profile/)`, inline: false});
         }
 
         return interaction.reply({
@@ -153,8 +153,8 @@ const subCommands = {
         const prog = await progress.getProgress(interaction.user.id);
         let ttWarn = '';
         if (prog && prog.tarkovTracker.token) {
-            embed.setDescription(t('Note: Progress synced via [TarkovTracker](https://tarkovtracker.io/settings/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.'));
-            ttWarn = '\n'+t('Note: Progress synced via [TarkovTracker](https://tarkovtracker.io/settings/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.');
+            embed.setDescription(t('Note: Progress synced via [TarkovTracker](https://tarkovtracker.org/profile/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.'));
+            ttWarn = '\n'+t('Note: Progress synced via [TarkovTracker](https://tarkovtracker.org/profile/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.');
         }
         if (stationId === 'all') {
             for (const station of stations) {
@@ -218,14 +218,14 @@ const subCommands = {
 
         const token = interaction.options.getString('token');
         if (!token) {
-            embed.setTitle(`❌ ${t('You must supply your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.')}`);
+            embed.setTitle(`❌ ${t('You must supply your [TarkovTracker API token](https://tarkovtracker.org/profile/) to link your account.')}`);
             return interaction.reply({
                 embeds: [embed],
                 ephemeral: true,
             });
         }
         if (!token.match(/^[a-zA-Z0-9]{22}$/)) {
-            embed.setTitle(`❌ ${t('The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.')}`);
+            embed.setTitle(`❌ ${t('The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.org/profile/) to link your account.')}`);
             return interaction.reply({
                 embeds: [embed],
                 ephemeral: true,
@@ -388,7 +388,7 @@ const defaultFunction = {
             .setDescriptionLocalizations(getCommandLocalizations('progress_link_desc'))
             .addStringOption(option => option
                 .setName('token')
-                .setDescription('Your TarkovTracker API token from https://tarkovtracker.io/settings/')
+                .setDescription('Your TarkovTracker API token from https://tarkovtracker.org/profile/')
                 .setNameLocalizations(getCommandLocalizations('token'))
                 .setDescriptionLocalizations(getCommandLocalizations('progress_link_token_desc'))
                 .setRequired(true)

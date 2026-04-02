@@ -45,7 +45,7 @@ const getDefaultGameModeProgress = () => {
         tarkovTracker: {
             lastUpdateStatus: 'n/a',
             lastUpdate: 0,
-            token: false
+            token: false,
         },
         level: defaultProgress.level,
         hideout: {},
