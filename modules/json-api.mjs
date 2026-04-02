@@ -1,0 +1,54 @@
+import { JSONPath } from "jsonpath-plus";
+
+const url = 'https://json.tarkov.dev/';
+
+const jsonApi = {
+    request: async (path) => {
+        const response = await fetch(`${url}${path}`, {
+            headers: {
+                'User-Agent': 'stash-tarkov-dev',
+            },
+        });
+        if (!response.ok) {
+            return Promise.reject(new Error(`${response.status} ${response.statusText}`));
+        }
+        return response.json();
+    },
+    requestTranslated: async (path, options = {}) => {
+        options.languages ??= await jsonApi.request('lang').then(resp => resp.data);
+        const locale = {};
+        const results = await Promise.all([
+            jsonApi.request(path),
+            ...options.languages.map(lang => apiRequest(`${path}_${lang}`).then(langData => {
+                locale[lang] = langData.data;
+            })),
+        ]);
+        const translated = {};
+        for (const lang of options.languages) {
+            translated = jsonApi.translate(results[0], locale[lang], {fallbackLangData: locale.en});
+        }
+        return translated;
+    },
+    translate: (data, langData, options = {}) => {
+        options.fallbackLangData ??= {};
+        const translatedData = structuredClone(data);
+        for (const jPath of data.translations ?? []) {
+            try {
+                JSONPath({
+                    path: jPath,
+                    json: translatedData,
+                    resultType: "all",
+                    callback: (result) => {
+                        const { path, value, parent, parentProperty } = result;
+                        parent[parentProperty] = langData[value] ?? options.fallbackLangData[value] ?? value;
+                    },
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        return translatedData.data;
+    },
+};
+
+export default jsonApi;

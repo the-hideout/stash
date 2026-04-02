@@ -274,17 +274,17 @@ const removeRestockAlert = async (id, traders, locale) => {
 const startRestockAlerts = async () => {
     const setRestockTimers = async () => {
         for (const gameMode of gameModes) {
-            const traders = await gameData.traders.getAll({gameMode});
+            const traders = await gameData.traders.getMerchants({gameMode});
             // traders to skip restock timers for
-            const skipTraders = ['fence', 'lightkeeper', 'btr-driver'];
             for (const trader of traders) {
                 const currentTimer = restockTimers[gameMode][trader.id];
                 if (currentTimer != trader.resetTime) {
                     //console.log(`Setting new restock timer for ${trader.name} at ${trader.resetTime}`);
                     restockTimers[gameMode][trader.id] = trader.resetTime;
                     const alertTime = new Date(trader.resetTime) - new Date() - 1000 * 60 * restockAlertMinutes;
-                    if (alertTime < 0) continue;
-                    if (skipTraders.includes(trader.normalizedName)) continue;
+                    if (alertTime < 0) {
+                        continue;
+                    }
                     setTimeout(async () => {
                         const restockMessage = '🛒 {{traderName}} restock in {{numMinutes}} minutes 🛒 ({{gameMode}})';
                         const messageVars = {numMinutes: restockAlertMinutes};

@@ -39,7 +39,7 @@ for (const file of commandFiles) {
 //await updateChoices();
 //console.timeEnd('Prefetch-choice-data');
 
-discordClient.on('ready', () => {
+discordClient.on('clientReady', () => {
     console.log(`Logged in as ${discordClient.user.tag} on shard ${discordClient.shard.ids[0]}`);
 
     initShardMessenger(discordClient);

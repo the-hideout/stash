@@ -97,9 +97,9 @@ const defaultFunction = {
             }
         };
         boss.equipment.forEach(contained => {
-            addLoot(contained.item.id);
-            for (const part of contained.item.containsItems) {
-                addLoot(part.item.id);
+            addLoot(contained.item);
+            for (const part of contained.contains) {
+                addLoot(part.item);
             }
         });
         boss.items.forEach(it => {
@@ -158,7 +158,7 @@ const defaultFunction = {
         const mapEmbeds = [];
         for (const map of maps) {
             // Only use the data for the boss specified in the command
-            const bossSpawn = map.bosses.find(spawn => spawn.boss.id === bossId);
+            const bossSpawn = map.bosses.find(spawn => spawn.mob === bossId);
             if (!bossSpawn) continue;
 
             const mapEmbed = new EmbedBuilder();
@@ -170,7 +170,15 @@ const defaultFunction = {
             const spawnLocations = bossSpawn.spawnLocations.map(spawnLocation => spawnLocation.name).join(', ');
 
             // Join the escort names into a comma separated string
-            const escortNames = bossSpawn.escorts.map(escortName => `${escortName.name} x${escortName.amount[0].count}`).join(', ').replaceAll(' x1', '');
+            let escortNames = [];
+            for (const escort of bossSpawn.escorts) {
+                const mob = bosses.find(b => b.id === escort.mob);
+                if (!mob) {
+                    continue;
+                }
+                escortNames.push(`${mob.name} x${escort.amount[0].count}`);
+            }
+            escortNames = escortNames.join(', ').replaceAll(' x1', '');
 
             var spawnTime;
             if (bossSpawn.spawnTime === -1) {

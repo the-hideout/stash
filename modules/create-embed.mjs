@@ -23,21 +23,20 @@ const createEmbed = {
         let totalCost = 0;
         const embed = new EmbedBuilder();
 
-        const rewardItem = items.find(it => it.id === barter.rewardItems[0].item.id);
+        const rewardItem = items.find(it => it.id === barter.rewardItems[0].item);
         let title = rewardItem.name;
 
         if (barter.rewardItems[0].count > 1) {
             title += " (" + barter.rewardItems[0].count + ")";
         }
 
-        //title += `\r\n ${traders.find(tr => tr.id === barter.trader.id).name} ${t('LL')}${barter.level}${locked}`;
         embed.setTitle(title);
         embed.setURL(rewardItem.link + `?barter=${barter.id}`);
         embed.setFooter({text: gameModeLabel});
-        const locked = prog.traders[barter.trader.id] < barter.level ? '🔒' : '';
-        const trader = traders.find(tr => tr.id === barter.trader.id);
+        const locked = prog.traders[barter.trader] < barter.minTraderLevel ? '🔒' : '';
+        const trader = traders.find(tr => tr.id === barter.trader);
         embed.setAuthor({
-            name: `${trader.name} ${t('LL')}${barter.level}${locked}`,
+            name: `${trader.name} ${t('LL')}${barter.minTraderLevel}${locked}`,
             iconURL: trader.imageLink,
             url: `https://tarkov.dev/trader/${trader.normalizedName}`,
         });
@@ -47,7 +46,7 @@ const createEmbed = {
         }
 
         for (const req of barter.requiredItems) {
-            const reqItem = items.find(i => i.id === req.item.id);
+            const reqItem = items.find(i => i.id === req.item);
             let itemCost = reqItem.avg24hPrice || 0;
 
             if (reqItem.lastLowPrice > itemCost && reqItem.lastLowPrice > 0) {
@@ -55,19 +54,19 @@ const createEmbed = {
             }
 
             for (const offer of reqItem.buyFor) {
-                if (!offer.vendor.trader) {
+                if (offer.vendor.id === 'flea-market') {
                     continue;
                 }
                 let traderPrice = offer.priceRUB;
 
-                if ((traderPrice < itemCost && prog.traders[offer.vendor.trader.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
+                if ((traderPrice < itemCost && prog.traders[offer.vendor.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
                     itemCost = traderPrice;
                 }
             }
 
             let bestSellPrice = 0;
             for (const offer of reqItem.sellFor) {
-                if (!offer.vendor.trader) {
+                if (offer.vendor.id === 'flea-market') {
                     continue;
                 }
                 if (offer.priceRUB > bestSellPrice) {
@@ -79,9 +78,9 @@ const createEmbed = {
             if (itemCost === 0) {
                 itemCost = bestSellPrice;
 
-                const isDogTag = req.attributes.some(att => att.name === 'minLevel');
+                const isDogTag = req.attributes.minLevel ?? false;
                 if (isDogTag) {
-                    const tagLevel = req.attributes.find(att => att.name === 'minLevel').value;
+                    const tagLevel = req.attributes.minLevel;
                     itemCost = bestSellPrice * tagLevel;
                     reqName += ' >= '+tagLevel;
                 }
@@ -111,7 +110,7 @@ const createEmbed = {
         let totalCost = 0;
         const embed = new EmbedBuilder();
 
-        const rewardItem = items.find(it => it.id === craft.rewardItems[0].item.id)
+        const rewardItem = items.find(it => it.id === craft.rewardItems[0].item)
         let title = rewardItem.name;
 
         if (craft.rewardItems[0].count > 1) {
@@ -125,8 +124,8 @@ const createEmbed = {
         const measuredTime = new Date(null);
         let timeDiscount = prog.skills['crafting']*0.0075*craft.duration;
         measuredTime.setSeconds(craft.duration - timeDiscount);
-        const locked = prog.hideout[craft.station.id] < craft.level ? '🔒' : '';
-        const station = hideout.find(st => st.id === craft.station.id);
+        const locked = prog.hideout[craft.station] < craft.level ? '🔒' : '';
+        const station = hideout.find(st => st.id === craft.station);
         embed.setAuthor({
             name: `${station.name} ${t('level')} ${craft.level} (${measuredTime.toISOString().substring(11, 19)})${locked}`,
             iconURL: station.imageLink,
@@ -137,8 +136,8 @@ const createEmbed = {
             embed.setThumbnail(rewardItem.iconLink);
         }
 
-        const ingredients = craft.requiredItems.filter(req => !req.attributes.some(att => att.type === 'tool'));
-        const tools = craft.requiredItems.filter(req => req.attributes.some(att => att.type === 'tool'));
+        const ingredients = craft.requiredItems.filter(req => !req.attributes.tool);
+        const tools = craft.requiredItems.filter(req => req.attributes.tool);
         const getRequirementCost = (reqItem) => {
             let itemCost = reqItem.avg24hPrice || 0;
 
@@ -147,13 +146,13 @@ const createEmbed = {
             }
 
             for (const offer of reqItem.buyFor) {
-                if (!offer.vendor.trader) {
+                if (offer.vendor.id === 'flea-market') {
                     continue;
                 }
 
                 let traderPrice = offer.priceRUB;
 
-                if ((traderPrice < itemCost && prog.traders[offer.vendor.trader.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
+                if ((traderPrice < itemCost && prog.traders[offer.vendor.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
                     itemCost = traderPrice;
                 }
             }
@@ -164,7 +163,7 @@ const createEmbed = {
             embed.addFields({name: `${t('Required Tools')} 🛠️`, value: t('Not consumed by craft'), inline: false});
             let toolCost = 0;
             for (const req of tools) {
-                const reqItem = items.find(it => it.id === req.item.id);
+                const reqItem = items.find(it => it.id === req.item);
                 const itemCost = getRequirementCost(reqItem);
                 toolCost += itemCost * req.count;
                 const valueString = itemCost.toLocaleString(lang) + "₽ x " + req.count
@@ -176,11 +175,11 @@ const createEmbed = {
 
         embed.addFields({name: `${t('Required Ingredients')} ⚙️`, value: t('Consumed by craft'), inline: false});
         for (const req of ingredients) {
-            const reqItem = items.find(it => it.id === req.item.id);
+            const reqItem = items.find(it => it.id === req.item);
             const itemCost = getRequirementCost(reqItem);
             let quantity = req.count;
             // water filter consumption rate reduction
-            if (craft.station.id === '5d484fc8654e760065037abf' && req.item.id === '5d1b385e86f774252167b98a') {
+            if (craft.station === '5d484fc8654e760065037abf' && req.item === '5d1b385e86f774252167b98a') {
                 let time = prog.skills['crafting']*0.0075*quantity;
                 let consumption = prog.skills['hideoutManagement']*0.005*quantity;
                 quantity = Math.round((quantity - time - consumption) * 100) /100;
@@ -199,8 +198,9 @@ const createEmbed = {
         const commandT = getFixedT(lang, 'command');
         const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
 
-        const [ maps, items ] = await Promise.all([
+        const [ maps, bossesData, items ] = await Promise.all([
             options.maps ?? gameData.maps.getAll({lang, gameMode}),
+            options.bosses ?? gameData.bosses.getAll({lang, gameMode}),
             options.items ?? gameData.items.getAll({lang, gameMode}),
         ]);
 
@@ -239,16 +239,17 @@ const createEmbed = {
 
         const bosses = {};
         for (const spawn of selectedMapData.bosses) {
-            if (!bosses[spawn.boss.id]) {
-                bosses[spawn.boss.id] = {
-                    ...spawn.boss,
+            if (!bosses[spawn.mob]) {
+                const b = bossesData.find(b => b.id === spawn.mob);
+                bosses[spawn.mob] = {
+                    name: b.name,
                     ...spawn,
                     minSpawn: spawn.spawnChance,
-                    maxSpawn: spawn.spawnChance
+                    maxSpawn: spawn.spawnChance,
                 };
             }
-            if (bosses[spawn.boss.id].minSpawn > spawn.spawnChance) bosses[spawn.boss.id].minSpawn = spawn.spawnChance;
-            if (bosses[spawn.boss.id].maxSpawn < spawn.spawnChance) bosses[spawn.boss.id].maxSpawn = spawn.spawnChance;
+            if (bosses[spawn.mob].minSpawn > spawn.spawnChance) bosses[spawn.mob].minSpawn = spawn.spawnChance;
+            if (bosses[spawn.mob].maxSpawn < spawn.spawnChance) bosses[spawn.mob].maxSpawn = spawn.spawnChance;
         }
         const bossArray = [];
         for (const bossId in bosses) {
@@ -271,7 +272,7 @@ const createEmbed = {
             { name: `${t('Time')} 🕑`, value: displayTime, inline: true},
         );
         if (selectedMapData.accessKeys.length > 0) {
-            const itemNames = items.filter(item => selectedMapData.accessKeys.some(access => access.id === item.id)).map(item => item.name);
+            const itemNames = items.filter(item => selectedMapData.accessKeys.some(access => access === item.id)).map(item => item.name);
             let accessLabel = t('Access item(s)');
             if (selectedMapData.accessKeysMinPlayerLevel > 0) {
                 accessLabel = t('Access item(s) for level >= {{playerLevel}}', {playerLevel: selectedMapData.accessKeysMinPlayerLevel});
@@ -326,10 +327,10 @@ const createEmbed = {
         let bestTraderName = false;
         let bestTraderPrice = -1;
 
-        for (const traderPrice of item.traderPrices) {
+        for (const traderPrice of item.sellToTrader) {
             if (traderPrice.priceRUB > bestTraderPrice) {
                 bestTraderPrice = traderPrice.priceRUB;
-                bestTraderName = traders.find(tr => tr.id === traderPrice.trader.id).name;
+                bestTraderName = traders.find(tr => tr.id === traderPrice.trader).name;
             }
         }
 
@@ -418,7 +419,7 @@ const createEmbed = {
         body += `• ${t('Item Tier')}: ${t(tier.msg)}\n`;
 
         for (const offer of item.buyFor) {
-            if (!offer.vendor.trader) {
+            if (offer.vendor.id === 'flea-market') {
                 continue;
             }
 
@@ -433,17 +434,19 @@ const createEmbed = {
                 quest = ` +${t('Task')}`;
             }
 
-            const locked = prog.traders[offer.vendor.trader.id] < level ? '🔒' : '';
-            const title = `${traders.find(tr => tr.id === offer.vendor.trader.id).name} ${t('LL')}${level}${quest} ${t('Price')}${locked}`;
+            const locked = prog.traders[offer.vendor.id] < level ? '🔒' : '';
+            const title = `${traders.find(tr => tr.id === offer.vendor.id).name} ${t('LL')}${level}${quest} ${t('Price')}${locked}`;
             embed.addFields({name: title, value: traderPrice, inline: true});
         }
 
-        for (const ib of item.bartersFor) {
-            const barter = barters.find(b => b.id === ib.id);
+        for (const barter of barters) {
+            if (!barter.rewardItems.some(rew => rew.item === item.id)) {
+                continue;
+            }
             let barterCost = 0;
 
             for (const req of barter.requiredItems) {
-                const reqItem = items.find(it => it.id === req.item.id);
+                const reqItem = items.find(it => it.id === req.item);
                 let itemCost = reqItem.avg24hPrice || 0;
 
                 if (reqItem.lastLowPrice > itemCost && reqItem.lastLowPrice > 0) {
@@ -451,20 +454,20 @@ const createEmbed = {
                 }
 
                 for (const offer of reqItem.buyFor) {
-                    if (!offer.vendor.trader) {
+                    if (offer.vendor.id === 'flea-market') {
                         continue;
                     }
 
                     let traderPrice = offer.priceRUB;
 
-                    if ((traderPrice < itemCost && prog.traders[offer.vendor.trader.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
+                    if ((traderPrice < itemCost && prog.traders[offer.vendor.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
                         itemCost = traderPrice;
                     }
                 }
 
                 let bestSellPrice = 0;
                 for (const offer of reqItem.sellFor) {
-                    if (!offer.vendor.trader) {
+                    if (offer.vendor.id === 'flea-market') {
                         continue;
                     }
                     if (offer.priceRUB > bestSellPrice) {
@@ -475,10 +478,9 @@ const createEmbed = {
                 if (itemCost === 0) {
                     itemCost = bestSellPrice;
 
-                    const isDogTag = req.attributes.some(att => att.name === 'minLevel');
+                    const isDogTag = req.attributes.minLevel ?? false;
                     if (isDogTag) {
-                        const tagLevel = req.attributes.find(att => att.name === 'minLevel').value;
-                        itemCost = bestSellPrice * tagLevel;
+                        itemCost = bestSellPrice * req.attributes.minLevel;
                     }
                 }
 
@@ -486,17 +488,19 @@ const createEmbed = {
             }
 
             barterCost = Math.round(barterCost / barter.rewardItems[0].count).toLocaleString(lang) + "₽";
-            const locked = prog.traders[barter.trader.id] < barter.level ? '🔒' : '';
-            const title = `${traders.find(t => t.id === barter.trader.id).name} ${t('LL')}${barter.level} ${t('Barter')}${locked}`;
+            const locked = prog.traders[barter.trader] < barter.level ? '🔒' : '';
+            const title = `${traders.find(t => t.id === barter.trader).name} ${t('LL')}${barter.level} ${t('Barter')}${locked}`;
             embed.addFields({name: title, value: barterCost, inline: true});
         }
 
-        for (const c of item.craftsFor) {
-            const craft = crafts.find(cr => cr.id === c.id);
+        for (const craft of crafts) {
+            if (!craft.rewardItems.some(rew => rew.item === item.id)) {
+                continue;
+            }
             let craftCost = 0;
 
             for (const req of craft.requiredItems) {
-                const reqItem = items.find(it => it.id === req.item.id);
+                const reqItem = items.find(it => it.id === req.item);
                 let itemCost = reqItem.avg24hPrice || 0;
 
                 if (reqItem.lastLowPrice > itemCost && reqItem.lastLowPrice > 0) {
@@ -504,13 +508,13 @@ const createEmbed = {
                 }
 
                 for (const offer of reqItem.buyFor) {
-                    if (!offer.vendor.trader) {
+                    if (offer.vendor.id === 'flea-market') {
                         continue;
                     }
 
                     let traderPrice = offer.priceRUB;
 
-                    if ((traderPrice < itemCost && prog.traders[offer.vendor.trader.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
+                    if ((traderPrice < itemCost && prog.traders[offer.vendor.id] >= offer.vendor.minTraderLevel) || itemCost == 0) {
                         itemCost = traderPrice;
                     }
                 }
@@ -521,8 +525,8 @@ const createEmbed = {
                 craftCost += ' (' + craft.rewardItems[0].count + ')';
             }
 
-            const locked = prog.hideout[craft.station.id] < craft.level ? '🔒' : '';
-            const title = `${hideout.find(s => s.id === craft.station.id).name} ${t('level')} ${craft.level} ${t('Craft')}${locked}`;
+            const locked = prog.hideout[craft.station] < craft.level ? '🔒' : '';
+            const title = `${hideout.find(s => s.id === craft.station).name} ${t('level')} ${craft.level} ${t('Craft')}${locked}`;
             embed.addFields({name: title, value: craftCost, inline: true});
         }
 
@@ -547,7 +551,7 @@ const createEmbed = {
         ]);
 
         const unlocksEmbed = new EmbedBuilder();
-        const mapLinks = maps.filter(m => m.locks.some(lock => lock.key.id === item.id)).map(map => `[${map.name}](http://tarkov.dev/map/${map.normalizedName}?q=${item.id})`);
+        const mapLinks = maps.filter(m => m.locks.some(lock => lock.key === item.id)).map(map => `[${map.name}](http://tarkov.dev/map/${map.normalizedName}?q=${item.id})`);
         if (mapLinks.length === 0) {
             unlocksEmbed.setTitle(`${t('Not used on any maps')} 🔐`);
         } else {
@@ -567,21 +571,21 @@ const createEmbed = {
         const embed = new EmbedBuilder();
 
         for (const task of tasks) {
-            let needed = task.objectives.some(obj => obj.requiredKeys?.some(keyOptions => keyOptions.some(k => k.id === item.id)));
-            needed = needed || task.objectives.some(obj => obj.items?.some(i => i.id === item.id));
+            let needed = task.objectives.some(obj => obj.requiredKeys?.some(keyOptions => keyOptions.some(k => k === item.id)));
+            needed = needed || task.objectives.some(obj => obj.items?.some(id => id === item.id));
             if (!needed) {
                 continue;
             }
 
-            let alternates = task.objectives.some(obj => obj.requiredKeys?.some(keyOptions => keyOptions.some(k => k.id === item.id) && keyOptions.length > 1));
-            alternates = alternates || task.objectives.some(obj => obj.items?.some(i => i.id === item.id) && obj.items.length > 1);
+            let alternates = task.objectives.some(obj => obj.requiredKeys?.some(keyOptions => keyOptions.some(k => k === item.id) && keyOptions.length > 1));
+            alternates = alternates || task.objectives.some(obj => obj.items?.some(id => id === item.id) && obj.items.length > 1);
             const fieldValueLines = [];
             if (alternates) {
                 fieldValueLines.push(t('Has alternates'));
             } else {
                 fieldValueLines.push(t('No alternates'));
             }
-            const fir = task.objectives.some(obj => obj.items?.some(i => i.id === item.id) && obj.foundInRaid);
+            const fir = task.objectives.some(obj => obj.items?.some(id => id === item.id) && obj.foundInRaid);
             if (fir) {
                 fieldValueLines.push(t('Found in raid'));
             }

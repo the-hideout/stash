@@ -26,7 +26,7 @@ export async function updateTiers(items, gameMode = 'regular') {
         }
         let price = Math.min(item.avg24hPrice ?? 0, item.lastLowPrice ?? 0);
         for (const traderPrice of item.sellFor) {
-            if (traderPrice.vendor.normalizedName === 'flea-market') continue;
+            if (traderPrice.vendor.id === 'flea-market') continue;
             if (traderPrice.priceRUB > price) price = traderPrice.priceRUB;
         }
         const size = item.width * item.height;

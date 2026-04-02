@@ -2,7 +2,7 @@
   "name": "stash-discord-bot",
   "version": "0.0.0",
   "private": true,
-  "description": "The Tarkov.dev's Escape from Tarkov Discord bot",
+  "description": "Tarkov.dev's Escape from Tarkov Discord bot",
   "main": "index.mjs",
   "engines": {
     "node": "22.*"
@@ -29,6 +29,7 @@
     "discord.js": "^14.25.1",
     "dotenv": "^17.3.1",
     "i18next": "^25.8.13",
+    "jsonpath-plus": "^10.4.0",
     "luxon": "^3.7.2"
   },
   "devDependencies": {

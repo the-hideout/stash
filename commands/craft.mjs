@@ -49,13 +49,15 @@ const defaultFunction = {
         const searchedItems = items.filter(item => item.name.toLowerCase().includes(searchString.toLowerCase()));
 
         for (const item of searchedItems) {
-            for (const craft of item.craftsFor) {
-                if (matchedCrafts.includes(craft.id)) continue;
-                matchedCrafts.push(craft.id);
-            }
-            for (const craft of item.craftsUsing) {
-                if (matchedCrafts.includes(craft.id)) continue;
-                matchedCrafts.push(craft.id);
+            for (const craft of crafts) {
+                if (craft.requiredItems.some(r => r.item === item.id)) {
+                    matchedCrafts.push(craft.id);
+                    continue;
+                }
+                if (craft.rewardItems.some(r => r.item === item.id)) {
+                    matchedCrafts.push(craft.id);
+                    continue;
+                }
             }
         }
 

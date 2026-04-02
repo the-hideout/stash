@@ -44,7 +44,7 @@ const defaultFunction = {
             if (reports.length > 1) {
                 embedTitle = t('Latest Goon Reports');
                 embedDescription = `${reports.map(report => {
-                    const map = maps.find(m => m.id === report.map.id);
+                    const map = maps.find(m => m.id === report.map);
                     if (!map) {
                         return false;
                     }

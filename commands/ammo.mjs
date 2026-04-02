@@ -29,6 +29,12 @@ const ammoLabels = {
     Caliber9x39: '9x39mm',
     Caliber127x55: '12.7x55mm',
     Caliber1143x23ACP: '.45 ACP',
+    Caliber127x99: ".50 BMG",
+    Caliber20x1mm: "20x1 mm",
+    Caliber68x51: "6.8x51 mm",
+    Caliber127x33: ".50 AE",
+    Caliber93x64: "9.3x64 mm",
+    Caliber784x49: ".308 ME",
 };
 
 const defaultFunction = {

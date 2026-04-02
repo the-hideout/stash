@@ -15,7 +15,7 @@ const subCommands = {
         const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
         try {
             //let prog = progress.getProgress(interaction.user.id);
-            const traders = (await gameData.traders.getAll({lang, gameMode})).filter(trader => trader.normalizedName !== 'lightkeeper' && trader.normalizedName !== 'btr-driver');
+            const traders = await gameData.traders.getMerchants({lang, gameMode});
             const embed = new EmbedBuilder();
             embed.setTitle(`${t('Trader restocks')} 🛒`);
             //embed.setDescription(``);
@@ -43,7 +43,7 @@ const subCommands = {
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
         const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
-        const traders = await gameData.traders.getAll({lang, gameMode});
+        const traders = await gameData.traders.getMerchants({lang, gameMode});
         let traderId = interaction.options.getString('trader');
         const sendAlert = interaction.options.getBoolean('send_alert');
         let forWho = t('all traders');
@@ -169,7 +169,7 @@ const defaultFunction = {
                 .setNameLocalizations(getCommandLocalizations('trader'))
                 .setDescriptionLocalizations(getCommandLocalizations('trader_desc'))
                 .setRequired(true)
-                .setChoices(...gameData.traders.choices({all: true, blacklist: ['Fence', 'Lightkeeper', 'BTR Driver']}))
+                .setChoices(...gameData.traders.choices({all: true, blacklist: ['Fence', 'Lightkeeper', 'BTR Driver', 'Mr. Kerman', 'Voevoda', 'Taran', 'Radio station']}))
             )
             .addBooleanOption(option => option
                 .setName('send_alert')
