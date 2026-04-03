@@ -232,7 +232,7 @@ export async function getMaps(options = defaultOptions) {
     if (!gameData.maps[gameMode]) {
         await updateMaps();
     }
-    return Object.values(jsonApi.translate(gameData.maps[gameMode].data, gameData.maps[gameMode].locale, {fallbackLangData: gameData.maps[gameMode].locale.en}).maps);
+    return Object.values(jsonApi.translate(gameData.maps[gameMode].data, gameData.maps[gameMode].locale[lang], {fallbackLangData: gameData.maps[gameMode].locale.en}).maps);
 };
 
 export async function getBosses(options = defaultOptions) {
@@ -244,7 +244,7 @@ export async function getBosses(options = defaultOptions) {
     if (!gameData.maps[gameMode]) {
         await updateMaps();
     }
-    return Object.values(jsonApi.translate(gameData.maps[gameMode].data, gameData.maps[gameMode].locale, {fallbackLangData: gameData.maps[gameMode].locale.en}).mobs);
+    return Object.values(jsonApi.translate(gameData.maps[gameMode].data, gameData.maps[gameMode].locale[lang], {fallbackLangData: gameData.maps[gameMode].locale.en}).mobs);
 }
 
 export async function updateTraders() {
@@ -290,7 +290,7 @@ export async function getTraders(options = defaultOptions) {
     if (!gameData.traders[gameMode]) {
         await updateTraders();
     }
-    return Object.values(jsonApi.translate(gameData.traders[gameMode].data, gameData.traders[gameMode].locale, {fallbackLangData: gameData.traders[gameMode].locale.en}));
+    return Object.values(jsonApi.translate(gameData.traders[gameMode].data, gameData.traders[gameMode].locale[lang], {fallbackLangData: gameData.traders[gameMode].locale.en}));
 };
 
 export async function updateHideout() {
@@ -336,7 +336,7 @@ export async function getHideout(options = defaultOptions) {
     if (!gameData.hideout[gameMode]) {
         await updateHideout();
     }
-    return Object.values(jsonApi.translate(gameData.hideout[gameMode].data, gameData.hideout[gameMode].locale, {fallbackLangData: gameData.hideout[gameMode].locale.en}));
+    return Object.values(jsonApi.translate(gameData.hideout[gameMode].data, gameData.hideout[gameMode].locale[lang], {fallbackLangData: gameData.hideout[gameMode].locale.en}));
 };
 
 export async function updateBarters() {
@@ -470,15 +470,15 @@ export async function getItems(options = defaultOptions) {
     if (!gameData.items[gameMode]) {
         await updateItems();
     }
-    return Object.values(jsonApi.translate(gameData.items[gameMode].data, gameData.items[gameMode].locale, {fallbackLangData: gameData.items[gameMode].locale.en}).items);
+    return Object.values(jsonApi.translate(gameData.items[gameMode].data, gameData.items[gameMode].locale[lang], {fallbackLangData: gameData.items[gameMode].locale.en}).items);
 }
 
 export async function getFlea(options = defaultOptions) {
-    const { gameMode } = mergeOptions(options);
+    const { lang, gameMode } = mergeOptions(options);
     if (!gameData.items[gameMode]) {
         await updateItems();
     }
-    return jsonApi.translate(gameData.items[gameMode].data, gameData.items[gameMode].locale, {fallbackLangData: gameData.items[gameMode].locale.en}).fleaMarket;
+    return jsonApi.translate(gameData.items[gameMode].data, gameData.items[gameMode].locale[lang], {fallbackLangData: gameData.items[gameMode].locale.en}).fleaMarket;
 };
 
 export async function getAmmo(options = defaultOptions) {
@@ -525,7 +525,7 @@ export async function getTasks(options = defaultOptions) {
     if (!gameData.tasks[gameMode]) {
         await updateTasks();
     }
-    return Object.values(jsonApi.translate(gameData.tasks[gameMode].data, gameData.tasks[gameMode].locale, {fallbackLangData: gameData.tasks[gameMode].locale.en}).tasks);
+    return Object.values(jsonApi.translate(gameData.tasks[gameMode].data, gameData.tasks[gameMode].locale[lang], {fallbackLangData: gameData.tasks[gameMode].locale.en}).tasks);
 };
 
 export async function getGoonReports(options = defaultOptions) {
@@ -556,7 +556,7 @@ export async function getAchievements(options = defaultOptions) {
     if (!gameData.tasks[gameMode]) {
         await updateTasks();
     }
-    return Object.values(jsonApi.translate(gameData.tasks[gameMode].data, gameData.tasks[gameMode].locale, {fallbackLangData: gameData.tasks[gameMode].locale.en}).achievements);
+    return Object.values(jsonApi.translate(gameData.tasks[gameMode].data, gameData.tasks[gameMode].locale[lang], {fallbackLangData: gameData.tasks[gameMode].locale.en}).achievements);
 };
 
 export async function updateAll(rejectOnError = false) {
