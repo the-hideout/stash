@@ -12,7 +12,7 @@ const subCommands = {
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
-        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+        let footerLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
         try {
             //let prog = progress.getProgress(interaction.user.id);
             const traders = await gameData.traders.getMerchants({lang, gameMode});
@@ -24,10 +24,11 @@ const subCommands = {
             }
             const alertsFor = await progress.getRestockAlerts(interaction.user.id, gameMode);
             if (alertsFor.length > 0) {
-                embed.setFooter({text: `${t('You have restock alerts set for')}: ${alertsFor.map(traderId => {
-                    return traders.find(trader => trader.id === traderId).name;
-                })} | ${gameModeLabel}`});
+                footerLabel = `${t('You have restock alerts set for')}: ${alertsFor.map(traderId => {
+                return traders.find(trader => trader.id === traderId).name;
+            })} | ${footerLabel}`;
             }
+            embed.setFooter({text: footerLabel});
 
             return interaction.editReply({
                 embeds: [embed]

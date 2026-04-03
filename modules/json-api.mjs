@@ -29,10 +29,11 @@ const jsonApi = {
         }
         return translated;
     },
-    translate: (data, langData, options = {}) => {
-        options.fallbackLangData ??= {};
-        const translatedData = structuredClone(data);
-        for (const jPath of data.translations ?? []) {
+    translate: (source, options = {}) => {
+        options.lang ??= 'en';
+        options.langFallback ??= 'en';
+        const translatedData = structuredClone(source.data);
+        for (const jPath of source.data.translations ?? []) {
             try {
                 JSONPath({
                     path: jPath,
@@ -40,7 +41,7 @@ const jsonApi = {
                     resultType: "all",
                     callback: (result) => {
                         const { path, value, parent, parentProperty } = result;
-                        parent[parentProperty] = langData[value] ?? options.fallbackLangData[value] ?? value;
+                        parent[parentProperty] = source.locale[options.lang][value] ?? source.locale[options.langFallback][value] ?? value;
                     },
                 });
             } catch (error) {
