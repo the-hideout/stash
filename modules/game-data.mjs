@@ -342,6 +342,9 @@ export async function getHideout(options = defaultOptions) {
 export async function updateBarters() {
     for (const gameMode of gameModes) {
         const response = await jsonApi.request(`${gameMode}/barters`);
+        for (const barter of response.data) {
+            barter.rewardItems ??= [barter.offerItem];
+        }
         gameData.barters[gameMode] = response.data;
     }
 
@@ -362,6 +365,9 @@ export async function getBarters(options = defaultOptions) {
 export async function updateCrafts() {
     for (const gameMode of gameModes) {
         const response = await jsonApi.request(`${gameMode}/crafts`);
+        for (const craft of response.data) {
+            craft.rewardItems ??= [craft.productItem];
+        }
         gameData.crafts[gameMode] = response.data;
     }
 
