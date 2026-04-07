@@ -343,7 +343,7 @@ export async function updateBarters() {
     for (const gameMode of gameModes) {
         const response = await jsonApi.request(`${gameMode}/barters`);
         for (const barter of response.data) {
-            barter.rewardItems ??= [barter.offerItem];
+            barter.rewardItems ??= [barter.offeredItem];
         }
         gameData.barters[gameMode] = response.data;
     }
