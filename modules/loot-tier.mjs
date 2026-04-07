@@ -56,7 +56,7 @@ export async function updateTiers(items, gameMode = 'regular') {
 
 function getPriceTier(price, noFlea, gameMode = 'regular') {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'getPriceTier', price, noFlea, gameMode})
+        return getParentReply({data: 'getPriceTier', price, noFlea, gameMode});
     }
     let color, tier_msg;
     if (price >= tiers[gameMode].legendary) {

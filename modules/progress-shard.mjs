@@ -5,8 +5,8 @@ const getFleaFactors = async prog => {
     if (!prog) {
         prog = await getParentReply({data: 'defaultUserProgress'});
     } else {
-        if (!prog.hideout['5d484fdf654e7600691aadf8']) prog.hideout['5d484fdf654e7600691aadf8'] = 0;
-        if (!prog.skills['hideoutManagement']) prog.skills['hideoutManagement'] = 0;
+        prog.hideout['5d484fdf654e7600691aadf8'] ??= 0;
+        prog.skills['hideoutManagement'] ??= 0;
     }
     return {
         intel: prog.hideout['5d484fdf654e7600691aadf8'],
@@ -26,7 +26,7 @@ const calcFleaFee = async (progress, price, baseValue, args) => {
         options.intel = prog.intel;
         options.management = prog.management;
     }
-    const flea = await gameData.flea.get({gameMode: options.gameMode});
+    const flea = options.flea ?? await gameData.flea.get({gameMode: options.gameMode});
     const q = options.requireAll ? 1 : options.count;
     const vo = baseValue*(options.count/q);
     const vr = price;
@@ -46,23 +46,30 @@ const calcFleaFee = async (progress, price, baseValue, args) => {
 };
 
 const optimalFleaPrice = async (progress, baseValue, gameMode = 'regular', lowerBound, upperBound) => {
-    if (!lowerBound) lowerBound = baseValue*5;
-    if (!upperBound) upperBound = baseValue*25;
+    lowerBound ??= baseValue*5;
+    upperBound ??= baseValue*25;
     let step = Math.round((upperBound - lowerBound) / 50);
-    if (step < 1) step = 1;
+    if (step < 1) {
+        step = 1;
+    }
     let highPrice = 0;
     let highProfit = 0;
     let highFee = 0;
-    const args = await getFleaFactors(progress);
+    const [args, flea] = await Promise.all([
+        getFleaFactors(progress),
+        gameData.flea.get({gameMode}),
+    ]);
     for (let price = lowerBound; price <= upperBound; price += step) {
-        const fee = await calcFleaFee(progress, price,baseValue, {...args, gameMode});
+        const fee = await calcFleaFee(progress, price,baseValue, {...args, gameMode, flea});
         const profit = price - fee;
         if (profit >= highProfit) {
             highProfit = profit;
             highPrice = price;
             highFee = fee;
         } else if (profit < highProfit) {
-            if (step != 1) return optimalFleaPrice(progress, baseValue, gameMode, highPrice, price);
+            if (step != 1) {
+                return optimalFleaPrice(progress, baseValue, gameMode, highPrice, price);
+            }
             break;
         }
     }
