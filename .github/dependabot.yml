@@ -11,10 +11,12 @@ updates:
           - "*"
     schedule:
       interval: monthly
-    cooldown: 90d
   - package-ecosystem: npm
     directory: "/"
     groups:
       npm-dependencies:
         patterns:
           - "*"
+    schedule:
+      interval: monthly
+    cooldown: 90d
