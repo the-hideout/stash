@@ -112,7 +112,7 @@ const getLocales = async (path) => {
 };
 
 export async function updateLanguages() {
-    gameData.languages = await jsonApi.request('lang').then(data => data.data);
+    gameData.languages = await jsonApi.request('endpoints').then(data => data.data.languages);
     return gameData.languages;
 }
 
