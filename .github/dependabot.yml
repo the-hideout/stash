@@ -19,4 +19,5 @@ updates:
           - "*"
     schedule:
       interval: monthly
-    cooldown: 90d
+    cooldown:
+      default-days: 90
