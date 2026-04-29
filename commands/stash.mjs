@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
 
 import progress from '../modules/progress-shard.mjs';
 import { getFixedT, comT, getCommandLocalizations, getTranslationChoices } from '../modules/translations.mjs';
@@ -9,7 +9,7 @@ function userIsAuthorized(interaction) {
 
 const subCommands = {
     servers: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         // The the message comes from a user other than the bot admin, return
         if (!userIsAuthorized(interaction)) {
             return interaction.editReply('You are not authorized to perform that command.');
@@ -31,7 +31,7 @@ const subCommands = {
         return interaction.editReply({ embeds: [embed] }).catch(console.error);
     },
     find_server: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         // The the message comes from a user other than the bot admin, return
         if (!userIsAuthorized(interaction)) {
             return interaction.editReply('You are not authorized to perform that command.');
@@ -78,7 +78,7 @@ const subCommands = {
         return interaction.editReply({ embeds: [embed] }).catch(console.error);
     },
     leave_server: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral,});
         // The the message comes from a user other than the bot admin, return
         if (!userIsAuthorized(interaction)) {
             return interaction.editReply('You are not authorized to perform that command.');
@@ -102,7 +102,7 @@ const subCommands = {
         return interaction.editReply(response).catch(console.error);
     },
     language: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral,});
         const t = getFixedT(interaction.locale);
 
         let locale = interaction.options.getString('locale') || 'none';

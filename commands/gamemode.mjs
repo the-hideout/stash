@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 
 import { getFixedT, getCommandLocalizations, comT } from '../modules/translations.mjs';
 import progress from '../modules/progress-shard.mjs';
@@ -26,7 +26,7 @@ const defaultFunction = {
         const gameModeT = comT(`game_mode_${gameMode}`, {lng: locale});
         return interaction.reply({
             content: `✅ ${t('Game mode set to {{gameMode}}.', {gameMode: gameModeT})}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral,
         });
     },
 };

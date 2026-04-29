@@ -72,12 +72,12 @@ const defaultFunction = {
 
             embeds.push(priceEmbed);
 
-            const matchedBarters = barters.filter(b => b.rewardItems.some(reward => reward.item.id === item.id) || b.requiredItems.some(req => req.item.id === item.id));
+            const matchedBarters = barters.filter(b => b.rewardItems.some(reward => reward.item === item.id) || b.requiredItems.some(req => req.item === item.id));
             for (const barter of matchedBarters) {
                 embeds.push(await createEmbed.barter(barter, interaction, {items, traders, progress: prog, interactionSettings: {lang, gameMode}}));
             }
 
-            const matchedCrafts = crafts.filter(c => c.rewardItems.some(reward => reward.item.id === item.id) || c.requiredItems.some(req=> req.item.id === item.id));
+            const matchedCrafts = crafts.filter(c => c.rewardItems.some(reward => reward.item === item.id) || c.requiredItems.some(req=> req.item === item.id));
             for (const craft of matchedCrafts) {
                 embeds.push(await createEmbed.craft(craft, interaction, {items, hideout, progress: prog, interactionSettings: {lang, gameMode}}));
             }

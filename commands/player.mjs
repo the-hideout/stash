@@ -147,6 +147,7 @@ const defaultFunction = {
         profileImageUrl.searchParams.set('data', JSON.stringify({aid: profile.aid, customization: profile.customization, equipment}));
         if (profileImageUrl.toString().length <= 2048) {
             embed.setImage(profileImageUrl.toString());
+            console.log(profileImageUrl.toString());
         } else {
             console.log(`Skipping /player profile image for url length ${profileImageUrl.toString().length}`);
             console.log(JSON.stringify(equipment, null, 4));

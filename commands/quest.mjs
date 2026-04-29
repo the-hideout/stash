@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
 
 import gameData from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
@@ -41,7 +41,7 @@ const defaultFunction = {
             embed.setFooter({text: gameModeLabel});
             return interaction.editReply({
                 embeds: [embed],
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 
@@ -51,7 +51,7 @@ const defaultFunction = {
             task = matchedTasks[0];
         }
 
-        const trader = traders.find(t => t.id === task.trader.id);
+        const trader = traders.find(t => t.id === task.trader);
 
         const embed = new EmbedBuilder();
 
@@ -82,7 +82,10 @@ const defaultFunction = {
 
         const footerParts = [`${task.experience} EXP`];
         for (const repReward of task.finishRewards.traderStanding) {
-            const repTrader = traders.find(t => t.id === repReward.trader.id);
+            const repTrader = traders.find(t => t.id === repReward.trader);
+            if (!repTrader) {
+                continue;
+            }
             const sign = repReward.standing >= 0 ? '+' : '';
             footerParts.push(`${repTrader.name} ${sign}${repReward.standing}`);
         }
