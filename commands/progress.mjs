@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { DateTime } from 'luxon';
 
 import gameData from '../modules/game-data.mjs';
@@ -57,12 +57,12 @@ const subCommands = {
             const nextUpdate = DateTime.fromJSDate(await progress.getUpdateTime(interaction.user.id), {locale: interaction.locale}).toRelative();
             embed.addFields({name: 'TarkovTracker 🧭', value: `${t('Last Updated')}: ${lastUpdate}\n${t('Next update')}: ${nextUpdate}`, inline: false});
         } else if (prog.tarkovTracker && prog.tarkovTracker.lastUpdateStatus === 'invalid') {
-            embed.addFields({name: 'TarkovTracker 🧭', value: `[❌ ${t('Invalid token')}](https://tarkovtracker.io/settings/)`, inline: false});
+            embed.addFields({name: 'TarkovTracker 🧭', value: `[❌ ${t('Invalid token')}](https://tarkovtracker.org/account/)`, inline: false});
         }
 
         return interaction.reply({
             embeds: [embed],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral,
         });
     },
     level: async interaction => {
@@ -77,11 +77,11 @@ const subCommands = {
         embed.setFooter({ text: gameModeLabel});
         return interaction.reply({
             embeds: [embed],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral,
         });
     },
     trader: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -121,7 +121,7 @@ const subCommands = {
         });
     },
     hideout: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -153,8 +153,8 @@ const subCommands = {
         const prog = await progress.getProgress(interaction.user.id);
         let ttWarn = '';
         if (prog && prog.tarkovTracker.token) {
-            embed.setDescription(t('Note: Progress synced via [TarkovTracker](https://tarkovtracker.io/settings/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.'));
-            ttWarn = '\n'+t('Note: Progress synced via [TarkovTracker](https://tarkovtracker.io/settings/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.');
+            embed.setDescription(t('Note: Progress synced via [TarkovTracker](https://tarkovtracker.org/account/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.'));
+            ttWarn = '\n'+t('Note: Progress synced via [TarkovTracker](https://tarkovtracker.org/account/) will overwrite your hideout settings. \nUse `/progress unlink` to stop syncing from TarkovTracker.');
         }
         if (stationId === 'all') {
             for (const station of stations) {
@@ -204,7 +204,7 @@ const subCommands = {
         embed.setTitle(`✅ ${t('{{thingName}} set to {{level}}.', {thingName: skill.name, level: level})}`);
         return interaction.reply({
             embeds: [embed],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral,
         });
     },
     link: async interaction => {
@@ -218,17 +218,17 @@ const subCommands = {
 
         const token = interaction.options.getString('token');
         if (!token) {
-            embed.setTitle(`❌ ${t('You must supply your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.')}`);
+            embed.setTitle(`❌ ${t('You must supply your [TarkovTracker API token](https://tarkovtracker.org/account/) to link your account.')}`);
             return interaction.reply({
                 embeds: [embed],
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
-        if (!token.match(/^[a-zA-Z0-9]{22}$/)) {
-            embed.setTitle(`❌ ${t('The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.io/settings/) to link your account.')}`);
+        if (!token.match(/^[A-Z]{3}_[a-zA-Z0-9]{18}$/)) {
+            embed.setTitle(`❌ ${t('The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.org/account/) to link your account.')}`);
             return interaction.reply({
                 embeds: [embed],
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 
@@ -237,7 +237,7 @@ const subCommands = {
         embed.setTitle(`✅ ${t('Your hideout progress will update from TarkovTracker {{updateTime}}.', {updateTime: updateTime})}`);
         return interaction.reply({
             embeds: [embed],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     },
     unlink: async interaction => {
@@ -253,7 +253,7 @@ const subCommands = {
         embed.setTitle(`✅ ${t('TarkovTracker account unlinked.')}`);
         return interaction.reply({
             embeds: [embed],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     },
     flea_market_fee: async interaction => {
@@ -275,7 +275,7 @@ const subCommands = {
         embed.setTitle(`✅ ${t('{{thingName}} set to {{level}}.', {thingName: t('Intelligence Center'), level: intel})}.\n✅ ${t('Hideout Management skill set to {{managementLevel}}.', {managementLevel: mgmt})}`);
         return interaction.reply({
             embeds: [embed],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     }
 };
@@ -388,7 +388,7 @@ const defaultFunction = {
             .setDescriptionLocalizations(getCommandLocalizations('progress_link_desc'))
             .addStringOption(option => option
                 .setName('token')
-                .setDescription('Your TarkovTracker API token from https://tarkovtracker.io/settings/')
+                .setDescription('Your TarkovTracker API token from https://tarkovtracker.org/account/')
                 .setNameLocalizations(getCommandLocalizations('token'))
                 .setDescriptionLocalizations(getCommandLocalizations('progress_link_token_desc'))
                 .setRequired(true)

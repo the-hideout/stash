@@ -26,7 +26,7 @@ export async function updateTiers(items, gameMode = 'regular') {
         }
         let price = Math.min(item.avg24hPrice ?? 0, item.lastLowPrice ?? 0);
         for (const traderPrice of item.sellFor) {
-            if (traderPrice.vendor.normalizedName === 'flea-market') continue;
+            if (traderPrice.vendor.id === 'flea-market') continue;
             if (traderPrice.priceRUB > price) price = traderPrice.priceRUB;
         }
         const size = item.width * item.height;
@@ -56,7 +56,7 @@ export async function updateTiers(items, gameMode = 'regular') {
 
 function getPriceTier(price, noFlea, gameMode = 'regular') {
     if (process.env.IS_SHARD) {
-        return getParentReply({data: 'getPriceTier', price, noFlea, gameMode})
+        return getParentReply({data: 'getPriceTier', price, noFlea, gameMode});
     }
     let color, tier_msg;
     if (price >= tiers[gameMode].legendary) {

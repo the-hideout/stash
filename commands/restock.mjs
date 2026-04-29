@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { DateTime } from 'luxon';
 import { ChannelType, PermissionFlagsBits } from 'discord-api-types/v10';
 
@@ -8,14 +8,14 @@ import { getFixedT, getCommandLocalizations, getTranslationChoices } from '../mo
 
 const subCommands = {
     show: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
-        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
+        let footerLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
         try {
             //let prog = progress.getProgress(interaction.user.id);
-            const traders = (await gameData.traders.getAll({lang, gameMode})).filter(trader => trader.normalizedName !== 'lightkeeper' && trader.normalizedName !== 'btr-driver');
+            const traders = await gameData.traders.getMerchants({lang, gameMode});
             const embed = new EmbedBuilder();
             embed.setTitle(`${t('Trader restocks')} 🛒`);
             //embed.setDescription(``);
@@ -24,10 +24,11 @@ const subCommands = {
             }
             const alertsFor = await progress.getRestockAlerts(interaction.user.id, gameMode);
             if (alertsFor.length > 0) {
-                embed.setFooter({text: `${t('You have restock alerts set for')}: ${alertsFor.map(traderId => {
-                    return traders.find(trader => trader.id === traderId).name;
-                })} | ${gameModeLabel}`});
+                footerLabel = `${t('You have restock alerts set for')}: ${alertsFor.map(traderId => {
+                return traders.find(trader => trader.id === traderId).name;
+            })} | ${footerLabel}`;
             }
+            embed.setFooter({text: footerLabel});
 
             return interaction.editReply({
                 embeds: [embed]
@@ -38,12 +39,12 @@ const subCommands = {
         }
     },
     alert: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
         const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
-        const traders = await gameData.traders.getAll({lang, gameMode});
+        const traders = await gameData.traders.getMerchants({lang, gameMode});
         let traderId = interaction.options.getString('trader');
         const sendAlert = interaction.options.getBoolean('send_alert');
         let forWho = t('all traders');
@@ -93,7 +94,7 @@ const subCommands = {
         });
     },
     channel: async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -169,7 +170,7 @@ const defaultFunction = {
                 .setNameLocalizations(getCommandLocalizations('trader'))
                 .setDescriptionLocalizations(getCommandLocalizations('trader_desc'))
                 .setRequired(true)
-                .setChoices(...gameData.traders.choices({all: true, blacklist: ['Fence', 'Lightkeeper', 'BTR Driver']}))
+                .setChoices(...gameData.traders.choices({all: true, blacklist: ['Fence', 'Lightkeeper', 'BTR Driver', 'Mr. Kerman', 'Voevoda', 'Taran', 'Radio station']}))
             )
             .addBooleanOption(option => option
                 .setName('send_alert')

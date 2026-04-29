@@ -7,20 +7,18 @@ const caches = {
         return gameData.items.getAll(lang).then(items => items.map(item => item.name).sort());
     },
     barter: async lang => {
-        return gameData.items.getAll(lang).then(items => items.filter(item => item.bartersFor.length > 0 || item.bartersUsing.length > 0).reduce((names, item) => {
-            if (!names.includes(item.name)) {
-                names.push(item.name);
-            }
-            return names;
-        }, []).sort());
+        const [items, barters] = await Promise.all([
+            gameData.items.getAll(lang),
+            gameData.barters.getAll(),
+        ]);
+        return items.filter(item => barters.some(b => b.rewardItems.some(r => r.item === item.id) || b.requiredItems.some(r => r.item === item.id))).map(item => item.name).sort();
     },
     craft: async lang => {
-        return gameData.items.getAll(lang).then(items => items.filter(item => item.craftsFor.length > 0 || item.craftsUsing.length > 0).reduce((names, item) => {
-            if (!names.includes(item.name)) {
-                names.push(item.name);
-            }
-            return names;
-        }, []).sort());
+        const [items, crafts] = await Promise.all([
+            gameData.items.getAll(lang),
+            gameData.crafts.getAll(),
+        ]);
+        return items.filter(item => crafts.some(c => c.rewardItems.some(r => r.item === item.id) || c.requiredItems.some(r => r.item === item.id))).map(item => item.name).sort();
     },
     key: async lang => {
         return gameData.items.getKeys(lang).then(items => items.map(item => item.name).sort());

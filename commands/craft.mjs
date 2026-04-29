@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
 
 import gameData from '../modules/game-data.mjs';
 import progress from '../modules/progress-shard.mjs';
@@ -31,7 +31,7 @@ const defaultFunction = {
         if (!searchString) {
             return interaction.editReply({
                 content: t('You need to specify a search term'),
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 
@@ -49,13 +49,15 @@ const defaultFunction = {
         const searchedItems = items.filter(item => item.name.toLowerCase().includes(searchString.toLowerCase()));
 
         for (const item of searchedItems) {
-            for (const craft of item.craftsFor) {
-                if (matchedCrafts.includes(craft.id)) continue;
-                matchedCrafts.push(craft.id);
-            }
-            for (const craft of item.craftsUsing) {
-                if (matchedCrafts.includes(craft.id)) continue;
-                matchedCrafts.push(craft.id);
+            for (const craft of crafts) {
+                if (craft.requiredItems.some(r => r.item === item.id)) {
+                    matchedCrafts.push(craft.id);
+                    continue;
+                }
+                if (craft.rewardItems.some(r => r.item === item.id)) {
+                    matchedCrafts.push(craft.id);
+                    continue;
+                }
             }
         }
 
@@ -67,7 +69,7 @@ const defaultFunction = {
             embed.setFooter({text: gameModeLabel});
             return interaction.editReply({
                 embeds: [embed],
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 

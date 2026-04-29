@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
-import graphqlRequest from '../modules/graphql-request.mjs';
+import jsonApi from '../modules/json-api.mjs';
 import generalError from '../modules/general-error.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
 import progress from '../modules/progress-shard.mjs';
@@ -33,25 +33,9 @@ const defaultFunction = {
         let currentStatus;
 
         try {
-            const statusResponse = await graphqlRequest({
-                graphql: `{
-                    status {
-                        currentStatuses {
-                            name
-                            message
-                            status
-                        }
-                        messages {
-                            time
-                            type
-                            content
-                            solveTime
-                        }
-                    }
-                }`
-            });
+            const statusResponse = await jsonApi.request('status');
 
-            currentStatus = statusResponse.data.status;
+            currentStatus = statusResponse.data;
         } catch (requestError) {
             console.error(requestError);
 
