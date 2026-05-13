@@ -106,6 +106,9 @@ const getLocales = async (path) => {
         return jsonApi.request(`${path}_${langCode}`).then(langData => {
             locales[langCode] = langData.data;
             return langData;
+        }).catch(error => {
+            console.log(`Error getting ${path}_${langCode}: ${error.message}`);
+            locales[langCode] = {};
         });
     }));
     return locales;
