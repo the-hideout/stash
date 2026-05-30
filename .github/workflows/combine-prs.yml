@@ -7,7 +7,7 @@ on:
 
 jobs:
   combine-prs:
-    uses: the-hideout/reusable-workflows/.github/workflows/combine-prs.yml@main
+    uses: the-hideout/reusable-workflows/.github/workflows/combine-prs.yml@0cf72494f5b72604bf164b554d8b58cc6d5ae013 # pin@main
     secrets:
       COMBINE_PRS_APP_ID: ${{ secrets.COMBINE_PRS_APP_ID }}
       COMBINE_PRS_PRIVATE_KEY: ${{ secrets.COMBINE_PRS_PRIVATE_KEY }}
