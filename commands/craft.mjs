@@ -97,8 +97,8 @@ const defaultFunction = {
 
             for (let i = MAX_CRAFTS; i < matchedCrafts.length; i = i + 1) {
                 const craft = crafts.find(c => c.id === matchedCrafts[i]);
-                const rewardItem = items.find(it => it.id === craft.rewardItems[0].item.id);
-                const station = hideout.find(s => s.id === craft.station.id);
+                const rewardItem = items.find(it => it.id === craft.rewardItems[0].item);
+                const station = hideout.find(s => s.id === craft.station);
                 const bitemname = `[${rewardItem.name}](${rewardItem.link}) (${station.name} level ${craft.level})`;
 
                 if (bitemname.length + 4 + otheritems.length > 2048) {
