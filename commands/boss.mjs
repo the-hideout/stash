@@ -82,6 +82,17 @@ const defaultFunction = {
 
         const boss = bosses.find(b => b.id === bossId);
 
+        if (!boss) {
+            const embed = new EmbedBuilder();
+            embed.setDescription(t(`Found no results for "{{searchString}}"`, {
+                searchString: bossId,
+            }));
+            embed.setFooter({text: gameModeLabel});
+            return interaction.editReply({
+                embeds: [embed],
+            });
+        }
+
         // Add base fields to the embed
         // Construct the description with boss details
         let details = t('Unknown');
