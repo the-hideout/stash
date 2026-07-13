@@ -11,7 +11,7 @@ let lastCheck = new Date(0);
 const getChanges = async () => {
     return;
     if (changes && new Date() - lastCheck < 1000 * 60 * 10) return changes;
-    const response = await fetch(`${URL}/changelogs/data.txt`);
+    const response = await fetch(`${URL}/changelogs/data.txt`, {headers: { "user-agent": "stash-tarkov-dev" }});
     lastCheck = new Date();
     changes = await response.text();
     return changes;

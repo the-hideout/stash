@@ -12,8 +12,9 @@ export async function apiRequest(token, endpoint) {
     try {
         const response = await fetch(url+endpoint, {
             headers: { 
-                'Authorization': 'Bearer '+token
-             }
+                'Authorization': 'Bearer '+token,
+                "user-agent": "stash-tarkov-dev",
+            },
         });
         if (!response.ok) {
             throw new Error(`${response.status} ${response.statusText}`);

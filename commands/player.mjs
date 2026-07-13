@@ -64,7 +64,7 @@ const defaultFunction = {
             profilePath = gameMode;
         }
 
-        const profile = await fetch(`https://players.tarkov.dev/${profilePath}/${accountId}.json`).then(r => r.json()).catch(error => {
+        const profile = await fetch(`https://players.tarkov.dev/${profilePath}/${accountId}.json`, {headers: { "user-agent": "stash-tarkov-dev" }}).then(r => r.json()).catch(error => {
             return {
                 err: error.message,
                 errmsg: error.message,

@@ -810,7 +810,7 @@ const gameDataExport = {
             if (gameMode !== 'regular') {
                 folder = gameMode;
             }
-            const response = await fetch(`https://players.tarkov.dev/${folder}/index.json`);
+            const response = await fetch(`https://players.tarkov.dev/${folder}/index.json`, {headers: { "user-agent": "stash-tarkov-dev" }});
             gameData.profiles[gameMode] = await response.json();
             console.log(`Retrieved ${gameMode} player profile index of ${Object.keys(gameData.profiles[gameMode]).length} profiles`);
             if (!profileIndexUpdateInterval) {

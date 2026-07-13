@@ -104,6 +104,7 @@ const defaultFunction = {
                     discordId: interaction.user.id,
                     gameMode: gameMode,
                 }),
+                headers: { "user-agent": "stash-tarkov-dev" },
             });
 
             if (!response.ok) {
