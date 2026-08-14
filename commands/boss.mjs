@@ -63,6 +63,9 @@ const defaultFunction = {
         await interaction.deferReply();
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
+        const commandT = getFixedT(lang, 'command');
+
+        const gameModeLabel = t(`Game mode: {{gameMode}}`, {gameMode: commandT(`game_mode_${gameMode}`)});
 
         // Get the boss name from the command interaction
         const bossId = interaction.options.getString('boss');
@@ -223,12 +226,16 @@ const defaultFunction = {
                 embed.addFields({name: field.name, value: field.value, inline: true});
             }
             mapEmbeds.length = 0;
+            embed.setFooter({text: gameModeLabel});
         }
         
         let overflowEmbeds = [];
         if (mapEmbeds.length >= 10) {
             overflowEmbeds = mapEmbeds.slice(9);
-            mapEmbeds.splice(9)
+            mapEmbeds.splice(9);
+            overflowEmbeds[overflowEmbeds.length - 1].setFooter({text: gameModeLabel});
+        } else if (mapEmbeds.length > 1) {
+            mapEmbeds[mapEmbeds.length - 1].setFooter({text: gameModeLabel});
         }
 
         // Send the message
