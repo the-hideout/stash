@@ -1,3 +1,3 @@
-const gameModes = ['regular', 'pve'];
+const gameModes = ['regular', 'pve', 'pvp-season'];
 
 export default gameModes;

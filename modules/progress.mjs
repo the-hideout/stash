@@ -168,10 +168,8 @@ const getUserProgress = async id => {
         };
     }
     for (const gameMode of gameModes) {
-        if (!userProgress[id].alerts.restock[gameMode]) {
-            userProgress[id].alerts.restock[gameMode] = [];
-        }
-        
+        userProgress[id].alerts.restock[gameMode] ??= [];
+        userProgress[id][gameMode] ??= getDefaultGameModeProgress();
     }
     return userProgress[id];
 };
