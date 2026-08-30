@@ -146,6 +146,12 @@ const progressShard = {
             gameMode: results[1],
         };
     },
+    async addBattlePassReportMessage(messageId) {
+        return getParentReply({data: 'addBattlePassReportMessage', message: messageId});
+    },
+    async removeBattlePassReportMessage(messageId) {
+        return getParentReply({data: 'removeBattlePassReportMessage', message: messageId});
+    },
 }
 
 export default progressShard;

@@ -329,7 +329,7 @@ const startRestockAlerts = async () => {
                                 messageVars.traderName = (await gameData.traders.get(trader.id, {lang: locale})).name;
                                 messageChannel(guildId, guildSettings.restockAlertChannel[gameMode], t(restockMessage, messageVars)).catch(error => {
                                     // only rejects if all shards fail to send the message
-                                    console.log(`Error sending ${trader.name} restock notification to channel ${guildId} ${guildSettings.restockAlertChannel}: ${error.message}`);
+                                    console.log(`Error sending ${trader.name} restock notification to channel ${guildId} ${guildSettings.restockAlertChannel[gameMode]}: ${error.message}`);
                                     userProgress.guilds[guildId].restockAlertChannel[gameMode] = false;
                                 });
                             }
@@ -514,6 +514,26 @@ const settings = {
         const prog = await getUserProgress(id);
         return prog.gameMode = gameMode;
     },
+    getBattlePassReportMessages: () => {
+        return userProgress.globalSettings.battlePassDocumentReportMessages;
+    },
+    addBattlePassReportMessage: async (messageId) => {
+        await loaded();
+        if (userProgress.globalSettings.battlePassDocumentReportMessages.includes(messageId)) {
+            return;
+        }
+        if (!messageId) {
+            return;
+        }
+        userProgress.globalSettings.battlePassDocumentReportMessages.push(messageId);
+        return messageId;
+    },
+    removeBattlePassReportMessage: async (messageId) => {
+        await loaded();
+        const startingLength = userProgress.globalSettings.battlePassDocumentReportMessages.length;
+        userProgress.globalSettings.battlePassDocumentReportMessages = userProgress.globalSettings.battlePassDocumentReportMessages.filter(id => id !== messageId);
+        return startingLength !== userProgress.globalSettings.battlePassDocumentReportMessages.length;
+    },
     setGuildTraderRestockAlertChannel: setGuildTraderRestockAlertChannel,
     setGuildLanguage: setGuildLanguage,
     getGuildLanguage: getGuildLanguage,
@@ -529,7 +549,7 @@ const settings = {
         }
         try {
             let savedUsers = {};
-            if (cf) {
+            if (cf && process.env.SKIP_CLOUD_PROGRESS !== 'true') {
                 savedUsers = await cloudflare.getValue('progress').catch(error => {
                     console.log('Error reading user progress from CloudflareKV', error);
                     console.log('Reading progress from local storage');
@@ -546,6 +566,9 @@ const settings = {
                 console.log(`Error reading ${usersJsonPath}`, error);
             }
         }
+        userProgress ??= {};
+        userProgress.globalSettings ??= {};
+        userProgress.globalSettings.battlePassDocumentReportMessages ??= [];
         const [flea, traders, hideout] = await Promise.all([
             gameData.flea.get(),
             gameData.traders.getAll(),
@@ -568,6 +591,7 @@ const settings = {
         // upgrade progress to multiple game modes
         for (const id in userProgress) {
             if (id === 'guilds') continue;
+            if (id === 'globalSettings') continue;
             const prog = userProgress[id];
             if (!prog.regular) {
                 prog.regular = {
@@ -591,18 +615,15 @@ const settings = {
                 prog.gameMode = 'regular';
             }
             for (const gameMode of gameModes) {
-                if (!prog[gameMode]) {
-                    prog[gameMode] = getDefaultGameModeProgress();
-                    continue;
-                }
+                prog[gameMode] ??= getDefaultGameModeProgress();
                 for (const trader of traders) {
-                    if (!prog[gameMode].traders[trader.id]) prog[gameMode].traders[trader.id] = 1;
+                    prog[gameMode].traders[trader.id] ??= 1;
                 }
                 for (const skill of skills) {
-                    if (!prog[gameMode].skills[skill.id]) prog[gameMode].skills[skill.id] = 0;
+                    prog[gameMode].skills[skill.id] ??= 0;
                 }
                 for (const station of hideout) {
-                    if (!prog[gameMode].hideout[station.id]) prog[gameMode].hideout[station.id] = 0;
+                    prog[gameMode].hideout[station.id] ??= 0;
                 }
             }
         }
