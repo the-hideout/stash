@@ -19,7 +19,15 @@ const restockTimers = {};
 let shutdown = false;
 let progressLoaded = false;
 
-let userProgress = {};
+let userProgress = {
+    guilds: {},
+    globalSettings: {},
+};
+
+const nonUserProgressIds = [
+    'guilds',
+    'globalSettings',
+];
 
 for (const gameMode of gameModes) {
     restockTimers[gameMode] = {};
@@ -345,9 +353,7 @@ const startRestockAlerts = async () => {
 };
 
 function setGuildTraderRestockAlertChannel(guildId, channelId, locale, gameMode = 'regular') {
-    if (!userProgress.guilds) {
-        userProgress.guilds = {};
-    }
+    userProgress.guilds ??= {};
     if (!userProgress.guilds[guildId]) {
         userProgress.guilds[guildId] = {
             restockAlertChannel: {
@@ -368,9 +374,7 @@ function setGuildTraderRestockAlertChannel(guildId, channelId, locale, gameMode 
 }
 
 function setGuildLanguage(guildId, locale) {
-    if (!userProgress.guilds) {
-        userProgress.guilds = {};
-    }
+    userProgress.guilds ??= {};
     if (!userProgress.guilds[guildId]) {
         userProgress.guilds[guildId] = {
             restockAlertChannel: {
@@ -385,9 +389,7 @@ function setGuildLanguage(guildId, locale) {
 }
 
 function getGuildLanguage(guildId) {
-    if (!userProgress.guilds) {
-        userProgress.guilds = {};
-    }
+    userProgress.guilds ??= {};
     if (!userProgress.guilds[guildId]) {
         userProgress.guilds[guildId] = {
             restockAlertChannel: {
@@ -590,30 +592,10 @@ const settings = {
 
         // upgrade progress to multiple game modes
         for (const id in userProgress) {
-            if (id === 'guilds') continue;
-            if (id === 'globalSettings') continue;
-            const prog = userProgress[id];
-            if (!prog.regular) {
-                prog.regular = {
-                    tarkovTracker: prog.tarkovTracker,
-                    level: prog.level,
-                    hideout: prog.hideout,
-                    traders: prog.traders,
-                    skills: prog.skills,
-                };
-                delete prog.tarkovTracker;
-                delete prog.level;
-                delete prog.hideout;
-                delete prog.traders;
-                delete prog.skills;
-                prog.alerts = {
-                    restock: {
-                        regular: prog.alerts?.restock || [],
-                        pve: [],
-                    },
-                };
-                prog.gameMode = 'regular';
+            if (nonUserProgressIds.includes(id)) {
+                continue;
             }
+            const prog = userProgress[id];
             for (const gameMode of gameModes) {
                 prog[gameMode] ??= getDefaultGameModeProgress();
                 for (const trader of traders) {
