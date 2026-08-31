@@ -36,7 +36,7 @@ for (const gameMode of gameModes) {
 const usersJsonPath = path.join('./cache', 'users.json');
 
 const defaultProgress = {
-    level: 15,
+    level: 1,
     hideout: {},
     traders: {},
     skills: {},
@@ -56,19 +56,10 @@ const getDefaultGameModeProgress = () => {
             token: false,
         },
         level: defaultProgress.level,
-        hideout: {},
-        traders: {},
-        skills: {},
+        hideout: structuredClone(defaultProgress.hideout),
+        traders: structuredClone(defaultProgress.traders),
+        skills: structuredClone(defaultProgress.skills),
     };
-    for (const stationId in defaultProgress.hideout) {
-        prog.hideout[stationId] = defaultProgress.hideout[stationId];
-    }
-    for (const traderId in defaultProgress.traders) {
-        prog.traders[traderId] = defaultProgress.traders[traderId];
-    }
-    for (const skillId in defaultProgress.skills) {
-        prog.skills[skillId] = defaultProgress.skills[skillId];
-    }
     return prog;
 };
 
