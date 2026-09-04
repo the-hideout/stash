@@ -187,7 +187,15 @@
         "Be the Scav": "Sei der Scav",
         "Equip like a Scav, arm and leg shots only.": "Rüste dich wie ein Scav aus, nur Arm- und Beintreffer sind erlaubt.",
         "Frogger 🐸": "Frogger 🐸",
-        "Enter Raid, you can only move by jumping.": "Betritt den Raid und du darfst dich nur hüpfend bewegen."
+        "Enter Raid, you can only move by jumping.": "Betritt den Raid und du darfst dich nur hüpfend bewegen.",
+        "BattlePass Document Reporting": "BattlePass Document Reporting",
+        "bp_doc_reporting_help_description": "To report a BattlePass Document, taks an EFT screenshot of the document where you're close enough for the item's name to show on the HUD.\nThen, invoke this command and submit that screenshot. Next, select which map you were on and the type of document.\n\nWe get the location of the item from the filename of the EFT screenshot, so it has to be a screenshot from the game itself. Not a Windows screen capture. Not a photo of your monitor from your phone.",
+        "Please upload a valid EFT screenshot.": "Please upload a valid EFT screenshot.",
+        "Screenshot_received_prompt": "Screenshot received\nPick the map and document type.",
+        "Select map": "Select map",
+        "Select document item": "Select document item",
+        "Timed out waiting for a selection.": "Timed out waiting for a selection.",
+        "BattlePass Document Reported": "BattlePass Document Reported"
     },
     "command": {
         "about": "über",
@@ -304,6 +312,10 @@
         "trader_desc": "Händler",
         "unlink": "unlink",
         "uptime": "uptime",
-        "uptime_desc": "Zeigt die Zeit, seit dem der Bot online ist."
+        "uptime_desc": "Zeigt die Zeit, seit dem der Bot online ist.",
+        "battlepassdocument": "battlepassdocument",
+        "battlepassdocument_desc": "Report the location of a BattlePass document",
+        "screenshot": "screenshot",
+        "battlepassdocument_screenshot_desc": "EFT screenshot showing BP document"
     }
 }
