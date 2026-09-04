@@ -5,6 +5,7 @@ import {
     Collection,
     AttachmentBuilder,
     MessageFlags,
+    Partials,
 } from 'discord.js';
 
 import autocomplete from './modules/autocomplete.mjs';
@@ -19,10 +20,11 @@ const discordClient = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.DirectMessages,
         GatewayIntentBits.GuildPresences,
     ],
-    partials: ["CHANNEL"],
+    partials: [Partials.Channel, Partials.Message, Partials.Reaction],
 });
 
 discordClient.commands = new Collection();
@@ -35,6 +37,8 @@ for (const file of commandFiles) {
     // With the key as the command name and the value as the exported module
     discordClient.commands.set(command.default.data.name, command);
 }
+
+discordClient.bpReportMessages = new Set();
 
 //console.time('Prefetch-choice-data');
 //await updateChoices();
@@ -95,9 +99,7 @@ discordClient.on('interactionCreate', async interaction => {
 
     let command = false;
 
-    if (interaction.isStringSelectMenu()) {
-        command = discordClient.commands.get(interaction.message.interaction.commandName);
-    } else if (interaction.isCommand()) {
+    if (interaction.isCommand()) {
         command = discordClient.commands.get(interaction.commandName);
     }
 
@@ -144,6 +146,60 @@ discordClient.on('interactionCreate', async interaction => {
             ],
         });
     }
+});
+
+discordClient.on('messageReactionAdd', async (reaction, user) => {
+    if (user.bot) return;
+    
+    if (!discordClient.bpReportMessages.has(reaction.message.id)) {
+        return;
+    }
+
+    if (reaction.partial) {
+        try { await reaction.fetch(); } catch { return; }
+    }
+    try { await reaction.message.fetch(); } catch { return; }
+
+    if (!['👍', '👎'].includes(reaction.emoji.name)) {
+        return;
+    }
+    
+    if (reaction.emoji.name === '👎') {
+        // do anything?
+    }
+    if (reaction.emoji.name === '👍') {
+        const reportBody = {};
+        for (const field of reaction.message.embeds[0].fields) {
+            let fieldValue = field.value;
+            if (field.name === 'location') {
+                fieldValue = JSON.parse(fieldValue);
+            }
+            reportBody[field.name] = fieldValue;
+        }
+        //const endpoint = 'https://manager.tarkov.dev/api/scanner/bp-document-report';
+        const endpoint = 'http://localhost:4000/api/scanner/bp-document-report';
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(reportBody),
+            headers: {
+                'content-type': 'application/json',
+                username: process.env.TDM_USER,
+                password: process.env.TDM_PASS,
+            },
+        });
+        if (!response.ok) {
+            console.log('Error submitting bp doc report', response.status);
+            return;
+        } 
+        const responseBody = await response.json();
+        if (responseBody.errors?.length) {
+            console.log('Errors submitting pb doc report', responseBody.errors, reportBody);
+            return;
+        }
+    }
+    // stop watching message?
+    await progress.removeBattlePassReportMessage(reaction.message.id);
+    await reaction.message.delete();
 });
 
 process.on('uncaughtException', async (error) => {
