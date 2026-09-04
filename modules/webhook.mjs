@@ -58,5 +58,6 @@ export default async function sendWebhook(message) {
     return webhookClient.send({
         embeds: [embed],
         files: message.files,
+        avatarURL : process.env.WEBHOOK_AVATAR,
     });
 };

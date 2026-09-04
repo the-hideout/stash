@@ -63,6 +63,9 @@ commandChoices = commandChoices.sort((a,b) => {
     return a.name.localeCompare(b.name);
 });
 
+// error if more than 25 choices
+commandChoices.splice(25);
+
 const defaultFunction = {
     data: new SlashCommandBuilder()
         .setName('help')

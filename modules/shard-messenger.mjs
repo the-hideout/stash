@@ -139,6 +139,18 @@ export const respondToShardMessage = async (message, shard) => {
             if (message.data === 'setUserGameMode') {
                 response.data = await progress.setGameMode(message.userId, message.gameMode);
             }
+            if (message.data === 'addBattlePassReportMessage') {
+                response.data = await progress.addBattlePassReportMessage(message.message);
+                for (const [index, shard] of shardingManager.shards) {
+                    getShardReply(shard.id, {data: 'addBattlePassReportMessage', messages: [message.message]});
+                }
+            }
+            if (message.data === 'removeBattlePassReportMessage') {
+                response.data = await progress.removeBattlePassReportMessage(message.message);
+                for (const [index, shard] of shardingManager.shards) {
+                    getShardReply(shard.id, {data: 'removeBattlePassReportMessage', messages: [message.message]});
+                }
+            }
         } catch (error) {
             response.data = null;
             response.error = {message: error.message, stack: error.stack};
@@ -153,8 +165,9 @@ export const respondToShardMessage = async (message, shard) => {
 export const respondToParentMessage = async (message) => {
     if (!message.uuid) return;
     if (message.type === 'getReply') {
+        const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], success: false}};
         if (message.data === 'messageUser') {
-            const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], userId: message.userId, success: false}};
+            response.data.userId = message.userId;
             try {
                 const user = await discordClient.users.fetch(message.userId);
                 if (!user) {
@@ -165,10 +178,10 @@ export const respondToParentMessage = async (message) => {
             } catch (error) {
                 response.error = {message: error.message, stack: error.stack};
             }
-            discordClient.shard.send(response);
         }
         if (message.data === 'messageChannel') {
-            const response = {uuid: message.uuid, data: {shardId: discordClient.shard.ids[0], guildId: message.guildId, channelId: message.channelId, success: false}};
+            response.data.guildId = message.guildId; 
+            response.data.channelId = message.channelId;
             try {
                 const channel = await discordClient.channels.fetch(message.channelId);
                 if (!channel) {
@@ -182,8 +195,24 @@ export const respondToParentMessage = async (message) => {
             } catch (error) {
                 response.error = {message: error.message, stack: error.stack};
             }
-            discordClient.shard.send(response);
         }
+        if (message.data === 'addBattlePassReportMessage') {
+            try {
+                discordClient.bpReportMessages.add(...message.messages);
+                response.data.success = true;
+            } catch (error) {
+                response.error = {message: error.message, stack: error.stack};
+            }
+        }
+        if (message.data === 'removeBattlePassReportMessage') {
+            try {
+                discordClient.bpReportMessages.delete(...message.messages);
+                response.data.success = true;
+            } catch (error) {
+                response.error = {message: error.message, stack: error.stack};
+            }
+        }
+        discordClient.shard.send(response);
         return;
     }
     process.emit(message.uuid, message);

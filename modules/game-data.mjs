@@ -508,6 +508,15 @@ export async function getStims(options = defaultOptions) {
     });
 }
 
+export async function getBattlePassDocuments(options = defaultOptions) {
+    if (process.env.IS_SHARD) {
+        return getParentReply({data: 'gameData', function: 'items.getBattlePassDocuments', args: options});
+    }
+    return getItems(options).then(items => {
+        return items.filter(item => item.categories[0] === '6a28212a0368f4438b0d0a45').sort((a, b) => a.name - b.name);
+    });
+}
+
 export async function updateTasks() {
     for (const gameMode of gameModes) {
         const [response, langData] = await Promise.all([
@@ -755,6 +764,7 @@ const gameDataExport = {
         },
         getAmmo: getAmmo,
         getStims: getStims,
+        getBattlePassDocuments,
         getKeys: async (options) => {
             if (process.env.IS_SHARD) {
                 return getParentReply({data: 'gameData', function: 'items.getKeys', args: options});
