@@ -52,9 +52,9 @@ const subCommands = {
         if (skillStatus.length > 0) embed.addFields({name: `${('Skills')} 💪`, value: skillStatus.join('\n'), inline: true});
 
         if (prog.tarkovTracker && prog.tarkovTracker.token) {
-            let lastUpdate = DateTime.fromJSDate(prog.tarkovTracker.lastUpdate, {locale: interaction.locale}).toRelative();
+            let lastUpdate = `<t:${Math.round(new Date(prog.tarkovTracker.lastUpdate).getTime() / 1000)}:R>`;//DateTime.fromJSDate(new Date(prog.tarkovTracker.lastUpdate), {locale: interaction.locale}).toRelative();
             if (prog.tarkovTracker.lastUpdate == 0) lastUpdate = t('never');
-            const nextUpdate = DateTime.fromJSDate(await progress.getUpdateTime(interaction.user.id), {locale: interaction.locale}).toRelative();
+            const nextUpdate = `<t:${Math.round((await progress.getUpdateTime(interaction.user.id)).getTime() / 1000)}:R>`;//DateTime.fromJSDate(await progress.getUpdateTime(interaction.user.id), {locale: interaction.locale}).toRelative();
             embed.addFields({name: 'TarkovTracker 🧭', value: `${t('Last Updated')}: ${lastUpdate}\n${t('Next update')}: ${nextUpdate}`, inline: false});
         } else if (prog.tarkovTracker && prog.tarkovTracker.lastUpdateStatus === 'invalid') {
             embed.addFields({name: 'TarkovTracker 🧭', value: `[❌ ${t('Invalid token')}](https://tarkovtracker.org/account/)`, inline: false});

@@ -78,7 +78,7 @@ const optimalFleaPrice = async (progress, baseValue, gameMode = 'regular', lower
 
 const progressShard = {
     async getUpdateTime(id) {
-        return getParentReply({data: 'userTarkovTrackerUpdateTime', userId: id});
+        return getParentReply({data: 'userTarkovTrackerUpdateTime', userId: id}).then(reply => new Date(reply));
     },
     async getProgress(id) {
         return getParentReply({data: 'userProgress', userId: id});

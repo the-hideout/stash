@@ -1,5 +1,4 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { DateTime } from 'luxon';
 
 import gameData from '../modules/game-data.mjs';
 import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs';
@@ -48,7 +47,8 @@ const defaultFunction = {
                     if (!map) {
                         return false;
                     }
-                    return `${map.name}: ${DateTime.fromMillis(parseInt(report.timestamp), {locale: lang}).toRelative()}`;
+                    console.log(report.timestamp);
+                    return `${map.name}: <t:${Math.round(parseInt(report.timestamp) / 1000)}:R>`;
                 }).filter(Boolean).join('\n')}`;
             }
             reportsEmbed.setTitle(embedTitle);
