@@ -1,5 +1,4 @@
 import { EmbedBuilder, SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { DateTime } from 'luxon';
 import { ChannelType, PermissionFlagsBits } from 'discord-api-types/v10';
 
 import gameData from '../modules/game-data.mjs';
@@ -20,7 +19,7 @@ const subCommands = {
             embed.setTitle(`${t('Trader restocks')} 🛒`);
             //embed.setDescription(``);
             for (const trader of traders) {
-                embed.addFields({name: trader.name, value: DateTime.fromISO(trader.resetTime, {locale: lang}).toRelative(), inline: true});
+                embed.addFields({name: trader.name, value: `<t:${Math.round(new Date(trader.resetTime).getTime() / 1000)}:R>`, inline: true});
             }
             const alertsFor = await progress.getRestockAlerts(interaction.user.id, gameMode);
             if (alertsFor.length > 0) {

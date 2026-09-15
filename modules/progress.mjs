@@ -46,6 +46,22 @@ const defaultProgress = {
 
 const tarkovTrackerUpdateIntervalMinutes = 1;
 
+const tarkovTrackerUpdateQueue = new Set();
+
+const queueTarkovTrackerUpdate = (id) => {
+    const prog = userProgress[id];
+    if (!prog) {
+        return;
+    }
+    const gameMode = prog.gameMode ?? 'regular';
+    if (!prog[gameMode]?.tarkovTracker) {
+        return;
+    }
+    tarkovTrackerUpdateQueue.add(prog);
+};
+
+let tarkovTrackerLastUpdate = new Date();
+
 const restockAlertMinutes = 2;
 
 const getDefaultGameModeProgress = () => {
@@ -99,29 +115,14 @@ const loaded = async () => {
     });
 };
 
-const getUsersForUpdate = () => {
-    return Object.values(userProgress).filter(prog => {
-        const gameMode = prog.gameMode ?? 'regular';
-        if (!prog[gameMode]?.tarkovTracker) {
-            return false;
-        }
-        if (prog[gameMode].tarkovTracker.token && !prog[gameMode].tarkovTracker.token.match(/^[a-zA-Z0-9]{22}$/)) {
-            prog[gameMode].tarkovTracker.token = false;
-            prog[gameMode].tarkovTracker.lastUpdateStatus = 'invalid';
-        }
-        return prog[gameMode].tarkovTracker.token !== false;
-    }).sort((a, b) => {
-        return a[a.gameMode ?? 'regular'].tarkovTracker.lastUpdate - b[b.gameMode ?? 'regular'].tarkovTracker.lastUpdate;
-    });
-};
-
 const updateTarkovTracker = async () => {
-    const users = getUsersForUpdate();
+    const users = [...tarkovTrackerUpdateQueue].slice(0, 25);
     const hideout = await gameData.hideout.getAll();
     for (let i = 0; i < 25 && i < users.length; i++) {
         const user = users[i];
         const gameMode = user.gameMode ?? 'regular';
         try {
+            console.log('updating', user.id, gameMode, user[gameMode].tarkovTracker.token);
             const ttprog = await getProgress(user[gameMode].tarkovTracker.token);
             //userProgress[user.id].level = ttprog.level;
             user[gameMode].hideout = {};
@@ -146,8 +147,11 @@ const updateTarkovTracker = async () => {
                 user[gameMode].tarkovTracker.lastUpdateStatus = error.message;
                 console.log(`Error updating TarkovTracker progress for user ${user.id} with token ${user[gameMode].tarkovTracker.token}`, error.message);
             }
+        } finally {
+            tarkovTrackerUpdateQueue.delete(user);
         }
     }
+    tarkovTrackerLastUpdate = new Date();
     saveUserProgress();
     setTimeout(updateTarkovTracker, 1000 * 60 * tarkovTrackerUpdateIntervalMinutes).unref();
 };
@@ -431,11 +435,12 @@ const settings = {
         if (!userProgress[id] || !userProgress[id][gameMode]?.tarkovTracker?.token) {
             throw new Error('Your TarkovTracker account is not linked');
         }
-        const users = getUsersForUpdate();
+        queueTarkovTrackerUpdate(id);
+        const users = [...tarkovTrackerUpdateQueue];
         for (let i = 0; i < users.length; i++) {
             let user = users[i];
             if (user.id !== id) continue;
-            const updateTime = new Date();
+            const updateTime = new Date(tarkovTrackerLastUpdate);
             updateTime.setMinutes(updateTime.getMinutes() + Math.ceil((i+1) / 25));
             return updateTime;
         }
@@ -453,6 +458,7 @@ const settings = {
     },
     async getProgressOrDefault(id) {
         await loaded();
+        queueTarkovTrackerUpdate(id);
         return mergeGameModeProgress(userProgress[id] ?? settings.getDefaultProgress());
     },
     async setLevel(id, level) {
