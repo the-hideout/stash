@@ -19,14 +19,14 @@ const defaultFunction = {
             .setChoices(...gameData.gameModes.choices())
         ),
     async execute(interaction) {
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
         const t = getFixedT(locale);
         const gameMode = interaction.options.getString('gamemode');
         progress.setGameMode(interaction.user.id, gameMode);
         const gameModeT = comT(`game_mode_${gameMode}`, {lng: locale});
-        return interaction.reply({
+        return interaction.editReply({
             content: `✅ ${t('Game mode set to {{gameMode}}.', {gameMode: gameModeT})}`,
-            flags: MessageFlags.Ephemeral,
         });
     },
 };

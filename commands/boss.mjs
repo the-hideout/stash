@@ -56,7 +56,7 @@ const defaultFunction = {
             .setNameLocalizations(getCommandLocalizations('boss'))
             .setDescriptionLocalizations(getCommandLocalizations('boss_select_desc'))
             .setRequired(true)
-            .setChoices(...gameData.bosses.choices())
+            .setAutocomplete(true)
         ),
 
     async execute(interaction) {
@@ -83,7 +83,7 @@ const defaultFunction = {
         // Construct the embed
         const embed = new EmbedBuilder();
 
-        const boss = bosses.find(b => b.id === bossId);
+        const boss = bosses.find(b => b.id === bossId) ?? bosses.find(b => b.name.toLowerCase() === bossId.toLowerCase());
 
         if (!boss) {
             const embed = new EmbedBuilder();
@@ -154,7 +154,7 @@ const defaultFunction = {
         embed.setURL(`https://tarkov.dev/boss/${boss.normalizedName}`);
 
         for (const bossData of bossDetails) {
-            if (bossData.id === bossId) {
+            if (bossData.id === boss.id) {
                 details = bossData.details;
                 //loot = boss.loot?.map(lootItem => items.find(i => i.id === lootItem.id)?.name).filter(Boolean).join(', ');
                 break;
@@ -172,7 +172,7 @@ const defaultFunction = {
         const mapEmbeds = [];
         for (const map of maps) {
             // Only use the data for the boss specified in the command
-            const bossSpawn = map.bosses.find(spawn => spawn.mob === bossId);
+            const bossSpawn = map.bosses.find(spawn => spawn.mob === boss.id);
             if (!bossSpawn) continue;
 
             const mapEmbed = new EmbedBuilder();

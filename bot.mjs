@@ -129,11 +129,10 @@ discordClient.on('interactionCreate', async interaction => {
             content: 'There was an error while executing this command!',
             flags: MessageFlags.Ephemeral,
         };
-        if (interaction.deferred) {
-            await interaction.editReply(message);
-        } else {
-            await interaction.reply(message);
-        }
+        const sendErrorMessage = interaction.deferred || interaction.replied ? interaction.editReply(message) : interaction.reply(message);
+        await sendErrorMessage.catch(replyError => {
+            console.error(`Error sending error message for /${interaction.commandName} command: ${replyError.message}`);
+        });
         sendWebhook({
             title: `Error running /${interaction.commandName} command on shard ${discordClient.shard.ids[0]}`,
             message: error.stack,

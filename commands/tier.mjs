@@ -12,6 +12,7 @@ const defaultFunction = {
         .setDescriptionLocalizations(getCommandLocalizations('tier_desc')),
 
     async execute(interaction) {
+        await interaction.deferReply();
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -28,7 +29,7 @@ const defaultFunction = {
                 • ${t((await getPriceTier(tiers.average -1, false, gameMode)).msg)} < ${tiers.average.toLocaleString(lang)}₽
             `)
             .setFooter({text: gameModeLabel});
-        return interaction.reply({ embeds: [embed] });
+        return interaction.editReply({ embeds: [embed] });
     },
 };
 

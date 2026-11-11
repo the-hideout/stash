@@ -20,6 +20,7 @@ const defaultFunction = {
         ),
 
     async execute(interaction) {
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const { member } = interaction;
@@ -32,9 +33,8 @@ const defaultFunction = {
             message: details,
             footer: `${member.guild ? `Server: ${member.guild.name}` : 'Reported in a DM'} | Language: ${lang} | Mode: ${gameMode}`,
         });
-        return interaction.reply({
+        return interaction.editReply({
             content: t("Thanks for reporting, we're on it!"),
-            flags: MessageFlags.Ephemeral,
         });
     },
 };
