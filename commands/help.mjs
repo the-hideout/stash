@@ -81,6 +81,7 @@ const defaultFunction = {
         ),
 
     async execute(interaction) {
+        await interaction.deferReply();
         const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
         const t = getFixedT(locale);
         const embed = new EmbedBuilder();
@@ -96,7 +97,7 @@ const defaultFunction = {
                 value: `${t('Where [command] is one of the following commands:')} \n`+Object.keys(commands).map(comm => comT(comm, {lng: locale})).join('\n')
             });
 
-            return interaction.reply({ embeds: [embed] });
+            return interaction.editReply({ embeds: [embed] });
         }
 
         const cmd = commands[helpCommand];
@@ -139,7 +140,7 @@ const defaultFunction = {
             }
         }
 
-        return interaction.reply({ embeds: [embed] });
+        return interaction.editReply({ embeds: [embed] });
     },
     examples: [
         '/$t(help) $t(barter)',

@@ -22,9 +22,9 @@ const defaultFunction = {
         }),
 
     async execute(interaction) {
+        await interaction.deferReply();
         const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
         const t = getFixedT(locale);
-        await interaction.deferReply();
         // Get the search string from the user invoked command
         let searchString = interaction.options.getString('name');
 

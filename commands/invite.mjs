@@ -13,6 +13,7 @@ const defaultFunction = {
         .setDescriptionLocalizations(getCommandLocalizations('invite_desc')),
 
     async execute(interaction) {
+        await interaction.deferReply();
         const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
         const t = getFixedT(locale);
         const embed = new EmbedBuilder();
@@ -24,7 +25,7 @@ const defaultFunction = {
         embed.setDescription(t('Click the link above to invite the Stash bot to your Discord server!'));
         embed.setURL(BOT_INVITE_LINK);
         embed.setFooter({ text: `${t('Enjoy')} ❤️` });
-        return interaction.reply({ embeds: [embed] });
+        return interaction.editReply({ embeds: [embed] });
     },
 };
 

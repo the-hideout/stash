@@ -7,6 +7,7 @@ import { getFixedT, getCommandLocalizations } from '../modules/translations.mjs'
 
 const subCommands = {
     show: async interaction => {
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -60,12 +61,12 @@ const subCommands = {
             embed.addFields({name: 'TarkovTracker 🧭', value: `[❌ ${t('Invalid token')}](https://tarkovtracker.org/account/)`, inline: false});
         }
 
-        return interaction.reply({
+        return interaction.editReply({
             embeds: [embed],
-            flags: MessageFlags.Ephemeral,
         });
     },
     level: async interaction => {
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -75,9 +76,8 @@ const subCommands = {
         const embed = new EmbedBuilder();
         embed.setTitle(`✅ ${t('PMC level set to {{level}}.', {level: level})}`);
         embed.setFooter({ text: gameModeLabel});
-        return interaction.reply({
+        return interaction.editReply({
             embeds: [embed],
-            flags: MessageFlags.Ephemeral,
         });
     },
     trader: async interaction => {
@@ -187,6 +187,7 @@ const subCommands = {
         });
     },
     skill: async interaction => {
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -202,12 +203,12 @@ const subCommands = {
         progress.setSkill(interaction.user.id, skillId, level);
         const skill = await gameData.skills.get(skillId);
         embed.setTitle(`✅ ${t('{{thingName}} set to {{level}}.', {thingName: skill.name, level: level})}`);
-        return interaction.reply({
+        return interaction.editReply({
             embeds: [embed],
-            flags: MessageFlags.Ephemeral,
         });
     },
     link: async interaction => {
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -219,28 +220,26 @@ const subCommands = {
         const token = interaction.options.getString('token');
         if (!token) {
             embed.setTitle(`❌ ${t('You must supply your [TarkovTracker API token](https://tarkovtracker.org/account/) to link your account.')}`);
-            return interaction.reply({
+            return interaction.editReply({
                 embeds: [embed],
-                flags: MessageFlags.Ephemeral,
             });
         }
         if (!token.match(/^[A-Z]{3}_[a-zA-Z0-9]{18}$/)) {
             embed.setTitle(`❌ ${t('The token you provided is invalid. Provide your [TarkovTracker API token](https://tarkovtracker.org/account/) to link your account.')}`);
-            return interaction.reply({
+            return interaction.editReply({
                 embeds: [embed],
-                flags: MessageFlags.Ephemeral,
             });
         }
 
         progress.setToken(interaction.user.id, token);
         const updateTime = DateTime.fromJSDate(await progress.getUpdateTime(interaction.user.id), {locale: interaction.locale}).toRelative()
         embed.setTitle(`✅ ${t('Your hideout progress will update from TarkovTracker {{updateTime}}.', {updateTime: updateTime})}`);
-        return interaction.reply({
+        return interaction.editReply({
             embeds: [embed],
-            flags: MessageFlags.Ephemeral,
         });
     },
     unlink: async interaction => {
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -251,12 +250,12 @@ const subCommands = {
 
         progress.setToken(interaction.user.id, false);
         embed.setTitle(`✅ ${t('TarkovTracker account unlinked.')}`);
-        return interaction.reply({
+        return interaction.editReply({
             embeds: [embed],
-            flags: MessageFlags.Ephemeral,
         });
     },
     flea_market_fee: async interaction => {
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
         const { lang, gameMode } = await progress.getInteractionSettings(interaction);
         const t = getFixedT(lang);
         const commandT = getFixedT(lang, 'command');
@@ -273,9 +272,8 @@ const subCommands = {
         progress.setSkill(interaction.user.id, 'hideoutManagement', mgmt);
 
         embed.setTitle(`✅ ${t('{{thingName}} set to {{level}}.', {thingName: t('Intelligence Center'), level: intel})}.\n✅ ${t('Hideout Management skill set to {{managementLevel}}.', {managementLevel: mgmt})}`);
-        return interaction.reply({
+        return interaction.editReply({
             embeds: [embed],
-            flags: MessageFlags.Ephemeral,
         });
     }
 };
@@ -428,7 +426,7 @@ const defaultFunction = {
         ),
 
     async execute(interaction) {
-        subCommands[interaction.options._subcommand](interaction);
+        return subCommands[interaction.options._subcommand](interaction);
     },
     examples: {
         level: ['/$t(progress) $t(level) 42'],

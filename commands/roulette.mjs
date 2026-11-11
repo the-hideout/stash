@@ -13,6 +13,7 @@ const defaultFunction = {
         .setNameLocalizations(getCommandLocalizations('roulette'))
         .setDescriptionLocalizations(getCommandLocalizations('roulette_desc')),
     async execute(interaction) {
+        await interaction.deferReply();
         const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
         const t = getFixedT(locale);
 
@@ -25,7 +26,7 @@ const defaultFunction = {
             text: `${t('Good Luck!')} 🎲`,
         });
 
-        return interaction.reply({ embeds: [embed] });
+        return interaction.editReply({ embeds: [embed] });
     },
 };
 

@@ -11,6 +11,7 @@ const defaultFunction = {
         .setNameLocalizations(getCommandLocalizations('uptime'))
         .setDescriptionLocalizations(getCommandLocalizations('uptime_desc')),
     async execute(interaction) {
+        await interaction.deferReply();
         const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
         const t = getFixedT(locale);
         const embed = new EmbedBuilder();
@@ -22,7 +23,7 @@ const defaultFunction = {
 
         embed.setDescription(`${t('I have been online for')}: ${uptimeFmt}`);
         embed.setFooter({text: t('Format HH:MM:SS')});
-        return interaction.reply({ embeds: [embed] });
+        return interaction.editReply({ embeds: [embed] });
     },
 };
 
