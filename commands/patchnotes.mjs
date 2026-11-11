@@ -27,7 +27,7 @@ const defaultFunction = {
         } catch (error) {
             const embed = new EmbedBuilder();
             embed.setURL('https://www.escapefromtarkov.com/news?page=1&filter=2');
-            embed.setTitle(`Patch Notes`);
+            embed.setTitle(t('Patch Notes'));
             //embed.setFooter({text: notes.date});
             embed.setDescription(t('Due to technical issues, please visit the official EFT website to view the latest patch notes.'));
             return interaction.editReply({ embeds: [embed] });
