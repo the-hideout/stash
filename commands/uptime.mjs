@@ -15,7 +15,7 @@ const defaultFunction = {
         const locale = await progress.getServerLanguage(interaction.guildId) || interaction.locale;
         const t = getFixedT(locale);
         const embed = new EmbedBuilder();
-        embed.setTitle(`${('Stash Uptime')} ⌛`);
+        embed.setTitle(`${t('Stash Uptime')} ⌛`);
 
         const uptime = process.uptime();
         const date = new Date(uptime * 1000);

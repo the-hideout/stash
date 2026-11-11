@@ -50,6 +50,7 @@ const gameData = {
         'de',
         'en',
         'es',
+        'es-mx',
         'fr',
         'hu',
         'it',

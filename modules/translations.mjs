@@ -23,6 +23,8 @@ export function getDiscordLocale(langCode) {
         'en-US': 'en-US',
         es: 'es-ES',
         'es-ES': 'es-ES',
+        'es-mx': 'es-419',
+        'es-419': 'es-419',
         fr: 'fr',
         hu: 'hu',
         it: 'it',
@@ -40,10 +42,28 @@ export function getDiscordLocale(langCode) {
     return subs[langCode];
 }
 
+// i18next normalizes region codes (es-mx -> es-MX), so also register region files under that casing.
+// Discord uses es-419 for Latin American Spanish, which our es-mx translations cover.
+const discordLocaleAliases = {
+    'es-419': 'es-mx',
+};
+const i18nextResources = {...translationResources};
+for (const langCode of Object.keys(translationResources)) {
+    const [language, region] = langCode.split('-');
+    if (region) {
+        i18nextResources[`${language}-${region.toUpperCase()}`] = translationResources[langCode];
+    }
+}
+for (const [alias, langCode] of Object.entries(discordLocaleAliases)) {
+    if (translationResources[langCode]) {
+        i18nextResources[alias] = translationResources[langCode];
+    }
+}
+
 i18next.init({
     lng: 'en-US',
     debug: process.env.NODE_ENV !== 'ci',
-    resources: translationResources,
+    resources: i18nextResources,
     fallbackLng: 'en-US',
 });
 

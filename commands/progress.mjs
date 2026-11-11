@@ -50,7 +50,7 @@ const subCommands = {
             const skill = await gameData.skills.get(skillId);
             skillStatus.push(`${skill.name} ${t('level')} ${prog.skills[skillId]}`);
         }
-        if (skillStatus.length > 0) embed.addFields({name: `${('Skills')} 💪`, value: skillStatus.join('\n'), inline: true});
+        if (skillStatus.length > 0) embed.addFields({name: `${t('Skills')} 💪`, value: skillStatus.join('\n'), inline: true});
 
         if (prog.tarkovTracker && prog.tarkovTracker.token) {
             let lastUpdate = `<t:${Math.round(new Date(prog.tarkovTracker.lastUpdate).getTime() / 1000)}:R>`;//DateTime.fromJSDate(new Date(prog.tarkovTracker.lastUpdate), {locale: interaction.locale}).toRelative();
