@@ -62,6 +62,33 @@ async function autocomplete(interaction) {
         }
         return names;
     }
+    if (cacheKey === 'boss') {
+        searchString = (interaction.options.getString('boss') ?? '').toLowerCase();
+        const [maps, mobs] = await Promise.all([
+            gameData.maps.getAll({lang, gameMode}),
+            gameData.bosses.getAll({lang, gameMode}),
+        ]);
+        const bossChoices = [];
+        for (const map of maps) {
+            for (const spawn of map.bosses) {
+                // Don't add Rogues and Raiders
+                if (spawn.mob === 'ExUsec' || spawn.mob === 'PmcBot') {
+                    continue;
+                }
+                if (bossChoices.some(choice => choice.value === spawn.mob)) {
+                    continue;
+                }
+                const boss = mobs.find(mob => mob.id === spawn.mob);
+                if (!boss) {
+                    continue;
+                }
+                bossChoices.push({name: boss.name, value: boss.id});
+            }
+        }
+        return bossChoices
+            .filter(choice => choice.name.toLowerCase().includes(searchString))
+            .sort((a, b) => a.name.localeCompare(b.name));
+    }
     if (cacheKey === 'progress' && interaction.options.getSubcommand() === 'hideout') {
         cacheKey = interaction.options.getSubcommand();
         searchString = interaction.options.getString('station');
